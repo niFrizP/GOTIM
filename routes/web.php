@@ -20,6 +20,9 @@ Route::middleware('auth')->group(function () {
 // Rutas de clientes
 Route::resource('clientes', ClienteController::class);
 
+// Ruta personalizada para reactivar clientes
+Route::post('/clientes/{id}/reactivar', [ClienteController::class, 'reactivar'])->name('clientes.reactivar');
+
 
 
 require __DIR__ . '/auth.php';

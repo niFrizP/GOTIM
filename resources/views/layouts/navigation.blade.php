@@ -16,6 +16,10 @@
                         <i class="fa-solid fa-house"></i>
                         <span class="ml-3">{{ __('Dashboard') }}</span>
                     </x-nav-link>
+                    <x-nav-link :href="route('clientes.index')" :active="request()->routeIs('clientes.index')">
+                        <i class="fa-solid fa-user"></i>
+                        <span class="ml-3">{{ __('Clientes') }}</span>
+                    </x-nav-link>
                 </div>
             </div>
 
