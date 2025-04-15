@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_estado');
 
             $table->dateTime('fecha_creacion')->useCurrent();
-            $table->string('estado', 50); // campo redundante, podría eliminarse si usas solo id_estado
+            $table->string('estado', 50); 
 
             $table->timestamps();
 
