@@ -43,14 +43,6 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <!-- Botón Registro -->
-                @if (Route::has('register'))
-                <a href="{{ route('register') }}"
-                    class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-white uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                    {{ __('Register') }}
-                </a>
-                @endif
-
                 <!-- Botón Login -->
                 <x-primary-button class="ms-3">
                     {{ __('Log in') }}
