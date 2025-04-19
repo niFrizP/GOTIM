@@ -48,7 +48,7 @@ GOTIM es una aplicación web diseñada para gestionar órdenes de trabajo en el 
 - **Base de datos:** MySQL
 - **Frontend:** Blade, Tailwind CSS, Alpine.js
 - **Control de versiones:** Git & GitHub
-- **Despliegue:** CPanel / Hosting compartido
+- **Despliegue:** Local o CPanel / Hosting compartido
 
 ---
 
