@@ -1,6 +1,4 @@
-<p align="center"><a href="https://github.com/tu-usuario/GOTIM" target="_blank"><img src="/ruta/al/logo-gotim.png" width="400" alt="GOTIM Logo"></a></p>
-
-# GOTIM
+<p align="center"><a href="https://github.com/niFrizP/GOTIM" target="_blank"><img src="https://raw.githubusercontent.com/niFrizP/GOTIM/refs/heads/main/public/images/logo.png" width="400" alt="GOTIM Logo"></a></p>
 
 **Gestión de Órdenes de Trabajo para la Mecánica Industrial**
 
