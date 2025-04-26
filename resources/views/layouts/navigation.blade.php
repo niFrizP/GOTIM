@@ -20,6 +20,14 @@
                         <i class="fa-solid fa-user"></i>
                         <span class="ml-3">{{ __('Clientes') }}</span>
                     </x-nav-link>
+                    @auth
+                    @if (Auth::user()->rol === 'administrador')
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        <i class="fa-solid fa-users"></i>
+                        <span class="ml-3">{{ __('Usuarios') }}</span>
+                    </x-nav-link>
+                    @endif
+                    @endauth
                 </div>
             </div>
 
@@ -85,13 +93,21 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @auth
+            @if (Auth::user()->rol === 'administrador')
+            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                {{ __('Usuarios') }}
+            </x-responsive-nav-link>
+            @endif
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->nombre }}
-                    {{ Auth::user()->apellido }}</div>
+                    {{ Auth::user()->apellido }}
+                </div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
             </div>
 
