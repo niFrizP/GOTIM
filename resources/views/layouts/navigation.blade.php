@@ -26,6 +26,10 @@
                         <i class="fa-solid fa-users"></i>
                         <span class="ml-3">{{ __('Usuarios') }}</span>
                     </x-nav-link>
+                    <x-nav-link :href="route('servicios.index')" :active="request()->routeIs('servicios.*')">
+                        <i class="fa-solid fa-wrench"></i> {{-- Puedes cambiar el ícono si quieres --}}
+                        <span class="ml-3">{{ __('Servicios') }}</span>
+                    </x-nav-link>
                     @endif
                     @endauth
                 </div>
@@ -97,6 +101,9 @@
             @if (Auth::user()->rol === 'administrador')
             <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                 {{ __('Usuarios') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('servicios.index')" :active="request()->routeIs('servicios.*')">
+                {{ __('Servicios') }}
             </x-responsive-nav-link>
             @endif
             @endauth
