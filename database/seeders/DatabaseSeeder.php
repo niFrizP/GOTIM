@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +15,42 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Usuarios base
+        $usuarios = [
+            [
+                'nombre' => 'Admin',
+                'apellido' => 'General',
+                'email' => 'admin@gotim.cl',
+                'password' => Hash::make('admin123'),
+                'rol' => 'Admin',
+            ],
+            [
+                'nombre' => 'Carlos',
+                'apellido' => 'Jefe',
+                'email' => 'supervisor@gotim.cl',
+                'password' => Hash::make('supervisor123'),
+                'rol' => 'Supervisor',
+            ],
+            [
+                'nombre' => 'Juan',
+                'apellido' => 'Pérez',
+                'email' => 'tecnico1@gotim.cl',
+                'password' => Hash::make('tecnico123'),
+                'rol' => 'Técnico',
+            ],
+        ];
 
-        User::factory()->create([
-            'nombre' => 'Test User',
-            'email' => 'test@example.com',
+        foreach ($usuarios as $usuario) {
+            User::create(array_merge($usuario, [
+                'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
+            ]));
+        }
+
+        // Seed regiones y ciudades
+        $this->call([
+            RegionesSeeder::class,
+            CiudadesSeeder::class,
         ]);
     }
 }

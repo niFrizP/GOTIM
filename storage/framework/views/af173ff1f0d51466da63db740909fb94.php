@@ -56,6 +56,8 @@
 
         </main>
     </div>
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+
 
     <!-- Scripts adicionales (si es necesario) -->
 </body>

@@ -28,7 +28,6 @@
                             <th class="border-b p-2">Correo</th>
                             <th class="border-b p-2">RUT</th>
                             <th class="border-b p-2">Teléfono</th>
-                            <th class="border-b p-2">Dirección</th>
                             <th class="border-b p-2">Estado</th>
                             <th class="border-b p-2">Acciones</th>
                         </tr>
