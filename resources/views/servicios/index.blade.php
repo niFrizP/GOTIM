@@ -79,8 +79,8 @@
             const form = document.getElementById('deleteForm');
             const message = document.getElementById('confirmMessage');
 
-            form.action = `/servicios/${id}`; // ✅ Ruta correcta
-            message.innerHTML = `¿Estás seguro de que deseas eliminar el servicio <strong>${nombreServicio}</strong>?`; // ✅ Nombre dinámico
+            form.action = `/servicios/${id}`;
+            message.innerHTML = `¿Estás seguro de que deseas eliminar el servicio <strong>${nombreServicio}</strong>?`;
 
             modal.classList.remove('hidden');
             setTimeout(() => {

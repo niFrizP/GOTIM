@@ -98,8 +98,8 @@
             const form = document.getElementById('deleteForm');
             const message = document.getElementById('confirmMessage');
 
-            form.action = `/users/${id}`; // ✅ Corrige la ruta
-            message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`; // ✅ Muestra el nombre
+            form.action = `/users/${id}`; 
+            message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`;
 
             modal.classList.remove('hidden');
             setTimeout(() => {
