@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CiudadController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ServicioController;
+
+Route::resource('servicios', ServicioController::class);
 
 Route::get('/', function () {
     return redirect()->route('login');
