@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
                 'apellido' => 'General',
                 'email' => 'admin@gotim.cl',
                 'password' => Hash::make('admin123'),
-                'rol' => 'Admin',
+                'rol' => 'Administrador',
             ],
             [
                 'nombre' => 'Carlos',
