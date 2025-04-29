@@ -171,15 +171,29 @@
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <?php if(Route::has('password.request')): ?>
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="<?php echo e(route('password.request')); ?>">
+        <!-- Botones -->
+        <div class="flex items-center justify-between mt-4">
+            <div>
+                <?php if(Route::has('password.request')): ?>
+                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" href="<?php echo e(route('password.request')); ?>">
                     <?php echo e(__('Forgot your password?')); ?>
 
                 </a>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
 
-            <?php if (isset($component)) { $__componentOriginald411d1792bd6cc877d687758b753742c = $component; } ?>
+            <div class="flex items-center gap-2">
+                <!-- Botón Registro -->
+                <?php if(Route::has('register')): ?>
+                <a href="<?php echo e(route('register')); ?>"
+                    class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-white uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <?php echo e(__('Register')); ?>
+
+                </a>
+                <?php endif; ?>
+
+                <!-- Botón Login -->
+                <?php if (isset($component)) { $__componentOriginald411d1792bd6cc877d687758b753742c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald411d1792bd6cc877d687758b753742c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.primary-button','data' => ['class' => 'ms-3']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('primary-button'); ?>
@@ -189,9 +203,9 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'ms-3']); ?>
-                <?php echo e(__('Log in')); ?>
+                    <?php echo e(__('Log in')); ?>
 
-             <?php echo $__env->renderComponent(); ?>
+                 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald411d1792bd6cc877d687758b753742c)): ?>
 <?php $attributes = $__attributesOriginald411d1792bd6cc877d687758b753742c; ?>
@@ -201,6 +215,7 @@
 <?php $component = $__componentOriginald411d1792bd6cc877d687758b753742c; ?>
 <?php unset($__componentOriginald411d1792bd6cc877d687758b753742c); ?>
 <?php endif; ?>
+            </div>
         </div>
     </form>
  <?php echo $__env->renderComponent(); ?>
@@ -212,5 +227,4 @@
 <?php if (isset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>
 <?php $component = $__componentOriginal69dc84650370d1d4dc1b42d016d7226b; ?>
 <?php unset($__componentOriginal69dc84650370d1d4dc1b42d016d7226b); ?>
-<?php endif; ?>
-<?php /**PATH D:\CAPSTONE 2025\GOTIM\resources\views/auth/login.blade.php ENDPATH**/ ?>
+<?php endif; ?><?php /**PATH D:\CAPSTONE 2025\GOTIM\resources\views/auth/login.blade.php ENDPATH**/ ?>

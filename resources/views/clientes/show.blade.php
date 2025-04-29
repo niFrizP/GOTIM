@@ -23,38 +23,68 @@
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Correo</dt>
-                        <dd class="mt-1 text-gray-800 dark:text-gray-200">
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
                             {{ $cliente->email }}
                         </dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">RUT</dt>
-                        <dd class="mt-1 text-gray-800 dark:text-gray-200" id="rut">
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
                             {{ $cliente->rut }}
                         </dd>
                     </div>
                     <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Razón Social</dt>
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ $cliente->razon_social }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Giro</dt>
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ $cliente->giro }}
+                        </dd>
+                    </div>
+                    <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Teléfono</dt>
-                        <dd class="mt-1 text-gray-800 dark:text-gray-200">
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
                             {{ $cliente->nro_contacto }}
                         </dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Dirección</dt>
-                        <dd class="mt-1 text-gray-800 dark:text-gray-200">
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
                             {{ $cliente->direccion }}
                         </dd>
                     </div>
-                    <div class="sm:col-span-2">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Estado</dt>
-                        <dd class="mt-2">
-                            <span
-                                class="inline-block rounded px-2 py-1 text-xs font-semibold
-                            {{ $cliente->estado === 'activo' ? 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' : 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300' }}">
-                                {{ $cliente->estado === 'activo' ? 'Activo' : 'Inhabilitado' }}
-                            </span>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Región</dt>
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ $cliente->Region->nombre_region }}
                         </dd>
                     </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Ciudad</dt>
+                        <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ $cliente->Ciudad->nombre_ciudad }}
+                        </dd>
+                    </div>
+                    <div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Fecha de Creación</dt>
+                            <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ $cliente->created_at->format('d/m/Y H:i') }}
+                            </dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Estado</dt>
+                            <dd class="mt-2">
+                                <span
+                                    class="inline-block rounded px-2 py-1 text-xs font-semibold
+                                {{ $cliente->estado === 'activo' ? 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' : 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300' }}">
+                                    {{ $cliente->estado === 'activo' ? 'Activo' : 'Inhabilitado' }}
+                                </span>
+                            </dd>
+                        </div>
+
                 </dl>
 
                 <div class="mt-8">

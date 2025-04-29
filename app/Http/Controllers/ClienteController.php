@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Cliente;
+use App\Models\Ciudad;
+use App\Models\Region;
 
 class ClienteController extends Controller
 {
@@ -21,7 +23,10 @@ class ClienteController extends Controller
      */
     public function create()
     {
-        return view('clientes.create');
+
+        $regiones = Region::all();
+        $ciudades = Ciudad::all();
+        return view('clientes.create', compact('regiones', 'ciudades'));
     }
 
     /**
@@ -32,6 +37,10 @@ class ClienteController extends Controller
         $validated = $request->validate([
             'nombre_cliente' => 'required|string|max:255',
             'apellido_cliente' => 'required|string|max:255',
+            'razon_social' => 'nullable|string|max:255',
+            'giro' => 'nullable|string|max:255',
+            'id_region' => 'required|integer|exists:regiones,id_region',
+            'id_ciudad' => 'required|integer|exists:ciudades,id_ciudad',
             'email' => 'required|email|unique:clientes,email',
             'rut' => 'required|string|max:20|unique:clientes,rut',
             'nro_contacto' => 'required|string|max:20',
@@ -57,7 +66,9 @@ class ClienteController extends Controller
     public function edit(string $id)
     {
         $cliente = Cliente::findOrFail($id);
-        return view('clientes.edit', compact('cliente'));
+        $regiones = Region::all(); // Obtener todas las regiones
+        $ciudades = Ciudad::all(); // Obtener todas las ciudades
+        return view('clientes.edit', compact('cliente', 'regiones', 'ciudades'));
     }
 
     /**
@@ -70,6 +81,10 @@ class ClienteController extends Controller
         $validated = $request->validate([
             'nombre_cliente' => 'required|string|max:255',
             'apellido_cliente' => 'required|string|max:255',
+            'razon_social' => 'nullable|string|max:255',
+            'giro' => 'nullable|string|max:255',
+            'id_region' => 'required|integer|exists:regiones,id_region',
+            'id_ciudad' => 'required|integer|exists:ciudades,id_ciudad',
             'email' => 'required|email|unique:clientes,email,' . $cliente->id_cliente . ',id_cliente',
             'rut' => 'required|string|max:20|unique:clientes,rut,' . $cliente->id_cliente . ',id_cliente',
             'nro_contacto' => 'required|string|max:20',
@@ -79,7 +94,7 @@ class ClienteController extends Controller
         $cliente->update($validated);
         return redirect()->route('clientes.index')->with('success', 'Cliente actualizado correctamente.');
     }
-    
+
     // Método para inhabilitar cliente
     public function destroy($id_cliente)
     {
@@ -128,5 +143,12 @@ class ClienteController extends Controller
         } else {
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
-    } 
+    }
+    // Método para obtener ciudades por región
+    public function obtenerCiudades($region_id)
+    {
+        $ciudades = Ciudad::where('id_region', $region_id)->get();
+
+        return response()->json($ciudades);
+    }
 }
