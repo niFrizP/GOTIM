@@ -36,14 +36,6 @@
                             <x-input-error :messages="$errors->get('email')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
-                        <!-- RUT -->
-                        <div>
-                            <x-input-label for="rut" value="RUT" />
-                            <x-text-input id="rut" name="rut" type="text" class="w-full"
-                                value="{{ old('rut') }}" maxlength="12" placeholder="Ej: 9.999.999-9" required />
-                            <x-input-error :messages="$errors->get('rut')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-                        </div>
-
                         <!-- Teléfono -->
                         <div>
                             <x-input-label for="nro_contacto" value="Teléfono" />
@@ -52,40 +44,132 @@
                             <x-input-error :messages="$errors->get('nro_contacto')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
+                        <!-- Giro -->
+                        <div>
+                            <x-input-label for="giro" value="Giro" />
+                            <x-text-input id="giro" name="giro" type="text" class="w-full"
+                                value="{{ old('giro') }}" required />
+                            <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        </div>
+
+                        <!-- Razón Social -->
+                        <div>
+                            <x-input-label for="razon_social" value="Razón Social" />
+                            <x-text-input id="razon_social" name="razon_social" type="text" class="w-full"
+                                value="{{ old('razon_social') }}" required />
+                            <x-input-error :messages="$errors->get('razon_social')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        </div>
+
+                        <!-- RUT -->
+                        <div>
+                            <x-input-label for="rut" value="RUT" />
+                            <x-text-input id="rut" name="rut" type="text" class="w-full"
+                                value="{{ old('rut') }}" maxlength="12" placeholder="Ej: 9.999.999-9" required />
+                            <x-input-error :messages="$errors->get('rut')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        </div>
+
                         <!-- Dirección -->
                         <div>
                             <x-input-label for="direccion" value="Dirección" />
-                            <x-text-input id="direccion" name="direccion" type="text" class="w-full"
+                            <x-text-input id="direccion" name="direccion" type="text" class="w-full select2"
                                 value="{{ old('direccion') }}" />
                             <x-input-error :messages="$errors->get('direccion')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
-                    </div>
+                        <!-- Región -->
+                        <div>
+                            <x-input-label for="region" value="Región" />
+                            <select id="id_region" name="id_region" class="w-full select2" required>
+                                <option value="" disabled selected>Seleccione una región</option>
+                                @foreach ($regiones as $region)
+                                    <option value="{{ $region->id_region }}">{{ $region->nombre_region }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <div class="mt-6">
-                        <x-primary-button>Guardar Cliente</x-primary-button>
-                        <a href="{{ route('clientes.index') }}"
-                            class="ml-4 text-sm text-gray-600 dark:text-gray-300 hover:underline">Cancelar</a>
+                        <!-- Ciudad -->
+                        <div>
+                            <x-input-label for="ciudad" value="Ciudad" />
+                            <select id="id_ciudad" name="id_ciudad" class="w-full select2" required>
+                                <option value="" disabled selected>Seleccione una ciudad</option>
+                                {{-- Las ciudades se cargarán dinámicamente --}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <x-primary-button>
+                            Crear Cliente
+                        </x-primary-button>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ route('clientes.index') }}" class="text-blue-500 hover:text-blue-700">
+                            Volver a la lista de clientes
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    <script>
-        function formatRut(input) {
-            let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
-            if (value.length === 9) {
-                value = value.replace(/^(\d{2})(\d{3})(\d{3})([\dkK])$/, '$1.$2.$3-$4');
-            } else if (value.length === 8) {
-                value = value.replace(/^(\d{1})(\d{3})(\d{3})([\dkK])$/, '$1.$2.$3-$4');
-            }
-            input.value = value;
-        };
+    @push('scripts')
+        <script>
+            function formatRut(input) {
+                let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
+                if (value.length === 9) {
+                    value = value.replace(/^(\d{2})(\d{3})(\d{3})([\dkK])$/, '$1.$2.$3-$4');
+                } else if (value.length === 8) {
+                    value = value.replace(/^(\d{1})(\d{3})(\d{3})([\dkK])$/, '$1.$2.$3-$4');
+                }
+                input.value = value;
+            };
 
 
-        document.getElementById('rut').addEventListener('input', function() {
-            formatRut(this);
-        });
-    </script>
+            document.getElementById('rut').addEventListener('input', function() {
+                formatRut(this);
+            });
+
+            document.getElementById('id_region').addEventListener('change', async function() {
+                const regionId = this.value;
+                console.log('Seleccionaste región ID:', regionId);
+
+                const $ciudad = $('#id_ciudad');
+
+                if (regionId) {
+                    try {
+                        const response = await fetch(`/cxr/${regionId}`);
+
+                        if (!response.ok) {
+                            throw new Error('Error al cargar ciudades');
+                        }
+
+                        const ciudades = await response.json();
+                        console.log('Ciudades recibidas:', ciudades);
+
+                        // Vaciar y actualizar las opciones
+                        $ciudad.empty();
+                        $ciudad.append('<option value="">Seleccione una ciudad</option>');
+
+                        ciudades.forEach(function(ciudad) {
+                            $ciudad.append(
+                                `<option value="${ciudad.id_ciudad}">${ciudad.nombre_ciudad}</option>`
+                            );
+                        });
+
+                        // Refrescar Select2 solo para el selector de ciudades
+                        $ciudad.select2({
+                            placeholder: "Seleccione una opción",
+                            allowClear: true
+                        });
+
+                        // Resetear selección
+                        $ciudad.val(null).trigger('change');
+
+                    } catch (error) {
+                        console.error('Error cargando ciudades:', error);
+                    }
+                }
+            });
+        </script>
+    @endpush
+
 </x-app-layout>
 
 

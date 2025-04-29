@@ -29,7 +29,6 @@
                             <th class="border-b p-2">Correo</th>
                             <th class="border-b p-2">RUT</th>
                             <th class="border-b p-2">Teléfono</th>
-                            <th class="border-b p-2">Dirección</th>
                             <th class="border-b p-2">Estado</th>
                             <th class="border-b p-2">Acciones</th>
                         </tr>
@@ -42,7 +41,6 @@
                                 <td class="border-b p-2">{{ $cliente->email }}</td>
                                 <td class="border-b p-2">{{ $cliente->rut }}</td>
                                 <td class="border-b p-2">{{ $cliente->nro_contacto }}</td>
-                                <td class="border-b p-2">{{ $cliente->direccion }}</td>
                                 <td class="border-b p-2">
                                     <span
                                         class="inline-block rounded px-2 py-1 text-xs font-semibold

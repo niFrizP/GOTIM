@@ -183,6 +183,15 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <!-- Botón Registro -->
+                <?php if(Route::has('register')): ?>
+                <a href="<?php echo e(route('register')); ?>"
+                    class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-white uppercase tracking-widest hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                    <?php echo e(__('Register')); ?>
+
+                </a>
+                <?php endif; ?>
+
                 <!-- Botón Login -->
                 <?php if (isset($component)) { $__componentOriginald411d1792bd6cc877d687758b753742c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald411d1792bd6cc877d687758b753742c = $attributes; } ?>
