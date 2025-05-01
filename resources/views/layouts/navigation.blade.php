@@ -30,6 +30,10 @@
                         <i class="fa-solid fa-wrench"></i> {{-- Puedes cambiar el ícono si quieres --}}
                         <span class="ml-3">{{ __('Servicios') }}</span>
                     </x-nav-link>
+                    <x-nav-link :href="route('categorias.index')" :active="request()->routeIs('categorias.*')">
+                        <i class="fa-solid fa-tags"></i>
+                        <span class="ml-3">{{ __('Categorías') }}</span>
+                    </x-nav-link>
                     @endif
                     @endauth
                 </div>
