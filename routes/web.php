@@ -7,6 +7,7 @@ use App\Http\Controllers\CiudadController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\TipoProductoController;
 
 // Rutas de categorías
 Route::resource('servicios', ServicioController::class);
@@ -54,6 +55,9 @@ Route::get('/categorias/inactivas', [CategoriaController::class, 'inactivas'])->
 
 Route::resource('categorias', CategoriaController::class)->except(['destroy']);
 
+Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, 'desactivar'])->name('tipo_productos.desactivar');
+Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
+Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
 
 
 
