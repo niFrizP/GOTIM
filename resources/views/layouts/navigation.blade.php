@@ -53,7 +53,7 @@
                                         </x-dropdown-link>
 
                                         <!-- Enlace a Categorías -->
-                                        <x-dropdown-link :href="route('servicios.index')" :active="request()->routeIs('categorias.*')">
+                                        <x-dropdown-link :href="route('categorias.index')" :active="request()->routeIs('categorias.*')">
                                             <i class="fa-solid fa-tags"></i> <!-- Icono para Categorías -->
                                             <span class="ml-3">{{ __('Categorías') }}
                                         </x-dropdown-link>
