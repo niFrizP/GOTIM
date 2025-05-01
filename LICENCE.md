@@ -37,6 +37,7 @@ Para consultas sobre licenciamiento o solicitudes especiales, contacta a:
 ---
 
 # ¡Gracias por respetar nuestro trabajo!
+```
 
 
                                   ,----,                         
@@ -54,4 +55,6 @@ Para consultas sobre licenciamiento o solicitudes especiales, contacta a:
 |   :    /     \   \ .'       '---'     ;   |.' ;   | |`-'       
  \   \ .'       `---`                   '---'   |   ;/           
   `---`                                         '---'            
-                                                                 
+
+```
+                                                    
