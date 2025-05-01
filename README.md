@@ -3,9 +3,12 @@
 **Gestión de Órdenes de Trabajo para la Mecánica Industrial**
 
 
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Laravel 11](https://img.shields.io/badge/Laravel-11-red.svg)
 ![PHP 8.2](https://img.shields.io/badge/PHP-8.2-777BB4.svg)
+![GitHub contributors](https://img.shields.io/github/contributors/niFrizP/GOTIM)
+![GitHub last commit](https://img.shields.io/github/last-commit/niFrizP/GOTIM)
+
+
 
 
 ---
