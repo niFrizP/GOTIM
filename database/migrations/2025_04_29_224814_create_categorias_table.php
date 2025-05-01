@@ -15,7 +15,7 @@ class CreateCategoriasTable extends Migration
             $table->id('id_categoria');
             $table->string('nombre_categoria');
             $table->text('descripcion')->nullable();
-            $table->boolean('activa')->default(true); // Soft delete lógico
+            $table->enum('estado', ['Activa', 'Inactiva'])->default('Activa');
             $table->timestamps();
         });
     }
