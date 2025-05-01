@@ -57,6 +57,12 @@
                                             <i class="fa-solid fa-tags"></i> <!-- Icono para Categorías -->
                                             <span class="ml-3">{{ __('Categorías') }}
                                         </x-dropdown-link>
+
+                                        <!-- Enlace a Tipos de Productos -->
+                                        <x-dropdown-link :href="route('tipo_productos.index')" :active="request()->routeIs('tipo_productos.*')">
+                                            <i class="fa-solid fa-box"></i> <!-- Icono para Tipos de Productos -->
+                                            <span class="ml-3">{{ __('Tipos de Productos') }}</span>
+                                        </x-dropdown-link>
                                     </x-slot>
                                 </x-dropdown>
                             </div>
