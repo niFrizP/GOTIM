@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('productos', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_producto');
             $table->foreignId('id_categoria')->constrained('categorias');
             $table->string('marca')->nullable();
             $table->string('modelo')->nullable();
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedInteger('stock')->default(0);
             $table->string('codigo')->unique(); // código único para seguimiento
             $table->string('imagen')->nullable();
-            $table->boolean('activo')->default(true);
+            $table->boolean('estado')->default(true);
             $table->timestamps();
         });
     }
