@@ -124,4 +124,21 @@ class InventarioController extends Controller
 
         return view('inventario.historial_inventario', compact('historial'));
     }
+
+    public function desactivar($id)
+    {
+        $inventario = Inventario::findOrFail($id);
+        $inventario->estado = 'eliminado';
+        $inventario->save();
+
+        return redirect()->route('inventario.index')->with('success', 'Registro de inventario desactivado.');
+    }
+    public function reactivar($id)
+    {
+        $inventario = Inventario::findOrFail($id);
+        $inventario->estado = 'activo';
+        $inventario->save();
+
+        return redirect()->route('inventario.index')->with('success', 'Registro de inventario reactivado.');
+    }
 }

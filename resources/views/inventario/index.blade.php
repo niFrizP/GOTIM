@@ -57,7 +57,7 @@
                             </td>
                             <td class="border-b p-2 space-x-2">
                                 <a href="{{ route('inventario.ver', $inv->id_inventario) }}" class="text-gray-600 hover:underline dark:text-gray-300">Ver</a>
-                                <a href="{{ route('inventario.editar', $inv->id_inventario) }}" class="text-blue-500 hover:underline">Editar</a>
+                                <a href="{{ route('inventario.edit', $inv->id_inventario) }}" class="text-blue-500 hover:underline">Editar</a>
                                 @if ($inv->estado === 'activo')
                                 <a href="{{ route('inventario.desactivar', $inv->id_inventario) }}" class="text-red-500 hover:underline">Desactivar</a>
                                 @else
