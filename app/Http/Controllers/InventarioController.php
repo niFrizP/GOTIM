@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Inventario;
+use App\Models\Producto;
+use App\Models\HistorialInventario;
+use Illuminate\Support\Facades\Auth;
+
+
+class InventarioController extends Controller
+{
+    public function index()
+    {
+        $inventarios = Inventario::with('producto')->get();
+        return view('inventario.index', compact('inventarios'));
+    }
+
+    public function create()
+    {
+        $productos = Producto::where('estado', true)->get();
+        return view('inventario.create', compact('productos'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'id_producto' => 'required|exists:productos,id_producto',
+            'cantidad' => 'required|integer|min:1',
+            'fecha_ingreso' => 'nullable|date',
+            'fecha_salida' => 'nullable|date|after_or_equal:fecha_ingreso',
+        ]);
+
+        Inventario::create($validated);
+        return redirect()->route('inventario.index')->with('success', 'Registro de inventario creado.');
+    }
+
+    public function show($id)
+    {
+        $inventario = Inventario::with('producto')->findOrFail($id);
+        return view('inventario.show', compact('inventario'));
+    }
+
+    public function edit($id)
+    {
+        $inventario = Inventario::findOrFail($id);
+        $productos = Producto::where('estado', true)->get();
+        return view('inventario.edit', compact('inventario', 'productos'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $inventario = Inventario::findOrFail($id);
+
+        $validated = $request->validate([
+            'id_producto' => 'required|exists:productos,id_producto',
+            'cantidad' => 'required|integer|min:1',
+            'fecha_ingreso' => 'nullable|date',
+            'fecha_salida' => 'nullable|date|after_or_equal:fecha_ingreso',
+        ]);
+
+        $campos = ['id_producto', 'cantidad', 'fecha_ingreso', 'fecha_salida'];
+
+        foreach ($campos as $campo) {
+            $valorAnterior = $inventario->$campo;
+            $valorNuevo = $validated[$campo] ?? null;
+
+            // Registrar solo si hubo cambio
+            if ($valorAnterior != $valorNuevo) {
+                HistorialInventario::create([
+                    'id_inventario' => $inventario->id_inventario,
+                    'id_producto' => $inventario->id_producto,
+                    'id_responsable' => Auth::id(),
+                    'campo_modificado' => $campo,
+                    'valor_anterior' => $valorAnterior,
+                    'valor_nuevo' => $valorNuevo,
+                    'fecha_modificacion' => now(),
+                ]);
+            }
+        }
+
+        $inventario->update($validated);
+
+        return redirect()->route('inventario.index')->with('success', 'Inventario actualizado correctamente.');
+    }
+
+    public function destroy($id)
+    {
+        $inventario = Inventario::findOrFail($id);
+        $inventario->estado = 'eliminado';
+        $inventario->save();
+
+        return redirect()->route('inventario.index')->with('success', 'Registro de inventario inhabilitado.');
+    }
+    public function historial()
+    {
+        $historial = \App\Models\HistorialInventario::with(['inventario.producto', 'responsable'])
+            ->orderBy('fecha_modificacion', 'desc')
+            ->get();
+
+        return view('inventario.historial_inventario', compact('historial'));
+    }
+}
