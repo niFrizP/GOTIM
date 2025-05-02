@@ -14,10 +14,14 @@ class TipoProducto extends Model
         'activo'
     ];
 
+    /**
+     * Relaciones
+    */
+
     // Relación con productos --Descomentar en el futuro
-    // public function productos() {
-    //     return $this->hasMany(Producto::class);
-    // }
+    public function productos() {
+    return $this->hasMany(Producto::class);
+    }
 
     
 }

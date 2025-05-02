@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id('id_producto');
-
+            $table-> string ('nombre_producto');
             $table->unsignedBigInteger('id_categoria');
             $table->foreign('id_categoria')->references('id_categoria')->on('categorias');
 
@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('marca')->nullable();
             $table->string('modelo')->nullable();
             $table->text('descripcion')->nullable();
-            $table->unsignedInteger('stock')->default(0);
             $table->string('codigo')->unique();
             $table->string('imagen')->nullable();
             $table->boolean('estado')->default(true);
