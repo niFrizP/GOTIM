@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TipoProducto;
+use App\Models\Categoria;
 
 class TipoProductoController extends Controller
 {
@@ -63,6 +64,12 @@ class TipoProductoController extends Controller
             return redirect()->route('tipo_productos.index')->with('error', 'Este tipo está inactivo y no puede editarse.');
         }
         return view('tipo_productos.edit', compact('tipo'));
+    }
+
+    public function obtenercategoria($id_categoria)
+    {
+        $categorias = Categoria::where('id_categoria', $id_categoria)->get();
+        return response()->json($categorias);
     }
 
     /**

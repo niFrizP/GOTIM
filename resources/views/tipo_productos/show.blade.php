@@ -63,17 +63,19 @@
                         <thead>
                             <tr class="bg-gray-100 text-left dark:bg-gray-700">
                                 <th class="p-2 text-sm text-gray-700 dark:text-gray-300">Nombre</th>
+                                <th class="p-2 text-sm text-gray-700 dark:text-gray-300">Modelo</th>
                                 <th class="p-2 text-sm text-gray-700 dark:text-gray-300">Código</th>
-                                <th class="p-2 text-sm text-gray-700 dark:text-gray-300">Stock</th>
+                                <th class="p-2 text-sm text-gray-700 dark:text-gray-300">Categoria</th>
                                 <th class="p-2 text-sm text-gray-700 dark:text-gray-300">Estado</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-900 dark:text-gray-100">
                             @foreach ($productos as $producto)
                                 <tr class="border-t border-gray-200 dark:border-gray-700">
-                                    <td class="p-2">{{ $producto->nombre }}</td>
+                                    <td class="p-2">{{ $producto->nombre_producto }}</td>
+                                    <td class="p-2">{{ $producto->modelo }}</td>
                                     <td class="p-2">{{ $producto->codigo }}</td>
-                                    <td class="p-2">{{ $producto->stock }}</td>
+                                    <td class="p-2">{{ $producto->categoria->nombre_categoria }}</td>
                                     <td class="p-2">
                                         <span class="{{ $producto->estado ? 'text-green-500' : 'text-red-500' }}">
                                             {{ $producto->estado ? 'Activo' : 'Inactivo' }}
