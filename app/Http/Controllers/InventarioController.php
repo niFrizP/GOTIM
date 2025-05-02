@@ -8,7 +8,6 @@ use App\Models\Producto;
 use App\Models\HistorialInventario;
 use Illuminate\Support\Facades\Auth;
 
-
 class InventarioController extends Controller
 {
     public function index()
@@ -66,7 +65,6 @@ class InventarioController extends Controller
             $valorAnterior = $inventario->$campo;
             $valorNuevo = $validated[$campo] ?? null;
 
-            // Registrar solo si hubo cambio
             if ($valorAnterior != $valorNuevo) {
                 HistorialInventario::create([
                     'id_inventario' => $inventario->id_inventario,
@@ -93,11 +91,36 @@ class InventarioController extends Controller
 
         return redirect()->route('inventario.index')->with('success', 'Registro de inventario inhabilitado.');
     }
-    public function historial()
+
+    public function historial(Request $request)
     {
-        $historial = \App\Models\HistorialInventario::with(['inventario.producto', 'responsable'])
-            ->orderBy('fecha_modificacion', 'desc')
-            ->get();
+        $query = HistorialInventario::with(['inventario.producto', 'responsable']);
+
+        if ($request->filled('producto')) {
+            $query->whereHas('inventario.producto', function ($q) use ($request) {
+                $q->where('descripcion', 'like', '%' . $request->producto . '%');
+            });
+        }
+
+        if ($request->filled('responsable')) {
+            $query->whereHas('responsable', function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->responsable . '%');
+            });
+        }
+
+        if ($request->filled('campo')) {
+            $query->where('campo_modificado', $request->campo);
+        }
+
+        if ($request->filled('fecha_inicio')) {
+            $query->whereDate('fecha_modificacion', '>=', $request->fecha_inicio);
+        }
+
+        if ($request->filled('fecha_fin')) {
+            $query->whereDate('fecha_modificacion', '<=', $request->fecha_fin);
+        }
+
+        $historial = $query->orderBy('fecha_modificacion', 'desc')->paginate(15)->withQueryString();
 
         return view('inventario.historial_inventario', compact('historial'));
     }

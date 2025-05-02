@@ -61,8 +61,9 @@ Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'act
 Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
 
 // Rutas de inventario
-Route::resource('inventario', InventarioController::class);
+// Rutas de inventario
 Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
+Route::resource('inventario', InventarioController::class);
 Route::get('/inventario/{id}/reactivar', [InventarioController::class, 'reactivar'])->name('inventario.reactivar');
 Route::get('/inventario/{id}/desactivar', [InventarioController::class, 'desactivar'])->name('inventario.desactivar');
 Route::get('/inventario/{id}/ver', [InventarioController::class, 'ver'])->name('inventario.ver');
