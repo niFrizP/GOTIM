@@ -35,21 +35,21 @@
                                     </span>
                                 </td>
                                 <td class="border-b p-2 space-x-2">
-                                    <a href="{{ route('tipo_productos.show', $tipo->id) }}"
+                                    <a href="{{ route('tipo_productos.show', $tipo->tipo_producto_id) }}"
                                         class="text-gray-600 dark:text-gray-300 hover:underline">Ver</a>
-                                    <a href="{{ route('tipo_productos.edit', $tipo->id) }}"
+                                    <a href="{{ route('tipo_productos.edit', $tipo->tipo_producto_id) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
 
                                     @if ($tipo->estado)
                                         <form method="POST"
-                                            action="{{ route('tipo_productos.desactivar', $tipo->id) }}" class="inline">
+                                            action="{{ route('tipo_productos.desactivar', $tipo->tipo_producto_id) }}" class="inline">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit"
                                                 class="text-red-500 hover:underline">Desactivar</button>
                                         </form>
                                     @else
-                                        <form method="POST" action="{{ route('tipo_productos.activar', $tipo->id) }}"
+                                        <form method="POST" action="{{ route('tipo_productos.activar', $tipo->tipo_producto_id) }}"
                                             class="inline">
                                             @csrf
                                             @method('PATCH')

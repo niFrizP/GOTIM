@@ -12,8 +12,7 @@ class TipoProductoController extends Controller
      */
     public function index()
     {
-        $tipos = TipoProducto::orderBy('nombre')->get();
-        $tiposProductos = TipoProducto::paginate(10);  // Paginación de 10 elementos por página
+        $tiposProductos = TipoProducto::orderBy('nombre')->paginate(10); // Paginación de 10 por página
         return view('tipo_productos.index', compact('tiposProductos'));
     }
 
@@ -51,7 +50,7 @@ class TipoProductoController extends Controller
     {
         $tipo = TipoProducto::with('productos')->findOrFail($id);
         $productos = $tipo->productos()->paginate(10); // Paginación de 10 por página
-        return view('tipo_productos.show', compact('tipo'));
+        return view('tipo_productos.show', compact('tipo', 'productos'));
     }
 
     /**
@@ -60,6 +59,9 @@ class TipoProductoController extends Controller
     public function edit(string $id)
     {
         $tipo = TipoProducto::findOrFail($id);
+        if (!$tipo->estado) {
+            return redirect()->route('tipo_productos.index')->with('error', 'Este tipo está inactivo y no puede editarse.');
+        }
         return view('tipo_productos.edit', compact('tipo'));
     }
 
@@ -71,7 +73,7 @@ class TipoProductoController extends Controller
         $tipo = TipoProducto::findOrFail($id);
 
         $request->validate([
-            'nombre' => 'required|string|max:100|unique:tipo_productos,nombre,' . $tipo->id,
+            'nombre' => 'required|string|max:100|unique:tipo_productos,nombre,' . $tipo->tipo_producto_id . ',tipo_producto_id',
             'descripcion' => 'nullable|string|max:255',
         ]);
 
