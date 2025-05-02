@@ -8,7 +8,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ServicioController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TipoProductoController;
-use App\Http\Controllers\InventarioController; 
+use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\ProductoController;
 
 // Rutas de categorías
 Route::resource('servicios', ServicioController::class);
@@ -56,6 +57,7 @@ Route::get('/categorias/inactivas', [CategoriaController::class, 'inactivas'])->
 
 Route::resource('categorias', CategoriaController::class)->except(['destroy']);
 
+//Ruta tipo_producto
 Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, 'desactivar'])->name('tipo_productos.desactivar');
 Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
 Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
@@ -70,6 +72,14 @@ Route::get('/inventario/{id}/desactivar', [InventarioController::class, 'desacti
 Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name('inventario.ver');
 Route::get('/inventario/{id}/edit', [InventarioController::class, 'edit'])->name('inventario.edit');
 Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
+//Rutas de Producto
+
+// Rutas de productos
+Route::resource('productos', ProductoController::class);
+// Ruta personalizada para reactivar Producto
+Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
+
+
 
 
 require __DIR__ . '/auth.php';

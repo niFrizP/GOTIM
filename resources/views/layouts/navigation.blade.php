@@ -63,11 +63,13 @@
                                     <i class="fa-solid fa-box"></i> <!-- Icono para Tipos de Productos -->
                                     <span class="ml-3">{{ __('Tipos de Productos') }}</span>
                                 </x-dropdown-link>
-                                <!-- Enlace a inventario -->
-                                <x-dropdown-link :href="route('inventario.index')" :active="request()->routeIs('inventario.*')">
-                                    <i class="fa-solid fa-boxes-stacked"></i> <!-- Icono para Inventario -->
-                                    <span class="ml-3">{{ __('Inventario') }}</span>
+
+                                <!-- Enlace a Producto -->
+                                <x-dropdown-link :href="route('productos.index')" :active="request()->routeIs('productos.*')">
+                                    <i class="fa-solid fa-boxes-stacked"></i> <!-- Icono para producto -->
+                                    <span class="ml-3">{{ __('Productos') }}
                                 </x-dropdown-link>
+
                             </x-slot>
                         </x-dropdown>
                     </div>
