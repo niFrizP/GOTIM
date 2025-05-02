@@ -4,7 +4,6 @@
             Detalle del Movimiento de Inventario
         </h2>
     </x-slot>
-
     <div class="py-6">
         <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
             <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md">
@@ -15,22 +14,18 @@
                             {{ $inventario->producto->marca ?? '-' }} {{ $inventario->producto->modelo ?? '' }}
                         </dd>
                     </div>
-
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Cantidad</dt>
                         <dd class="mt-1 text-gray-800 dark:text-gray-200">{{ $inventario->cantidad }}</dd>
                     </div>
-
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Fecha Ingreso</dt>
                         <dd class="mt-1 text-gray-800 dark:text-gray-200">{{ $inventario->fecha_ingreso ?? '-' }}</dd>
                     </div>
-
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Fecha Salida</dt>
                         <dd class="mt-1 text-gray-800 dark:text-gray-200">{{ $inventario->fecha_salida ?? '-' }}</dd>
                     </div>
-
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Estado</dt>
                         <dd class="mt-1">
@@ -41,13 +36,11 @@
                         </dd>
                     </div>
                 </dl>
-
                 <div class="mt-8">
                     <a href="{{ route('inventario.index') }}"
                         class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                         ← Volver a la lista
                     </a>
-
                     @if ($inventario->estado === 'activo')
                     <button onclick="mostrarModal({{ $inventario->id_inventario }})"
                         class="ml-2 inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
@@ -63,7 +56,6 @@
             </div>
         </div>
     </div>
-
     <!-- Modal de Confirmación -->
     <div id="confirmModal"
         class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
@@ -88,7 +80,6 @@
             </div>
         </div>
     </div>
-
     <script>
         function mostrarModal(id) {
             const modal = document.getElementById('confirmModal');
