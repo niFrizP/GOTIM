@@ -1,6 +1,6 @@
 <p align="center"><a href="https://github.com/niFrizP/GOTIM" target="_blank"><img src="https://raw.githubusercontent.com/niFrizP/GOTIM/refs/heads/main/public/images/logo.png" width="400" alt="GOTIM Logo"></a></p>
 
-**Gestión de Órdenes de Trabajo para la Mecánica Industrial**
+**Gestor de Órdenes de Trabajo para la Mecánica Industrial**
 
 
 ![Laravel 11](https://img.shields.io/badge/Laravel-11-red.svg)
