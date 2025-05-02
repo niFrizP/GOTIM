@@ -18,9 +18,14 @@ class TipoProducto extends Model
         'estado'
     ];
 
-    // Relación con productos --Descomentar en el futuro
+    /**
+     * Relaciones
+    */
+
+    // Relación con productos 
     public function productos()
     {
         return $this->hasMany(Producto::class, 'tipo_producto_id', 'tipo_producto_id');
     }
 }
+
