@@ -7,6 +7,8 @@ use App\Models\Inventario;
 use App\Models\Producto;
 use App\Models\HistorialInventario;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class InventarioController extends Controller
 {
@@ -96,6 +98,7 @@ class InventarioController extends Controller
     {
         $query = HistorialInventario::with(['inventario.producto', 'responsable']);
 
+        // Filtros
         if ($request->filled('producto')) {
             $query->whereHas('inventario.producto', function ($q) use ($request) {
                 $q->where('descripcion', 'like', '%' . $request->producto . '%');
@@ -120,11 +123,43 @@ class InventarioController extends Controller
             $query->whereDate('fecha_modificacion', '<=', $request->fecha_fin);
         }
 
-        $historial = $query->orderBy('fecha_modificacion', 'desc')->paginate(15)->withQueryString();
+        // Obtener todos los registros para agruparlos
+        $historialSinPaginar = $query->orderBy('fecha_modificacion', 'desc')->get();
+
+        // Agrupar por fecha + responsable
+        $agrupado = $historialSinPaginar->groupBy(function ($item) {
+            $fecha = Carbon::parse($item->fecha_modificacion)->format('Y-m-d H:i:s');
+            $responsable = $item->responsable->nombre ?? 'Sistema';
+            return $fecha . '|' . $responsable;
+        });
+
+        // Consolidar cambios
+        $historialAgrupado = $agrupado->map(function ($grupo) {
+            return [
+                'producto' => $grupo->first()->inventario->producto->descripcion ?? 'Producto eliminado',
+                'campos' => $grupo->pluck('campo_modificado')->unique()->values()->all(),
+                'descripciones' => $grupo->map(function ($item) {
+                    return "<strong>{$item->campo_modificado}</strong> de <em>{$item->valor_anterior}</em> a <em>{$item->valor_nuevo}</em>";
+                }),
+                'responsable' => $grupo->first()->responsable->nombre ?? 'Sistema',
+                'fecha_modificacion' => Carbon::parse($grupo->first()->fecha_modificacion)->format('Y-m-d H:i:s'),
+            ];
+        })->values();
+
+        // Paginación manual
+        $page = request()->get('page', 1);
+        $perPage = 15;
+        $currentPageItems = $historialAgrupado->slice(($page - 1) * $perPage, $perPage)->values();
+        $historial = new LengthAwarePaginator(
+            $currentPageItems,
+            $historialAgrupado->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('inventario.historial_inventario', compact('historial'));
     }
-
     public function desactivar($id)
     {
         $inventario = Inventario::findOrFail($id);
