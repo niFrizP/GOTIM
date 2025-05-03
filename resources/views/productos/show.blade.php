@@ -34,44 +34,42 @@
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Tipo de Producto</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                            {{ $producto->tipo_producto->nombre ?? 'N/A' }}
+                            {{ $producto->tipoproducto->nombre ?? 'N/A' }}
                         </dd>
                     </div>
 
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Marca</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                            {{ $producto->marca }}
+                            {{ $producto->marca ?? 'N/A' }}
                         </dd>
                     </div>
 
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Modelo</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                            {{ $producto->modelo }}
+                            {{ $producto->modelo ?? 'N/A' }}
                         </dd>
                     </div>
 
                     <div class="sm:col-span-2">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Descripción</dt>
                         <dd class="mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-line">
-                            {{ $producto->descripcion }}
+                            {{ $producto->descripcion ?? 'No hay una descripción del producto' }}
                         </dd>
                     </div>
 
                     @if ($producto->imagen)
-                    <div class="sm:col-span-2">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Imagen</dt>
-                        <dd class="mt-2">
-                            <img 
-                                src="{{ asset('storage/' . $producto->imagen) }}" 
-                                alt="Imagen del producto" 
-                                class="h-48 rounded-lg object-cover shadow border border-gray-300 dark:border-gray-600 cursor-pointer"
-                                onclick="mostrarImagenModal('{{ asset('storage/' . $producto->imagen) }}')" />
-                        </dd>
-                    </div>
-                @endif
-                
+                        <div class="sm:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Imagen</dt>
+                            <dd class="mt-2">
+                                <img src="{{ asset('storage/' . $producto->imagen) }}" alt="Imagen del producto"
+                                    class="h-48 rounded-lg object-cover shadow border border-gray-300 dark:border-gray-600 cursor-pointer"
+                                    onclick="mostrarImagenModal('{{ asset('storage/' . $producto->imagen) }}')" />
+                            </dd>
+                        </div>
+                    @endif
+
 
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Fecha de Creación</dt>
@@ -106,14 +104,17 @@
 
                     @if ($producto->estado)
                         <!-- Botón para inhabilitar -->
-                        <button onclick="mostrarModal()" class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 ml-2">
+                        <button onclick="mostrarModal()"
+                            class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 ml-2">
                             Inhabilitar Producto
                         </button>
                     @else
                         <!-- Botón de reactivar -->
-                        <form action="{{ route('productos.reactivar', $producto->id_producto) }}" method="POST" class="inline-block">
+                        <form action="{{ route('productos.reactivar', $producto->id_producto) }}" method="POST"
+                            class="inline-block">
                             @csrf
-                            <button type="submit" class="inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 ml-2">
+                            <button type="submit"
+                                class="inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 ml-2">
                                 Reactivar Producto
                             </button>
                         </form>
@@ -127,7 +128,8 @@
     <div id="confirmModal"
         class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
 
-        <div class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
+        <div
+            class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white text-center">
                 Confirmar Inhabilitación
             </h3>
@@ -171,27 +173,28 @@
         }
     </script>
 
-<!-- Modal para ver imagen en grande -->
-<div id="imagenModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80 flex items-center justify-center">
-    <div class="relative max-w-3xl mx-auto">
-        <img id="imagenAmpliada" src="" class="max-h-[80vh] rounded-lg shadow-xl" alt="Imagen ampliada" />
-        <button onclick="cerrarImagenModal()" class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
+    <!-- Modal para ver imagen en grande -->
+    <div id="imagenModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80 flex items-center justify-center">
+        <div class="relative max-w-3xl mx-auto">
+            <img id="imagenAmpliada" src="" class="max-h-[80vh] rounded-lg shadow-xl" alt="Imagen ampliada" />
+            <button onclick="cerrarImagenModal()"
+                class="absolute top-2 right-2 text-white text-2xl font-bold">&times;</button>
+        </div>
     </div>
-</div>
-<script>
-    function mostrarImagenModal(src) {
-        const modal = document.getElementById('imagenModal');
-        const imagen = document.getElementById('imagenAmpliada');
-        imagen.src = src;
-        modal.classList.remove('hidden');
-    }
+    <script>
+        function mostrarImagenModal(src) {
+            const modal = document.getElementById('imagenModal');
+            const imagen = document.getElementById('imagenAmpliada');
+            imagen.src = src;
+            modal.classList.remove('hidden');
+        }
 
-    function cerrarImagenModal() {
-        const modal = document.getElementById('imagenModal');
-        modal.classList.add('hidden');
-        document.getElementById('imagenAmpliada').src = '';
-    }
-</script>
+        function cerrarImagenModal() {
+            const modal = document.getElementById('imagenModal');
+            modal.classList.add('hidden');
+            document.getElementById('imagenAmpliada').src = '';
+        }
+    </script>
 
 
 </x-app-layout>

@@ -20,12 +20,18 @@ class TipoProducto extends Model
 
     /**
      * Relaciones
-    */
+     */
 
     // Relación con productos 
     public function productos()
     {
-        return $this->hasMany(Producto::class, 'tipo_producto_id', 'tipo_producto_id');
+        return $this->hasMany(Producto::class, 'tipo_producto_id', 'tipo_producto_id', 'id_categoria');
     }
-}
 
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'id_categoria');
+    }
+
+
+}

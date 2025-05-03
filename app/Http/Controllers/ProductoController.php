@@ -118,13 +118,14 @@ class ProductoController extends Controller
     
 
 
-    /*Optener el tipo producto*/
+    /*Obtener el tipo producto*/
     public function obtenertipoproducto($tipo_producto_id)
     {
         $tipo_producto = TipoProducto::where('tipo_producto_id', $tipo_producto_id)->get();
         return response()->json($tipo_producto);
     }
-    /*Optener Categoria*/
+
+    /*Obtener Categoria*/
     public function obtenercategoria($id_categoria)
     {
         $categorias=Categoria::where('id_categoria',$id_categoria)->get();
