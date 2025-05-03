@@ -67,16 +67,35 @@ class InventarioController extends Controller
             $valorAnterior = $inventario->$campo;
             $valorNuevo = $validated[$campo] ?? null;
 
-            if ($valorAnterior != $valorNuevo) {
-                HistorialInventario::create([
-                    'id_inventario' => $inventario->id_inventario,
-                    'id_producto' => $inventario->id_producto,
-                    'id_responsable' => Auth::id(),
-                    'campo_modificado' => $campo,
-                    'valor_anterior' => $valorAnterior,
-                    'valor_nuevo' => $valorNuevo,
-                    'fecha_modificacion' => now(),
-                ]);
+            $isFecha = in_array($campo, ['fecha_ingreso', 'fecha_salida']);
+
+            if ($isFecha) {
+                $anteriorFormateado = $valorAnterior ? Carbon::parse($valorAnterior)->format('Y-m-d') : null;
+                $nuevoFormateado = $valorNuevo ? Carbon::parse($valorNuevo)->format('Y-m-d') : null;
+
+                if ($anteriorFormateado !== $nuevoFormateado) {
+                    HistorialInventario::create([
+                        'id_inventario' => $inventario->id_inventario,
+                        'id_producto' => $inventario->id_producto,
+                        'id_responsable' => Auth::id(),
+                        'campo_modificado' => $campo,
+                        'valor_anterior' => $valorAnterior,
+                        'valor_nuevo' => $valorNuevo,
+                        'fecha_modificacion' => now(),
+                    ]);
+                }
+            } else {
+                if ($valorAnterior != $valorNuevo) {
+                    HistorialInventario::create([
+                        'id_inventario' => $inventario->id_inventario,
+                        'id_producto' => $inventario->id_producto,
+                        'id_responsable' => Auth::id(),
+                        'campo_modificado' => $campo,
+                        'valor_anterior' => $valorAnterior,
+                        'valor_nuevo' => $valorNuevo,
+                        'fecha_modificacion' => now(),
+                    ]);
+                }
             }
         }
 
@@ -133,19 +152,55 @@ class InventarioController extends Controller
             return $fecha . '|' . $responsable;
         });
 
+        // Mapeo de nombres amigables para los campos
+        $nombreCampos = [
+            'id_producto' => 'Producto',
+            'cantidad' => 'Cantidad',
+            'fecha_ingreso' => 'Fecha ingreso',
+            'fecha_salida' => 'Fecha salida',
+        ];
+
         // Consolidar cambios
-        $historialAgrupado = $agrupado->map(function ($grupo) {
+        $historialAgrupado = $agrupado->map(function ($grupo) use ($nombreCampos) {
             return [
                 'producto' => $grupo->first()->inventario->producto->descripcion ?? 'Producto eliminado',
-                'campos' => $grupo->pluck('campo_modificado')->unique()->values()->all(),
+                'campos' => $grupo->pluck('campo_modificado')->unique()->map(function ($campo) use ($nombreCampos) {
+                    return $nombreCampos[$campo] ?? ucfirst(str_replace('_', ' ', $campo));
+                })->values()->all(),
+
                 'descripciones' => $grupo->map(function ($item) {
-                    return "<strong>{$item->campo_modificado}</strong> de <em>{$item->valor_anterior}</em> a <em>{$item->valor_nuevo}</em>";
+                    $campo = $item->campo_modificado;
+                    $anterior = $item->valor_anterior;
+                    $nuevo = $item->valor_nuevo;
+
+                    switch ($campo) {
+                        case 'id_producto':
+                            $anteriorNombre = optional(\App\Models\Producto::find($anterior))->descripcion ?? $anterior;
+                            $nuevoNombre = optional(\App\Models\Producto::find($nuevo))->descripcion ?? $nuevo;
+                            return "<strong>Producto</strong> de <em>{$anteriorNombre}</em> a <em>{$nuevoNombre}</em>";
+
+                        case 'cantidad':
+                            return "<strong>Cantidad</strong> de <em>{$anterior}</em> a <em>{$nuevo}</em>";
+
+                        case 'fecha_ingreso':
+                        case 'fecha_salida':
+                            try {
+                                $anteriorF = $anterior ? \Carbon\Carbon::parse($anterior)->format('d-m-Y') : 'Sin fecha';
+                                $nuevoF = $nuevo ? \Carbon\Carbon::parse($nuevo)->format('d-m-Y') : 'Sin fecha';
+                                return "<strong>" . ucfirst(str_replace('_', ' ', $campo)) . "</strong> de <em>{$anteriorF}</em> a <em>{$nuevoF}</em>";
+                            } catch (\Exception $e) {
+                                return "<strong>" . ucfirst(str_replace('_', ' ', $campo)) . "</strong> modificado.";
+                            }
+
+                        default:
+                            return "<strong>" . ucfirst(str_replace('_', ' ', $campo)) . "</strong> de <em>{$anterior}</em> a <em>{$nuevo}</em>";
+                    }
                 }),
+
                 'responsable' => $grupo->first()->responsable->nombre ?? 'Sistema',
-                'fecha_modificacion' => Carbon::parse($grupo->first()->fecha_modificacion)->format('Y-m-d H:i:s'),
+                'fecha_modificacion' => Carbon::parse($grupo->first()->fecha_modificacion)->format('d-m-Y H:i:s'),
             ];
         })->values();
-
         // Paginación manual
         $page = request()->get('page', 1);
         $perPage = 15;
@@ -157,7 +212,6 @@ class InventarioController extends Controller
             $page,
             ['path' => request()->url(), 'query' => request()->query()]
         );
-
         return view('inventario.historial_inventario', compact('historial'));
     }
     public function desactivar($id)
