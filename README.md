@@ -38,10 +38,10 @@ GOTIM es una aplicación web diseñada para gestionar órdenes de trabajo en el 
 | Autenticación          | ✅ Completado |
 | Gestión de Roles       | ✅ Completado |
 | Gestión de Clientes    | ✅ Completado |
-| Gestión de Inventario  | 🔄 En desarrollo |
-| Gestión de Categorias    | 🔄 En desarrollo |
-| Gestión de Servicios    | 🔄 En desarrollo |
-| Órdenes de Trabajo     | ⏳ Pendiente |
+| Gestión de Inventario  | ✅ Completado |
+| Gestión de Categorias  | ✅ Completado |
+| Gestión de Servicios   | ✅ Completado |
+| Órdenes de Trabajo     | 🔄 En desarrollo |
 | Historial de Servicios | ⏳ Pendiente |
 | Reportes               | ⏳ Pendiente |
 
