@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RegionesSeeder::class,
             CiudadesSeeder::class,
+            EstadoOTSeeder::class,
         ]);
     }
 }

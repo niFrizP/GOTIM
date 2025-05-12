@@ -73,6 +73,11 @@
                                     <i class="fa-solid fa-boxes-stacked"></i> <!-- Icono para Inventario -->
                                     <span class="ml-3">{{ __('Inventario') }}</span>
                                 </x-dropdown-link>
+                                <!-- Enlace a Órdenes de Trabajo -->
+                                <x-dropdown-link :href="route('ot.index')" :active="request()->routeIs('ot.*')">
+                                    <i class="fa-solid fa-clipboard-list"></i> <!-- Icono para OT -->
+                                    <span class="ml-3">{{ __('Órdenes de Trabajo') }}</span>
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
@@ -160,8 +165,14 @@
             <x-responsive-nav-link :href="route('tipo_productos.index')" :active="request()->routeIs('tipo_productos.*')">
                 {{ __('Tipos de Productos') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('productos.index')" :active="request()->routeIs('productos.*')">
+                {{ __('Productos') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('inventario.index')" :active="request()->routeIs('inventario.*')">
                 {{ __('Inventario') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('ot.index')" :active="request()->routeIs('ot.*')">
+                {{ __('Órdenes de Trabajo') }}
             </x-responsive-nav-link>
             @endif
             @endauth

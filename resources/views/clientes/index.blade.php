@@ -28,6 +28,7 @@
                             <th class="border-b p-2">Correo</th>
                             <th class="border-b p-2">RUT</th>
                             <th class="border-b p-2">Teléfono</th>
+                            <th class="border-b p-2">Dirección</th>
                             <th class="border-b p-2">Estado</th>
                             <th class="border-b p-2">Acciones</th>
                         </tr>
@@ -104,7 +105,7 @@
             const form = document.getElementById('deleteForm');
             const message = document.getElementById('confirmMessage');
 
-            form.action = `/clientes/${id}`; 
+            form.action = `/clientes/${id}`;
             message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`;
 
             modal.classList.remove('hidden');

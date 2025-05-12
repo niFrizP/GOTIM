@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TipoProductoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\OTController;
 
 // Rutas de categorías
 Route::resource('servicios', ServicioController::class);
@@ -78,7 +79,23 @@ Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'
 Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
+// Rutas de OT
+Route::middleware(['auth'])->group(function () {
+    Route::get('ot/historial', [OTController::class, 'historialGeneral'])
+        ->name('ot.historial.global');
+    // CRUD menos destroy
+    Route::resource('ot', OTController::class)->except(['destroy']);
 
+    // Desactivar (inhabilitar) OT
+    Route::post('ot/{id_ot}/desactivar', [OTController::class, 'desactivar'])
+        ->name('ot.desactivar');
+
+    // Reactivar OT
+    Route::post('ot/{id_ot}/reactivar', [OTController::class, 'reactivar'])
+        ->name('ot.reactivar');
+    Route::get('ot/{ot}/historial', [OTController::class, 'historial'])
+        ->name('ot.historial');
+});
 
 
 

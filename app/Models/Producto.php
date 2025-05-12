@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TipoProducto;
 use App\Models\Categoria;
+use App\Models\Inventario;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Producto extends Model
@@ -36,6 +37,10 @@ class Producto extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'id_categoria');
-    }  
-    
+    }
+    // En App\Models\Producto.php
+    public function inventario()
+    {
+        return $this->hasMany(Inventario::class, 'id_producto', 'id_producto');
+    }
 }
