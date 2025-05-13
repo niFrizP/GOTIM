@@ -28,7 +28,7 @@
                                 <select id="id_categoria" name="id_categoria" class="w-full" required>
                                     <option value="">Seleccione una categoría</option>
                                     @foreach ($categorias as $categoria)
-                                        <option value="{{ $categoria->id_categoria }}">{{ $categoria->nombre_categoria }}</option>
+                                    <option value="{{ $categoria->id_categoria }}">{{ $categoria->nombre_categoria }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('id_categoria')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
@@ -40,7 +40,7 @@
                                 <select id="tipo_producto_id" name="tipo_producto_id" class="w-full">
                                     <option value="">Seleccione un tipo</option>
                                     @foreach ($tiposProducto as $tipo)
-                                        <option value="{{ $tipo->tipo_producto_id }}">{{ $tipo->nombre }}</option>
+                                    <option value="{{ $tipo->tipo_producto_id }}">{{ $tipo->nombre }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('tipo_producto_id')" class="mt-1 text-sm text-red-600 dark:text-red-400" />

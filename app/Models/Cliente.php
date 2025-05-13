@@ -32,7 +32,7 @@ class Cliente extends Model
      * Relaciones
      */
 
-     
+
     // Un cliente tiene muchas órdenes de trabajo
     public function ordenesTrabajo()
     {

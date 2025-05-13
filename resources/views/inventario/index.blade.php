@@ -38,7 +38,7 @@
                     <tbody>
                         @foreach ($inventarios as $inv)
                         <tr>
-                            <td class="border-b p-2">{{ $inv->producto->descripcion ?? 'N/A' }}</td>
+                            <td class="border-b p-2">{{ $inv->producto->nombre_producto ?? 'N/A' }}</td>
                             <td class="border-b p-2">{{ $inv->cantidad }}</td>
                             <td class="border-b p-2">{{ $inv->fecha_ingreso }}</td>
                             <td class="border-b p-2">{{ $inv->fecha_salida ?? '-' }}</td>

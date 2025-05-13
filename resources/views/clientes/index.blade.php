@@ -105,7 +105,7 @@
             const form = document.getElementById('deleteForm');
             const message = document.getElementById('confirmMessage');
 
-            form.action = `/clientes/${id}`; 
+            form.action = `/clientes/${id}`;
             message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`;
 
             modal.classList.remove('hidden');
