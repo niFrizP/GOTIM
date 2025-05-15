@@ -8,6 +8,8 @@
     <div class="py-6">
         <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
             <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Detalles</h3>
+
                 <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Nombre</dt>
@@ -57,7 +59,7 @@
 
             {{-- Tabla de productos --}}
             <div class="mt-8 rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md">
-                <h3 class="text-xl font-bold mb-4">Productos Asociados</h3>
+                <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Productos Asociados</h3>
                 @if ($productos->count())
                     <table class="w-full table-auto border-collapse">
                         <thead>

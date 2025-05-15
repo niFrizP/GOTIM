@@ -163,7 +163,7 @@ class InventarioController extends Controller
         // Consolidar cambios
         $historialAgrupado = $agrupado->map(function ($grupo) use ($nombreCampos) {
             return [
-                'producto' => $grupo->first()->inventario->producto->descripcion ?? 'Producto eliminado',
+                'producto' => $grupo->first()->inventario->producto->nombre_producto ?? 'Producto eliminado',
                 'campos' => $grupo->pluck('campo_modificado')->unique()->map(function ($campo) use ($nombreCampos) {
                     return $nombreCampos[$campo] ?? ucfirst(str_replace('_', ' ', $campo));
                 })->values()->all(),
