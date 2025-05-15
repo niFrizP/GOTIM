@@ -7,6 +7,7 @@ use App\Models\TipoProducto;
 use App\Models\Categoria;
 use App\Models\Inventario;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\DetalleProducto;
 
 class Producto extends Model
 {
@@ -33,6 +34,12 @@ class Producto extends Model
     {
         return $this->belongsTo(TipoProducto::class, 'tipo_producto_id');
     }
+
+    public function detalleProductos()
+    {
+        return $this->hasMany(DetalleProducto::class, 'id_producto', 'id_producto');
+    }
+
 
     public function categoria()
     {

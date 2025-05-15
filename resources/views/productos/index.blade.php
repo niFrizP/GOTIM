@@ -39,9 +39,20 @@
                                 <td class="border-b p-2">{{ $producto->nombre_producto }}</td>
                                 <td class="border-b p-2">{{ $producto->marca }}</td>
                                 <td class="border-b p-2">{{ $producto->modelo }}</td>
-                                <td class="border-b p-2">{{ $producto->descripcion }}</td>
+                                <td class="border-b p-2 max-w-xs text-sm">
+                                    <div x-data="{ expand: false }">
+                                        <div :class="{ 'line-clamp-3': !expand }" class="whitespace-normal">
+                                            {{ $producto->descripcion }}
+                                        </div>
+                                        <button @click="expand = !expand"
+                                            class="text-blue-500 text-xs mt-1 hover:underline">
+                                            <span x-text="expand ? 'Mostrar menos' : 'Mostrar más'"></span>
+                                        </button>
+                                    </div>
+                                </td>
                                 <td class="border-b p-2">
-                                    <span class="inline-block rounded px-2 py-1 text-xs font-semibold
+                                    <span
+                                        class="inline-block rounded px-2 py-1 text-xs font-semibold
                                         {{ $producto->estado ? 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' : 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300' }}">
                                         {{ $producto->estado ? 'Activo' : 'Inhabilitado' }}
                                     </span>
@@ -52,16 +63,19 @@
                                     <a href="{{ route('productos.edit', $producto->id_producto) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
                                     @if ($producto->estado)
-                                    <button onclick="mostrarModal('{{ $producto->id_producto }}', '{{ $producto->nombre_producto }}')" class="text-red-500 hover:underline">
-                                        Inhabilitar
-                                    </button>
+                                        <button
+                                            onclick="mostrarModal('{{ $producto->id_producto }}', '{{ $producto->nombre_producto }}')"
+                                            class="text-red-500 hover:underline">
+                                            Inhabilitar
+                                        </button>
                                     @else
-                                    <form action="{{ route('productos.reactivar', $producto->id_producto) }}" method="POST" class="inline-block">
+                                        <form action="{{ route('productos.reactivar', $producto->id_producto) }}"
+                                            method="POST" class="inline-block">
                                             @csrf
                                             <button type="submit" class="text-green-500 hover:underline">
                                                 Reactivar
                                             </button>
-                                    </form>
+                                        </form>
                                     @endif
                                 </td>
                             </tr>
@@ -75,7 +89,8 @@
     <!-- Modal de Confirmación -->
     <div id="confirmModal"
         class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
-        <div class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
+        <div
+            class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white text-center">
                 Confirmar Inhabilitación
             </h3>
