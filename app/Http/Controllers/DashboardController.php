@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\DB;
+
 class DashboardController extends Controller
 {
     /**
@@ -11,54 +13,27 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        //
+// Tarjetas
+    $totalUsers = DB::table('usuarios')->count();
+    $totalOrders = DB::table('ot')->count();
+    $completedOrders = DB::table('ot')
+        ->join('estado_ot', 'ot.id_estado', '=', 'estado_ot.id_estado')
+        ->where('estado_ot.nombre_estado', 'Completada') // Ajusta según el valor real
+        ->count();
+
+    // Órdenes por mes (usando fecha_entrega)
+    $ordersPerMonth = DB::table('ot')
+        ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTHNAME(fecha_entrega) as month'))
+        ->groupBy(DB::raw('MONTH(fecha_entrega)'))
+        ->orderBy(DB::raw('MONTH(fecha_entrega)'))
+        ->pluck('count', 'month');
+
+    $labels = $ordersPerMonth->keys();
+    $data = $ordersPerMonth->values();
+
+    return view('dashboard', compact('totalUsers', 'totalOrders', 'completedOrders', 'labels', 'data'));
+        
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

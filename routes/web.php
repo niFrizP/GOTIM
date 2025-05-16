@@ -11,6 +11,7 @@ use App\Http\Controllers\TipoProductoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\OTController;
+use App\Http\Controllers\DashboardController;
 
 // Rutas de categorías
 Route::resource('servicios', ServicioController::class);
@@ -95,6 +96,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('ot.reactivar');
     Route::get('ot/{ot}/historial', [OTController::class, 'historial'])
         ->name('ot.historial');
+
+    //Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 
