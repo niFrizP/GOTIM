@@ -30,26 +30,40 @@
                 </div>
             </div>
 
-            <!-- Gráficos -->
-            <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-                <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Órdenes por Mes</div>
-                <canvas id="ordersChart"></canvas>
-            </div>
+<!-- Gráficos en grilla de 2 columnas -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+        <form method="GET" action="{{ route('dashboard') }}" class="mb-4">
+        <label for="mes" class="block text-gray-100 font-semibold mb-2">Filtrar por Mes:</label>
+        <select name="mes" id="mes" onchange="this.form.submit()" class="w-full md:w-1/2 p-2 rounded text-gray-900">
+            <option value="">-- Todos los Meses --</option>
+            @foreach(range(1, 12) as $m)
+                <option value="{{ $m }}" {{ request('mes') == $m ? 'selected' : '' }}>
+                    {{ \Carbon\Carbon::create()->month($m)->locale('es')->translatedFormat('F') }}
+                </option>
+            @endforeach
+        </select>
+    </form>
+        <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Órdenes por Mes</div>
+        <canvas id="ordersChart"></canvas>
+    </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-                <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Órdenes por Estado</div>
-                <canvas id="ordersByStatusChart"></canvas>
-            </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+        
+        <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Órdenes por Estado</div>
+        <canvas id="ordersByStatusChart"></canvas>
+    </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-                <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Productos por Categoría</div>
-                <canvas id="productsByCategoryChart"></canvas>
-            </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+        <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Productos por Categoría</div>
+        <canvas id="productsByCategoryChart"></canvas>
+    </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-                <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Órdenes por Responsable</div>
-                <canvas id="ordersByResponsableChart"></canvas>
-            </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+        <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Órdenes por Responsable</div>
+        <canvas id="ordersByResponsableChart"></canvas>
+    </div>
+</div>  
 
             <!-- Productos con bajo stock -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
