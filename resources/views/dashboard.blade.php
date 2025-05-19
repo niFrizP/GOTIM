@@ -17,7 +17,7 @@
             <!-- Tarjetas -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-blue-600 text-white p-4 rounded shadow">
-                    <div class="text-lg">Usuarios</div>
+                    <div class="text-lg">Clientes</div>
                     <div class="text-3xl font-bold">{{ $totalCliente }}</div>
                 </div>
                 <div class="bg-green-600 text-white p-4 rounded shadow">
@@ -56,7 +56,7 @@
                 <div class="mb-4 font-bold text-gray-900 dark:text-gray-100">Productos con Stock Bajo</div>
                 <ul class="list-disc list-inside text-gray-100">
                     @forelse($lowStockProducts as $product)
-                        <li>{{ $product->nombre }} - Stock: {{ $product->cantidad }}</li>
+                        <li>{{ $product->nombre_producto }} - Stock: {{ $product->cantidad }}</li>
                     @empty
                         <li>Todos los productos tienen stock suficiente.</li>
                     @endforelse
@@ -65,7 +65,7 @@
         </div>
     </div>
 
-    @section('scripts')
+    @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             const ordersChart = new Chart(document.getElementById('ordersChart'), {
@@ -119,5 +119,5 @@
                 options: { scales: { y: { beginAtZero: true } } }
             });
         </script>
-    @endsection
+    @endpush
 </x-app-layout>
