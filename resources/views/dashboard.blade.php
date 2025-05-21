@@ -83,16 +83,26 @@
                 options: { scales: { y: { beginAtZero: true } } }
             });
 
-            const ordersByStatusChart = new Chart(document.getElementById('ordersByStatusChart'), {
-                type: 'pie',
-                data: {
-                    labels: {!! json_encode($ordersByStatus->keys()) !!},
-                    datasets: [{
-                        data: {!! json_encode($ordersByStatus->values()) !!},
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-                    }]
-                }
-            });
+const ordersByStatusChart = new Chart(document.getElementById('ordersByStatusChart'), {
+    type: 'pie',
+    data: {
+        labels: {!! json_encode($ordersByStatus->keys()) !!},
+        datasets: [{
+            data: {!! json_encode($ordersByStatus->values()) !!},
+            backgroundColor: [
+                '#FF6384', // rojo rosado
+                '#36A2EB', // azul
+                '#FFCE56', // amarillo
+                '#4BC0C0', // celeste verdoso
+                '#9966FF', // violeta
+                '#FF9F40', // naranja
+                '#00A36C', // verde bosque
+                '#C71585'  // fucsia oscuro
+            ]
+        }]
+    }
+});
+
 
             const productsByCategoryChart = new Chart(document.getElementById('productsByCategoryChart'), {
                 type: 'bar',
