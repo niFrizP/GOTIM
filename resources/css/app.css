@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+}
+
+
 /* Estilo base para Select2 en modo claro */
 .select2-container--default .select2-selection--single {
     background-color: #fff;
