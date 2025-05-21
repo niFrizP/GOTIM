@@ -67,8 +67,11 @@
         </div>
     </div>
 
+
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
         <script>
             const ordersChart = new Chart(document.getElementById('ordersChart'), {
                 type: 'bar',
@@ -90,18 +93,34 @@ const ordersByStatusChart = new Chart(document.getElementById('ordersByStatusCha
         datasets: [{
             data: {!! json_encode($ordersByStatus->values()) !!},
             backgroundColor: [
-                '#FF6384', // rojo rosado
-                '#36A2EB', // azul
-                '#FFCE56', // amarillo
-                '#4BC0C0', // celeste verdoso
-                '#9966FF', // violeta
-                '#FF9F40', // naranja
-                '#00A36C', // verde bosque
-                '#C71585'  // fucsia oscuro
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#00A36C', '#C71585'
             ]
         }]
-    }
+    },
+    options: {
+        plugins: {
+            datalabels: {
+                color: '#fff',
+                font: {
+                    weight: 'bold'
+                },
+                formatter: (value, context) => {
+                    const data = context.chart.data.datasets[0].data;
+                    const total = data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(1);
+                    return `${percentage}% (${value})`;
+                }
+            },
+            legend: {
+                position: 'bottom'
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
 });
+
+
 
 
             const productsByCategoryChart = new Chart(document.getElementById('productsByCategoryChart'), {
