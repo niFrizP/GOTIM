@@ -5,23 +5,29 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
+    <div class="py-6">
+        <div class="mx-auto max-w-4xl sm:px-6 lg:px-8 space-y-6">
+
+            <div class="mx-auto max-w-4xl sm:px-6 lg:px-8 space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        @include('profile.partials.update-profile-information-form')
+                    </dl>
+                </div>
+            </div>
+            <div class="mx-auto max-w-4xl sm:px-6 lg:px-8 space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        @include('profile.partials.update-password-form')
+                    </dl>
                 </div>
             </div>
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
-
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+            <div class="mx-auto max-w-4xl sm:px-6 lg:px-8 space-y-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        @include('profile.partials.delete-user-form')
+                    </dl>
                 </div>
             </div>
         </div>

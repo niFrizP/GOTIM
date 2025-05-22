@@ -13,7 +13,7 @@
             <div class="flex items-center justify-between mb-4">
                 <a href="{{ route('ot.create') }}"
                     class="inline-block bg-blue-500 px-4 py-2 text-white rounded hover:bg-blue-600">
-                    ➕ Nueva OT
+                    + Nueva OT
                 </a>
 
                 <a href="{{ route('ot.historial.global') }}"
@@ -23,10 +23,10 @@
             </div>
 
             {{-- Éxito --}}
-            @if(session('success'))
-            <div class="mb-4 bg-green-100 p-4 text-green-800 rounded dark:bg-green-900/20">
-                {{ session('success') }}
-            </div>
+            @if (session('success'))
+                <div class="mb-4 bg-green-100 p-4 text-green-800 rounded dark:bg-green-900/20">
+                    {{ session('success') }}
+                </div>
             @endif
 
             {{-- FILTROS --}}
@@ -42,8 +42,9 @@
                         <select id="cliente" name="cliente"
                             class="w-full p-2 border rounded dark:bg-gray-800 dark:text-gray-100">
                             <option value="">Todos</option>
-                            @foreach($clientes as $id => $nombre)
-                            <option value="{{ $id }}" @selected(request('cliente')==$id)>{{ $nombre }}</option>
+                            @foreach ($clientes as $id => $nombre)
+                                <option value="{{ $id }}" @selected(request('cliente') == $id)>{{ $nombre }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -56,8 +57,9 @@
                         <select id="responsable" name="responsable"
                             class="w-full p-2 border rounded dark:bg-gray-800 dark:text-gray-100">
                             <option value="">Todos</option>
-                            @foreach($responsables as $id => $nombre)
-                            <option value="{{ $id }}" @selected(request('responsable')==$id)>{{ $nombre }}</option>
+                            @foreach ($responsables as $id => $nombre)
+                                <option value="{{ $id }}" @selected(request('responsable') == $id)>{{ $nombre }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -70,20 +72,19 @@
                         <select id="estado" name="estado"
                             class="w-full p-2 border rounded dark:bg-gray-800 dark:text-gray-100">
                             <option value="">Todos</option>
-                            @foreach($estados as $id => $nombre)
-                            <option value="{{ $id }}" @selected(request('estado')==$id)>{{ $nombre }}</option>
+                            @foreach ($estados as $id => $nombre)
+                                <option value="{{ $id }}" @selected(request('estado') == $id)>{{ $nombre }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
 
                     {{-- Fecha de Creación --}}
                     <div>
-                        <label for="fecha_creacion" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        <label for="fecha_creacion" class="block text-sm font-medium  text-gray-800 dark:text-gray-100">
                             Fecha de Creación
                         </label>
-                        <input type="date"
-                            id="fecha_creacion"
-                            name="fecha_creacion"
+                        <input type="date" id="fecha_creacion" name="fecha_creacion"
                             value="{{ request('fecha_creacion') }}"
                             class="w-full p-2 border rounded dark:bg-gray-800 dark:text-gray-100" />
                     </div>
@@ -94,8 +95,7 @@
                             class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                             Limpiar
                         </a>
-                        <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                             Filtrar
                         </button>
                     </div>
@@ -117,56 +117,57 @@
                     </thead>
                     <tbody>
                         @forelse($ordenes as $ot)
-                        <tr>
-                            <td class="border-b p-2">{{ $ot->id_ot }}</td>
-                            <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}</td>
-                            <td class="border-b p-2">{{ $ot->responsable->nombre }}</td>
-                            <td class="border-b p-2">
-                                <span class="inline-block rounded px-2 py-1 text-xs font-semibold">
-                                    {{ $ot->estadoOT->nombre_estado }}
-                                </span>
-                            </td>
-                            <td class="border-b p-2">
-                                {{ \Carbon\Carbon::parse($ot->fecha_creacion)->format('d/m/Y') }}
-                            </td>
-                            <td class="border-b p-2 space-x-2">
-                                {{-- Ver --}}
-                                <a href="{{ route('ot.show', $ot->id_ot) }}"
-                                    class="text-gray-600 hover:underline dark:text-gray-300">
-                                    Ver
-                                </a>
+                            <tr>
+                                <td class="border-b p-2">{{ $ot->id_ot }}</td>
+                                <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}</td>
+                                <td class="border-b p-2">{{ $ot->responsable->nombre }}</td>
+                                <td class="border-b p-2">
+                                    <span class="inline-block rounded px-2 py-1 text-xs font-semibold">
+                                        {{ $ot->estadoOT->nombre_estado }}
+                                    </span>
+                                </td>
+                                <td class="border-b p-2">
+                                    {{ \Carbon\Carbon::parse($ot->fecha_creacion)->format('d/m/Y') }}
+                                </td>
+                                <td class="border-b p-2 space-x-2">
+                                    {{-- Ver --}}
+                                    <a href="{{ route('ot.show', $ot->id_ot) }}"
+                                        class="text-gray-600 hover:underline dark:text-gray-300">
+                                        Ver
+                                    </a>
 
-                                {{-- Editar --}}
-                                <a href="{{ route('ot.edit', $ot->id_ot) }}"
-                                    class="text-blue-500 hover:underline">
-                                    Editar
-                                </a>
-                                {{-- Inhabilitar si no está finalizada --}}
-                                @if($ot->estadoOT->nombre_estado !== 'Finalizada')
-                                <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="text-red-500 hover:underline">
-                                        Inhabilitar
-                                    </button>
-                                </form>
-                                @else
-                                <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="text-green-500 hover:underline">
-                                        Reactivar
-                                    </button>
-                                </form>
-                                @endif
+                                    {{-- Editar --}}
+                                    <a href="{{ route('ot.edit', $ot->id_ot) }}" class="text-blue-500 hover:underline">
+                                        Editar
+                                    </a>
+                                    {{-- Inhabilitar si no está finalizada --}}
+                                    @if ($ot->estadoOT->nombre_estado !== 'Finalizada')
+                                        <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST"
+                                            class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-red-500 hover:underline">
+                                                Inhabilitar
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST"
+                                            class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-green-500 hover:underline">
+                                                Reactivar
+                                            </button>
+                                        </form>
+                                    @endif
 
-                            </td>
+                                </td>
 
-                        </tr>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="6" class="border-b p-4 text-center">
-                                No se encontraron órdenes.
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="6" class="border-b p-4 text-center">
+                                    No se encontraron órdenes.
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>

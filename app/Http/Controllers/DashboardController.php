@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\OT;
@@ -70,6 +71,5 @@ return view('dashboard', compact(
     'responsableOrders'
 ));
     }
-
 
 }
