@@ -9,12 +9,14 @@ use App\Models\EstadoOt;
 use App\Models\Servicio;
 use App\Models\Producto;
 use App\Models\HistorialOT;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\View;
+use Carbon\Carbon;
 
 class OTController extends Controller
 {
@@ -475,5 +477,101 @@ class OTController extends Controller
             default:
                 return "<strong>{$h->campo_modificado}</strong> de <em>{$h->valor_anterior}</em> a <em>{$h->valor_nuevo}</em>";
         }
+    }
+
+    public function exportOrdenes($id)
+    {
+        // Cargar la OT con sus relaciones
+        $ordenTrabajo = OT::with([
+            'cliente',
+            'responsable',
+            'estadoOT',
+            'detalleProductos.producto',
+            'servicios',
+            'archivosAdjuntos',
+        ])->findOrFail($id);
+
+        // Obtener y agrupar el historial como en el método 'show'
+        $todos = HistorialOT::with('usuario')
+            ->where('id_ot', $id)
+            ->orderByDesc('id_historial_ot')
+            ->get();
+
+        $agrupado = $todos->groupBy(function ($h) {
+            return "{$h->fecha_modificacion->format('Y-m-d H:i:s')}|{$h->id_responsable}";
+        });
+
+        $historialTransformado = $agrupado->map(function ($group) {
+            $first = $group->first();
+            return [
+                'id_historial'       => $group->min('id_historial_ot'),
+                'usuario'            => $first->usuario->nombre ?? 'Sistema',
+                'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
+                'campos'             => $group->pluck('campo_modificado')->unique()->values()->all(),
+                'descripciones'      => $group->map(fn($h) => app(OTController::class)->descripcion($h))->all(),
+            ];
+        })->sortByDesc('id_historial')->values();
+
+        // Generar base64 del logo
+        $logoPath = public_path('images/logo.png');
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoData = file_get_contents($logoPath);
+        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+
+        // Fuente (aunque ahora usás DejaVu, dejo esto por si volvés a usar Cairo)
+        $fontPath = resource_path('fonts/CairoPlay-Regular.ttf');
+        $base64Font = file_exists($fontPath) ? base64_encode(file_get_contents($fontPath)) : '';
+
+        // Renderizar la vista PDF
+        $view = View::make('ot.pdf', [
+            'ordenTrabajo' => $ordenTrabajo,
+            'historial'    => $historialTransformado,
+            'base64Logo'   => $base64Logo,
+            'base64Font'   => $base64Font,
+        ]);
+
+        $html = $view->render();
+
+        // Generar y retornar el PDF
+        $pdf = Pdf::loadHTML($html)->setPaper('A4', 'portrait');
+        $fechaDescarga = now()->format('Y-m-d_H-i-s');
+
+        return $pdf->download("OrdenTrabajo_{$ordenTrabajo->id_ot}_{$fechaDescarga}.pdf");
+    }
+
+    public function exportarListadoOT(Request $request)
+    {
+        $query = OT::with(['cliente', 'responsable', 'estadoOT']);
+
+        if ($request->filled('cliente')) {
+            $query->where('id_cliente', $request->cliente);
+        }
+        if ($request->filled('responsable')) {
+            $query->where('id_responsable', $request->responsable);
+        }
+        if ($request->filled('estado')) {
+            $query->where('id_estado', $request->estado);
+        }
+        if ($request->filled('fecha_creacion')) {
+            $query->whereDate('fecha_creacion', $request->fecha_creacion);
+        }
+
+        $ordenes = $query->orderBy('fecha_creacion', 'desc')->get();
+
+        // Base64 logo si querés incluirlo
+        $logoPath = public_path('images/logo.png');
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoData = file_get_contents($logoPath);
+        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+
+        $view = View::make('ot.reporte', [
+            'ordenes' => $ordenes,
+            'base64Logo' => $base64Logo,
+        ]);
+
+        $pdf = Pdf::loadHTML($view->render())->setPaper('A4', 'landscape');
+
+        $fecha = now()->format('Y-m-d_H-i-s');
+        return $pdf->download("Listado_OTs_{$fecha}.pdf");
     }
 }

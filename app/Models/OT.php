@@ -80,8 +80,14 @@ class OT extends Model
             'id_servicio'        // FK de Servicio en la pivote
         )->withTimestamps();
     }
+
     public function historial()
     {
-        return $this->hasMany(HistorialOT::class, 'id_ot');
+        return $this->hasMany(HistorialOT::class, 'id_ot', 'id_ot');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'id_responsable');
     }
 }

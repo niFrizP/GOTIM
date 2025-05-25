@@ -33,9 +33,7 @@
                     <div>
                         <dt class="font-medium text-gray-700 dark:text-gray-300">Entrega Estimada</dt>
                         <dd class="mt-1 text-gray-900 dark:text-gray-100">
-                            {{ $ot->fecha_entrega
-        ? $ot->fecha_entrega->format('d/m/Y')
-        : '—' }}
+                            {{ $ot->fecha_entrega ? $ot->fecha_entrega->format('d/m/Y') : '—' }}
                         </dd>
 
                     </div>
@@ -46,12 +44,12 @@
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Descripción</h3>
 
-                @if($ot->detalleOT->isEmpty())
-                <p class="text-gray-500 dark:text-gray-400">—</p>
+                @if ($ot->detalleOT->isEmpty())
+                    <p class="text-gray-500 dark:text-gray-400">—</p>
                 @else
-                @foreach($ot->detalleOT as $detalle)
-                <p class="text-gray-900 dark:text-gray-100">{{ $detalle->descripcion_actividad }}</p>
-                @endforeach
+                    @foreach ($ot->detalleOT as $detalle)
+                        <p class="text-gray-900 dark:text-gray-100">{{ $detalle->descripcion_actividad }}</p>
+                    @endforeach
                 @endif
             </div>
             {{-- Tipos de Trabajo --}}
@@ -59,9 +57,9 @@
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Tipos de Trabajo</h3>
                 <ul class="list-disc pl-5 space-y-1">
                     @forelse($ot->servicios as $s)
-                    <li class="text-gray-900 dark:text-gray-100">{{ $s->nombre_servicio }}</li>
+                        <li class="text-gray-900 dark:text-gray-100">{{ $s->nombre_servicio }}</li>
                     @empty
-                    <li class="text-gray-500">No hay tipos de trabajo asignados.</li>
+                        <li class="text-gray-500">No hay tipos de trabajo asignados.</li>
                     @endforelse
                 </ul>
             </div>
@@ -69,45 +67,44 @@
             {{-- Productos Asociados --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Productos Asociados</h3>
-                @if($ot->detalleProductos->isEmpty())
-                <p class="text-gray-500">No hay productos asociados.</p>
+                @if ($ot->detalleProductos->isEmpty())
+                    <p class="text-gray-500">No hay productos asociados.</p>
                 @else
-                <table class="w-full table-auto text-left text-gray-800 dark:text-gray-100">
-                    <thead>
-                        <tr>
-                            <th class="border-b p-2">Producto</th>
-                            <th class="border-b p-2">Cantidad</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($ot->detalleProductos as $d)
-                        <tr>
-                            <td class="border-b p-2">{{ $d->producto->marca }} {{ $d->producto->modelo }}</td>
-                            <td class="border-b p-2">{{ $d->cantidad }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                    <table class="w-full table-auto text-left text-gray-800 dark:text-gray-100">
+                        <thead>
+                            <tr>
+                                <th class="border-b p-2">Producto</th>
+                                <th class="border-b p-2">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($ot->detalleProductos as $d)
+                                <tr>
+                                    <td class="border-b p-2">{{ $d->producto->marca }} {{ $d->producto->modelo }}</td>
+                                    <td class="border-b p-2">{{ $d->cantidad }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 @endif
             </div>
 
             {{-- Archivos Adjuntos --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Archivos Adjuntos</h3>
-                @if($ot->archivosAdjuntos->isEmpty())
-                <p class="text-gray-500">No hay archivos adjuntos.</p>
+                @if ($ot->archivosAdjuntos->isEmpty())
+                    <p class="text-gray-500">No hay archivos adjuntos.</p>
                 @else
-                <ul class="list-disc pl-5 space-y-1">
-                    @foreach($ot->archivosAdjuntos as $file)
-                    <li>
-                        <a href="{{ asset('storage/'.$file->ruta_archivo) }}"
-                            target="_blank"
-                            class="text-blue-600 hover:underline dark:text-blue-400">
-                            {{ $file->nombre_original }}
-                        </a>
-                    </li>
-                    @endforeach
-                </ul>
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach ($ot->archivosAdjuntos as $file)
+                            <li>
+                                <a href="{{ asset('storage/' . $file->ruta_archivo) }}" target="_blank"
+                                    class="text-blue-600 hover:underline dark:text-blue-400">
+                                    {{ $file->nombre_original }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
                 @endif
             </div>
 
@@ -115,60 +112,64 @@
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Historial de Cambios</h3>
 
-                @if($historial->isEmpty())
-                <p class="text-gray-500 dark:text-gray-400">No hay historial de cambios para esta orden.</p>
+                @if ($historial->isEmpty())
+                    <p class="text-gray-500 dark:text-gray-400">No hay historial de cambios para esta orden.</p>
                 @else
-                <div class="overflow-x-auto">
-                    <table class="w-full table-auto text-left text-sm text-gray-800 dark:text-gray-100">
-                        <thead>
-                            <tr>
-                                <th class="border-b p-2">ID Hist.</th>
-                                <th class="border-b p-2">Usuario</th>
-                                <th class="border-b p-2">Fecha</th>
-                                <th class="border-b p-2">Campos</th>
-                                <th class="border-b p-2">Descripción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($historial as $h)
-                            <tr>
-                                <td class="border-b p-2">{{ $h['id_historial'] }}</td>
-                                <td class="border-b p-2">{{ $h['usuario'] }}</td>
-                                <td class="border-b p-2">{{ $h['fecha_modificacion'] }}</td>
-                                <td class="border-b p-2">
-                                    <ul class="list-disc list-inside">
-                                        @foreach($h['campos'] as $campo)
-                                        <li>{{ $campo }}</li>
-                                        @endforeach
-                                    </ul>
-                                </td>
-                                <td class="border-b p-2">
-                                    <ul class="list-disc list-inside">
-                                        @foreach($h['descripciones'] as $desc)
-                                        <li>{!! $desc !!}</li>
-                                        @endforeach
-                                    </ul>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-auto text-left text-sm text-gray-800 dark:text-gray-100">
+                            <thead>
+                                <tr>
+                                    <th class="border-b p-2">ID Hist.</th>
+                                    <th class="border-b p-2">Usuario</th>
+                                    <th class="border-b p-2">Fecha</th>
+                                    <th class="border-b p-2">Campos</th>
+                                    <th class="border-b p-2">Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($historial as $h)
+                                    <tr>
+                                        <td class="border-b p-2">{{ $h['id_historial'] }}</td>
+                                        <td class="border-b p-2">{{ $h['usuario'] }}</td>
+                                        <td class="border-b p-2">{{ $h['fecha_modificacion'] }}</td>
+                                        <td class="border-b p-2">
+                                            <ul class="list-disc list-inside">
+                                                @foreach ($h['campos'] as $campo)
+                                                    <li>{{ $campo }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                        <td class="border-b p-2">
+                                            <ul class="list-disc list-inside">
+                                                @foreach ($h['descripciones'] as $desc)
+                                                    <li>{!! $desc !!}</li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 @endif
             </div>
 
 
             {{-- Acciones --}}
             <div class="flex justify-end space-x-2">
+                <a href="{{ route('ot.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    Volver
+                </a>
                 <a href="{{ route('ot.edit', $ot->id_ot) }}"
                     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Editar
                 </a>
-                <a href="{{ route('ot.index') }}"
-                    class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-                    Volver
+                <a href="{{ route('ot.export', $ot->id_ot) }}" target="_blank"
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    Exportar PDF
                 </a>
             </div>
+
 
         </div>
     </div>

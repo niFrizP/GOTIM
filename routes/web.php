@@ -48,7 +48,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/users/{user}/reactivar', [UserController::class, 'reactivar'])->name('users.reactivar');
 });
 
-// Rutas de Categorías
 // Rutas de estado de categorías
 Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
 Route::delete('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
@@ -63,8 +62,6 @@ Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, '
 Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
 Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
 
-
-// Rutas de inventario
 // Rutas de inventario
 Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
 Route::resource('inventario', InventarioController::class);
@@ -73,18 +70,23 @@ Route::get('/inventario/{id}/desactivar', [InventarioController::class, 'desacti
 Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name('inventario.ver');
 Route::get('/inventario/{id}/edit', [InventarioController::class, 'edit'])->name('inventario.edit');
 Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
-//Rutas de Producto
 
 // Rutas de productos
 Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
+
 // Rutas de OT
 Route::middleware(['auth'])->group(function () {
     Route::get('ot/historial', [OTController::class, 'historialGeneral'])
         ->name('ot.historial.global');
     // CRUD menos destroy
     Route::resource('ot', OTController::class)->except(['destroy']);
+
+    // Ruta para exportar OT a PDF
+    Route::get('/ot/export/{id}', [OTController::class, 'exportOrdenes'])->name('ot.export');
+    Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
+
 
     // Desactivar (inhabilitar) OT
     Route::post('ot/{id_ot}/desactivar', [OTController::class, 'desactivar'])
