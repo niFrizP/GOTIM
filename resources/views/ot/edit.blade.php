@@ -7,30 +7,30 @@
     </x-slot>
 
     @php
-    // Sacamos la descripción de detalle_ot (o cadena vacía)
-    $descripcionGuardada = optional($ot->detalleOT->first())->descripcion_actividad ?? '';
+        // Sacamos la descripción de detalle_ot (o cadena vacía)
+        $descripcionGuardada = optional($ot->detalleOT->first())->descripcion_actividad ?? '';
 
-    // Preparamos el array inicial para Alpine
-    $initial = [
-    'clienteId' => old('id_cliente', $ot->id_cliente),
-    'clienteLabel' => old('cliente_label', $ot->cliente->nombre_cliente),
-    'responsableId' => old('id_responsable', $ot->id_responsable),
-    'responsableLabel'=> old('responsable_label', $ot->responsable->nombre),
-    'form' => [
-    'id_estado' => old('id_estado', $ot->id_estado),
-    'fecha_entrega' => old('fecha_entrega', optional($ot->fecha_entrega)->format('Y-m-d')),
-    'descripcion' => old('descripcion', $descripcionGuardada),
-    'servicios' => $ot->servicios
-    ->map(fn($s)=>['id'=>$s->id_servicio,'label'=>$s->nombre_servicio])
-    ->toArray(),
-    'productos' => $ot->detalleProductos
-    ->map(fn($p)=>[
-    'id' => $p->id_producto,
-    'label' => $p->producto->marca.' '.$p->producto->modelo,
-    'cantidad' => $p->cantidad
-    ])->toArray(),
-    ],
-    ];
+        // Preparamos el array inicial para Alpine
+        $initial = [
+            'clienteId' => old('id_cliente', $ot->id_cliente),
+            'clienteLabel' => old('cliente_label', $ot->cliente->nombre_cliente),
+            'responsableId' => old('id_responsable', $ot->id_responsable),
+            'responsableLabel' => old('responsable_label', $ot->responsable->nombre),
+            'form' => [
+                'id_estado' => old('id_estado', $ot->id_estado),
+                'fecha_entrega' => old('fecha_entrega', optional($ot->fecha_entrega)->format('Y-m-d')),
+                'descripcion' => old('descripcion', $descripcionGuardada),
+                'servicios' => $ot->servicios
+                    ->map(fn($s) => ['id' => $s->id_servicio, 'label' => $s->nombre_servicio])
+                    ->toArray(),
+                'productos' => $ot->detalleProductos
+                    ->map(fn($p) => [
+                        'id' => $p->id_producto,
+                        'label' => $p->producto->marca . ' ' . $p->producto->modelo,
+                        'cantidad' => $p->cantidad
+                    ])->toArray(),
+            ],
+        ];
     @endphp
 
     <div class="py-6">
@@ -42,168 +42,144 @@
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         {{-- Cliente --}}
                         <div class="sm:col-span-2">
-                            <x-input-label for="cliente_input" value="Cliente" />
-                            <input
-                                id="cliente_input"
-                                type="text"
-                                list="clientes_list"
-                                x-model="clienteLabel"
-                                @change="setCliente"
-                                class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
-                                placeholder="Empieza a escribir para buscar…"
-                                required />
-                            <datalist id="clientes_list">
-                                @foreach($clientes as $id=>$nombre)
-                                <option data-id="{{ $id }}">{{ $nombre }}</option>
+                            <x-input-label for="id_cliente" value="Cliente" />
+                            <select id="id_cliente" name="id_cliente"
+                                class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white"
+                                required>
+                                <option value="">Seleccione un cliente</option>
+                                @foreach($clientes as $id => $nombre)
+                                    <option value="{{ $id }}" {{ $id == $ot->id_cliente ? 'selected' : '' }}>{{ $nombre }}
+                                    </option>
                                 @endforeach
-                            </datalist>
-                            <input type="hidden" name="id_cliente" :value="clienteId" />
-                            <x-input-error :messages="$errors->get('id_cliente')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            </select>
+                            <x-input-error :messages="$errors->get('id_cliente')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Responsable --}}
                         <div class="sm:col-span-2">
-                            <x-input-label for="responsable_input" value="Responsable" />
-                            <input
-                                id="responsable_input"
-                                type="text"
-                                list="responsables_list"
-                                x-model="responsableLabel"
-                                @change="setResponsable"
-                                class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
-                                placeholder="Empieza a escribir para buscar…"
-                                required />
-                            <datalist id="responsables_list">
-                                @foreach($responsables as $id=>$nombre)
-                                <option data-id="{{ $id }}">{{ $nombre }}</option>
+                            <x-input-label for="id_responsable" value="Responsable" />
+                            <select id="id_responsable" name="id_responsable"
+                                class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white"
+                                required>
+                                <option value="">Seleccione un responsable</option>
+                                @foreach($responsables as $id => $nombre)
+                                    <option value="{{ $id }}" {{ $id == $ot->id_responsable ? 'selected' : '' }}>{{ $nombre }}
+                                    </option>
                                 @endforeach
-                            </datalist>
-                            <input type="hidden" name="id_responsable" :value="responsableId" />
-                            <x-input-error :messages="$errors->get('id_responsable')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            </select>
+                            <x-input-error :messages="$errors->get('id_responsable')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Estado --}}
                         <div>
                             <x-input-label for="id_estado" value="Estado" />
-                            <select
-                                id="id_estado"
-                                name="id_estado"
-                                x-model="form.id_estado"
-                                class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
-                                required>
+                            <select id="id_estado" name="id_estado"
+                                class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" required>
                                 <option value="">Seleccione un estado</option>
-                                @foreach($estados as $id=>$nombre)
-                                <option value="{{ $id }}">{{ $nombre }}</option>
+                                @foreach($estados as $id => $nombre)
+                                    <option value="{{ $id }}" {{ $id == $ot->id_estado ? 'selected' : '' }}>{{ $nombre }}
+                                    </option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('id_estado')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('id_estado')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
-                        {{-- Fecha de Entrega --}}
+                        {{-- Fecha entrega --}}
                         <div>
                             <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega" />
-                            <input
-                                id="fecha_entrega"
-                                name="fecha_entrega"
-                                type="date"
-                                x-model="form.fecha_entrega"
-                                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white" />
-                            <x-input-error :messages="$errors->get('fecha_entrega')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full"
+                                :value="old('fecha_entrega', optional($ot->fecha_entrega)->format('Y-m-d'))" />
+                            <x-input-error :messages="$errors->get('fecha_entrega')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Descripción --}}
                         <div class="sm:col-span-2">
                             <x-input-label for="descripcion" value="Descripción" />
-                            <textarea
-                                id="descripcion"
-                                name="descripcion"
-                                x-model="form.descripcion"
-                                rows="4"
+                            <textarea id="descripcion" name="descripcion" rows="4"
                                 class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
-                                placeholder="Escribe una descripción detallada..."></textarea>
-                            <x-input-error :messages="$errors->get('descripcion')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                                placeholder="Escribe una descripción detallada...">{{ old('descripcion', $descripcionGuardada) }}</textarea>
+                            <x-input-error :messages="$errors->get('descripcion')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
                     </div>
 
-                    {{-- Tipos de Trabajo --}}
+                    {{-- Servicios múltiples --}}
                     <div class="mt-6">
-                        <x-input-label value="Tipos de Trabajo" />
-                        <template x-for="(s,i) in form.servicios" :key="i">
-                            <div class="flex items-center space-x-2 mt-2">
-                                <input
-                                    type="text"
-                                    list="servicios_list"
-                                    x-model="s.label"
-                                    @change="setServicio(i)"
-                                    class="flex-1 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Escribe para buscar…"
-                                    required />
-                                <button type="button" @click="removeServicio(i)"
-                                    class="px-2 py-1 bg-red-500 text-white rounded">✕</button>
-                                <input type="hidden" name="servicios[]" :value="s.id" />
-                            </div>
-                        </template>
-                        <datalist id="servicios_list">
-                            @foreach($servicios as $id=>$nombre)
-                            <option data-id="{{ $id }}">{{ $nombre }}</option>
+                        <x-input-label for="servicios" value="Tipos de Servicio" />
+                        <select id="servicios" name="servicios[]"
+                            class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" multiple>
+                            @foreach($servicios as $id => $nombre)
+                                <option value="{{ $id }}" {{ in_array($id, $ot->servicios->pluck('id_servicio')->toArray()) ? 'selected' : '' }}>{{ $nombre }}</option>
                             @endforeach
-                        </datalist>
-                        <button type="button" @click="addServicio()"
-                            class="mt-2 px-4 py-2 bg-green-500 text-white rounded">+ Agregar Tipo de Trabajo</button>
-                        <x-input-error :messages="$errors->get('servicios')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        </select>
+                        <x-input-error :messages="$errors->get('servicios')"
+                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
-                    {{-- Productos Asociados --}}
+                    {{-- Productos asociados con cantidad --}}
                     <div class="mt-6">
-                        <x-input-label value="Productos Asociados" />
-                        <template x-for="(p, i) in form.productos" :key="i">
-                            <div class="flex items-center space-x-2 mt-2">
-                                <input
-                                    type="text"
-                                    list="productos_list"
-                                    x-model="p.label"
-                                    @change="setProducto(i)"
-                                    class="flex-1 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Escribe para buscar…"
-                                    required />
-                                <input
-                                    type="number"
-                                    class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white"
-                                    x-model.number="p.cantidad"
-                                    min="1"
-                                    placeholder="Cant."
-                                    required />
-                                <input type="hidden" :name="`productos[${i}][id]`" :value="p.id" />
-                                <input type="hidden" :name="`productos[${i}][cantidad]`" :value="p.cantidad" />
-                            </div>
-                        </template>
-                        <datalist id="productos_list">
-                            @foreach($productos as $prod)
-                            <option data-id="{{ $prod->id_producto }}">
-                                {{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ optional($prod->inventario->first())->stock_total ?? 0 }}
-                            </option>
+                        <x-input-label for="productos" value="Productos Asociados" />
+                        <div class="grid gap-2" id="productosContainer">
+                            @foreach($ot->detalleProductos as $i => $p)
+                                <div class="producto-item flex items-center gap-2 mb-2">
+                                    <select name="productos[{{ $i }}][id]"
+                                        class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white"
+                                        required>
+                                        <option value="">Seleccione un producto</option>
+                                        @foreach($productos as $prod)
+                                            <option value="{{ $prod->id_producto }}" {{ $prod->id_producto == $p->id_producto ? 'selected' : '' }}>
+                                                {{ $prod->marca }} {{ $prod->modelo }} — Stock:
+                                                {{ optional($prod->inventario->first())->cantidad ?? 0 }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input type="number" name="productos[{{ $i }}][cantidad]" min="1"
+                                        value="{{ $p->cantidad }}"
+                                        class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white"
+                                        placeholder="Cant." required />
+                                    <button type="button" class="bg-red-500 text-white rounded px-2 py-1"
+                                        onclick="$(this).parent().remove()">✕</button>
+                                </div>
                             @endforeach
-                        </datalist>
-                        <button type="button" @click="addProducto()"
-                            class="mt-2 px-4 py-2 bg-green-500 text-white rounded">+ Agregar Producto</button>
-                        <x-input-error :messages="$errors->get('productos')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        </div>
+                        <button type="button" class="mt-2 px-4 py-2 bg-green-500 text-white rounded"
+                            onclick="addProductoSelect()">+ Agregar Producto</button>
+                        <x-input-error :messages="$errors->get('productos')"
+                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Archivos Adjuntos --}}
                     <div class="mt-6">
                         <x-input-label for="archivos" value="Archivos Adjuntos" />
-                        <input
-                            id="archivos"
-                            name="archivos[]"
-                            type="file"
-                            multiple
+                        <input id="archivos" name="archivos[]" type="file" multiple
                             class="w-full text-sm text-gray-900 dark:text-gray-200" />
-                        <x-input-error :messages="$errors->get('archivos')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-error :messages="$errors->get('archivos')"
+                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
+                    {{-- Archivos ya cargados --}}
+                    @if ($ot->archivosAdjuntos && $ot->archivosAdjuntos->count())
+                        <div class="mt-4">
+                            <x-input-label value="Archivos ya cargados" />
+                            <ul class="list-disc pl-6 text-sm text-gray-800 dark:text-gray-200">
+                                @foreach ($ot->archivosAdjuntos as $archivo)
+                                    <li>
+                                        <a href="{{ Storage::url($archivo->ruta_archivo) }}" target="_blank"
+                                            class="text-blue-500 underline">
+                                            {{ $archivo->nombre_original }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
 
                     {{-- Botones --}}
                     <div class="mt-6 flex justify-end space-x-2">
-                        <x-secondary-button @click.prevent="resetForm()">Limpiar</x-secondary-button>
                         <a href="{{ route('ot.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded">Cancelar</a>
                         <x-primary-button type="submit">Guardar Cambios</x-primary-button>
                     </div>
@@ -211,64 +187,36 @@
             </div>
         </div>
     </div>
+    {{-- CDN Select2 --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('otForm', () => ({
-                clienteId: @json($initial['clienteId']),
-                clienteLabel: @json($initial['clienteLabel']),
-                responsableId: @json($initial['responsableId']),
-                responsableLabel: @json($initial['responsableLabel']),
-                form: @json($initial['form']),
-
-                setCliente() {
-                    const opt = Array.from(document.querySelectorAll('#clientes_list option'))
-                        .find(o => o.textContent.trim() === this.clienteLabel.trim());
-                    this.clienteId = opt?.dataset.id || '';
-                },
-                setResponsable() {
-                    const opt = Array.from(document.querySelectorAll('#responsables_list option'))
-                        .find(o => o.textContent.trim() === this.responsableLabel.trim());
-                    this.responsableId = opt?.dataset.id || '';
-                },
-                addServicio() {
-                    this.form.servicios.push({
-                        id: '',
-                        label: ''
-                    });
-                },
-                removeServicio(i) {
-                    this.form.servicios.splice(i, 1);
-                },
-                setServicio(i) {
-                    const opt = Array.from(document.querySelectorAll('#servicios_list option'))
-                        .find(o => o.textContent.trim() === this.form.servicios[i].label.trim());
-                    this.form.servicios[i].id = opt?.dataset.id || '';
-                },
-                addProducto() {
-                    this.form.productos.push({
-                        id: '',
-                        label: '',
-                        cantidad: 1
-                    });
-                },
-                removeProducto(i) {
-                    this.form.productos.splice(i, 1);
-                },
-                setProducto(i) {
-                    const txt = this.form.productos[i].label.split('—')[0].trim();
-                    const opt = Array.from(document.querySelectorAll('#productos_list option'))
-                        .find(o => o.textContent.trim().startsWith(txt));
-                    this.form.productos[i].id = opt?.dataset.id || '';
-                },
-                resetForm() {
-                    this.clienteId = @json($initial['clienteId']);
-                    this.clienteLabel = @json($initial['clienteLabel']);
-                    this.responsableId = @json($initial['responsableId']);
-                    this.responsableLabel = @json($initial['responsableLabel']);
-                    this.form = @json($initial['form']);
-                },
-            }));
+        $(document).ready(function () {
+            $('.select2').select2({
+                placeholder: 'Seleccione una opción',
+                allowClear: true,
+                width: '100%'
+            });
         });
+
+        function addProductoSelect() {
+            let idx = $('#productosContainer .producto-item').length;
+            const html = `
+            <div class="producto-item flex items-center gap-2 mb-2">
+                <select name="productos[${idx}][id]" class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" required>
+                    <option value="">Seleccione un producto</option>
+                    @foreach($productos as $prod)
+                        <option value="{{ $prod->id_producto }}">{{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ optional($prod->inventario->first())->cantidad ?? 0 }}</option>
+                    @endforeach
+                </select>
+                <input type="number" name="productos[${idx}][cantidad]" min="1" value="1" class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white" placeholder="Cant." required />
+                <button type="button" class="bg-red-500 text-white rounded px-2 py-1" onclick="$(this).parent().remove()">✕</button>
+            </div>`;
+            $('#productosContainer').append(html);
+            $('#productosContainer .producto-item:last-child .select2').select2({ width: '100%' });
+        }
     </script>
+
 </x-app-layout>

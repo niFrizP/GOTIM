@@ -37,20 +37,20 @@ class OTController extends Controller
 
         $ordenes = $query->orderBy('fecha_creacion', 'desc')->paginate(10);
 
-        $clientes     = Cliente::pluck('nombre_cliente', 'id_cliente');
+        $clientes = Cliente::pluck('nombre_cliente', 'id_cliente');
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
-        $estados      = EstadoOt::pluck('nombre_estado', 'id_estado');
+        $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
 
         return view('ot.index', compact('ordenes', 'clientes', 'responsables', 'estados'));
     }
 
     public function create()
     {
-        $clientes     = Cliente::pluck('nombre_cliente', 'id_cliente');
+        $clientes = Cliente::pluck('nombre_cliente', 'id_cliente');
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
-        $estados      = EstadoOt::pluck('nombre_estado', 'id_estado');
-        $servicios    = Servicio::pluck('nombre_servicio', 'id_servicio');
-        $productos    = Producto::with('inventario')->where('estado', true)->get();
+        $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
+        $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
+        $productos = Producto::with('inventario')->where('estado', true)->get();
 
         return view('ot.create', compact('clientes', 'responsables', 'estados', 'servicios', 'productos'));
     }
@@ -58,35 +58,35 @@ class OTController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'id_cliente'           => 'required|exists:clientes,id_cliente',
-            'id_responsable'       => 'required|exists:users,id',
-            'id_estado'            => 'required|exists:estado_ot,id_estado',
-            'fecha_entrega'        => 'nullable|date',
-            'descripcion'          => 'nullable|string',
-            'servicios'            => 'array',
-            'servicios.*'          => 'exists:servicios,id_servicio',
-            'productos'            => 'array',
-            'productos.*.id'       => 'required|exists:productos,id_producto',
+            'id_cliente' => 'required|exists:clientes,id_cliente',
+            'id_responsable' => 'required|exists:users,id',
+            'id_estado' => 'required|exists:estado_ot,id_estado',
+            'fecha_entrega' => 'nullable|date',
+            'descripcion' => 'nullable|string',
+            'servicios' => 'array',
+            'servicios.*' => 'exists:servicios,id_servicio',
+            'productos' => 'array',
+            'productos.*.id' => 'required|exists:productos,id_producto',
             'productos.*.cantidad' => 'required|integer|min:1',
-            'archivos.*'           => 'file',
+            'archivos.*' => 'file',
         ]);
 
         DB::transaction(function () use ($data, $request) {
             // 1) Creo la OT
             $ot = OT::create([
-                'id_cliente'     => $data['id_cliente'],
+                'id_cliente' => $data['id_cliente'],
                 'id_responsable' => $data['id_responsable'],
-                'id_estado'      => $data['id_estado'],
-                'fecha_entrega'  => $data['fecha_entrega'] ?? null,
+                'id_estado' => $data['id_estado'],
+                'fecha_entrega' => $data['fecha_entrega'] ?? null,
             ]);
 
             // 2) Registro **solo** historial de creación
             HistorialOT::create([
-                'id_ot'              => $ot->id_ot,
-                'id_responsable'     => Auth::id(),
-                'campo_modificado'   => 'Creación',
-                'valor_anterior'     => null,
-                'valor_nuevo'        => 'Orden creada',
+                'id_ot' => $ot->id_ot,
+                'id_responsable' => Auth::id(),
+                'campo_modificado' => 'Creación',
+                'valor_anterior' => null,
+                'valor_nuevo' => 'Orden creada',
                 'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
             ]);
 
@@ -102,7 +102,7 @@ class OTController extends Controller
             foreach ($data['productos'] as $prod) {
                 $ot->detalleProductos()->create([
                     'id_producto' => $prod['id'],
-                    'cantidad'    => $prod['cantidad'],
+                    'cantidad' => $prod['cantidad'],
                 ]);
             }
 
@@ -110,8 +110,8 @@ class OTController extends Controller
                 foreach ($request->file('archivos') as $file) {
                     $path = $file->store('archivos_ot', 'public');
                     $ot->archivosAdjuntos()->create([
-                        'ruta_archivo'    => $path,
-                        'tipo_archivo'    => $file->getMimeType(),
+                        'ruta_archivo' => $path,
+                        'tipo_archivo' => $file->getMimeType(),
                         'nombre_original' => $file->getClientOriginalName(),
                     ]);
                 }
@@ -150,17 +150,17 @@ class OTController extends Controller
         // Preparo la colección final de bloques de historial
         $historial = $agrupado->map(function ($group) {
             $first = $group->first();
+            $campos = collect($group)->pluck('campo_modificado')->implode(',');
+            $listaCampos = collect(explode(',', $campos))->map(fn($c) => trim($c))->unique()->values()->all();
+
             return [
-                'id_historial'       => $group->min('id_historial_ot'),
-                'usuario'            => $first->usuario->nombre ?? 'Sistema',
+                'id_historial' => $group->min('id_historial_ot'),
+                'usuario' => $first->usuario->nombre ?? 'Sistema',
                 'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
-                'campos'             => $group->pluck('campo_modificado')->unique()->values()->all(),
-                'descripciones'      => $group->map(fn($h) => $this->descripcion($h))->all(),
+                'campos' => $listaCampos,
+                'descripciones' => $group->map(fn($h) => $this->descripcion($h))->all(),
             ];
-        })
-            // Aseguro que quede ordenado de mayor a menor ID de historial
-            ->sortByDesc('id_historial')
-            ->values();
+        })->sortByDesc('id_historial')->values();
 
         // Paso todo a la vista
         return view('ot.show', compact('ot', 'historial'));
@@ -175,14 +175,15 @@ class OTController extends Controller
             'estadoOT',
             'servicios',
             'detalleOT',
-            'detalleProductos.producto'
+            'detalleProductos.producto',
+            'archivosAdjuntos'
         ])->findOrFail($id);
 
-        $clientes     = Cliente::pluck('nombre_cliente', 'id_cliente');
+        $clientes = Cliente::pluck('nombre_cliente', 'id_cliente');
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
-        $estados      = EstadoOt::pluck('nombre_estado', 'id_estado');
-        $servicios    = Servicio::pluck('nombre_servicio', 'id_servicio');
-        $productos    = Producto::with('inventario')->where('estado', true)->get();
+        $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
+        $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
+        $productos = Producto::with('inventario')->where('estado', true)->get();
 
         return view('ot.edit', compact(
             'ot',
@@ -196,78 +197,79 @@ class OTController extends Controller
 
     public function update(Request $request, $id)
     {
-        $ot   = OT::findOrFail($id);
+        $ot = OT::findOrFail($id);
         $data = $request->validate([
-            'id_cliente'     => 'required|exists:clientes,id_cliente',
+            'id_cliente' => 'required|exists:clientes,id_cliente',
             'id_responsable' => 'required|exists:users,id',
-            'id_estado'      => 'required|exists:estado_ot,id_estado',
-            'fecha_entrega'  => 'nullable|date',
-            'descripcion'    => 'nullable|string',
-            'servicios'      => 'array',
-            'servicios.*'    => 'exists:servicios,id_servicio',
-            'productos'      => 'array',
+            'id_estado' => 'required|exists:estado_ot,id_estado',
+            'fecha_entrega' => 'nullable|date',
+            'descripcion' => 'nullable|string',
+            'servicios' => 'array',
+            'servicios.*' => 'exists:servicios,id_servicio',
+            'productos' => 'array',
             'productos.*.id' => 'required|exists:productos,id_producto',
             'productos.*.cantidad' => 'required|integer|min:1',
-            'archivos.*'     => 'file',
+            'archivos.*' => 'file',
         ]);
 
         DB::transaction(function () use ($ot, $data) {
             $labels = [
-                'id_cliente'     => 'Cliente',
+                'id_cliente' => 'Cliente',
                 'id_responsable' => 'Responsable',
-                'id_estado'      => 'Estado',
-                'fecha_entrega'  => 'Fecha de Entrega',
-                'descripcion'    => 'Descripción',
-                'servicios'      => 'Tipo de Trabajo',
-                'productos'      => 'Productos Asociados',
+                'id_estado' => 'Estado',
+                'fecha_entrega' => 'Fecha de Entrega',
+                'descripcion' => 'Descripción',
+                'servicios' => 'Tipo de Trabajo',
+                'productos' => 'Productos Asociados',
             ];
 
             $cambios = [];
 
             // 1) Campos simples
             foreach (['id_cliente', 'id_responsable', 'id_estado', 'fecha_entrega'] as $campo) {
-                $antes   = $ot->$campo;
+                $antes = $ot->$campo;
                 $despues = $data[$campo] ?? null;
-                if ($antes == $despues) continue;
+                if ($antes == $despues)
+                    continue;
 
                 switch ($campo) {
                     case 'id_cliente':
                         $valorAnterior = optional(Cliente::find($antes))->nombre_cliente ?? 'Sin asignar';
-                        $valorNuevo    = optional(Cliente::find($despues))->nombre_cliente ?? 'Sin asignar';
+                        $valorNuevo = optional(Cliente::find($despues))->nombre_cliente ?? 'Sin asignar';
                         break;
                     case 'id_responsable':
                         $valorAnterior = optional(User::find($antes))->nombre ?? 'Sin asignar';
-                        $valorNuevo    = optional(User::find($despues))->nombre ?? 'Sin asignar';
+                        $valorNuevo = optional(User::find($despues))->nombre ?? 'Sin asignar';
                         break;
                     case 'id_estado':
                         $valorAnterior = optional(EstadoOt::find($antes))->nombre_estado ?? 'Sin asignar';
-                        $valorNuevo    = optional(EstadoOt::find($despues))->nombre_estado ?? 'Sin asignar';
+                        $valorNuevo = optional(EstadoOt::find($despues))->nombre_estado ?? 'Sin asignar';
                         break;
                     case 'fecha_entrega':
                         $valorAnterior = $antes ? Carbon::parse($antes)->format('d/m/Y') : '-';
-                        $valorNuevo    = $despues ? Carbon::parse($despues)->format('d/m/Y') : '-';
+                        $valorNuevo = $despues ? Carbon::parse($despues)->format('d/m/Y') : '-';
                         break;
                 }
 
                 $cambios[] = [
-                    'campo'           => $labels[$campo],
-                    'valor_anterior'  => $valorAnterior,
-                    'valor_nuevo'     => $valorNuevo,
+                    'campo' => $labels[$campo],
+                    'valor_anterior' => $valorAnterior,
+                    'valor_nuevo' => $valorNuevo,
                 ];
             }
 
             // 2) Descripción
             $descAntes = optional($ot->detalleOT->first())->descripcion_actividad ?? '';
-            $descDesp  = $data['descripcion'] ?? '';
+            $descDesp = $data['descripcion'] ?? '';
             if ($descAntes !== $descDesp) {
                 $ot->detalleOT()->delete();
                 if ($descDesp) {
                     $ot->detalleOT()->create(['descripcion_actividad' => $descDesp]);
                 }
                 $cambios[] = [
-                    'campo'           => $labels['descripcion'],
-                    'valor_anterior'  => $descAntes ?: 'Sin descripción',
-                    'valor_nuevo'     => $descDesp  ?: 'Sin descripción',
+                    'campo' => $labels['descripcion'],
+                    'valor_anterior' => $descAntes ?: 'Sin descripción',
+                    'valor_nuevo' => $descDesp ?: 'Sin descripción',
                 ];
             }
 
@@ -275,12 +277,12 @@ class OTController extends Controller
             $oldServ = $ot->servicios()->pluck('servicios.id_servicio')->toArray();
             $newServ = $data['servicios'] ?? [];
             if (array_diff($oldServ, $newServ) || array_diff($newServ, $oldServ)) {
-                $antes   = Servicio::whereIn('id_servicio', $oldServ)->pluck('nombre_servicio')->implode(', ');
+                $antes = Servicio::whereIn('id_servicio', $oldServ)->pluck('nombre_servicio')->implode(', ');
                 $despues = Servicio::whereIn('id_servicio', $newServ)->pluck('nombre_servicio')->implode(', ');
                 $cambios[] = [
-                    'campo'           => $labels['servicios'],
-                    'valor_anterior'  => $antes ?: '—',
-                    'valor_nuevo'     => $despues ?: '—',
+                    'campo' => $labels['servicios'],
+                    'valor_anterior' => $antes ?: '—',
+                    'valor_nuevo' => $despues ?: '—',
                 ];
                 $ot->servicios()->sync($newServ);
             }
@@ -299,9 +301,9 @@ class OTController extends Controller
                     $prod = Producto::find($prodId);
                     $label = "{$prod->marca} {$prod->modelo}";
                     $cambios[] = [
-                        'campo'           => "Cantidad de {$label}",
-                        'valor_anterior'  => $oldQty,
-                        'valor_nuevo'     => $newProducts[$prodId],
+                        'campo' => "Cantidad de {$label}",
+                        'valor_anterior' => $oldQty,
+                        'valor_nuevo' => $newProducts[$prodId],
                     ];
                 }
             }
@@ -311,9 +313,9 @@ class OTController extends Controller
             $newIds = array_keys($newProducts);
             if (array_diff($oldIds, $newIds) || array_diff($newIds, $oldIds)) {
                 $cambios[] = [
-                    'campo'           => $labels['productos'],
-                    'valor_anterior'  => json_encode($oldIds),
-                    'valor_nuevo'     => json_encode($newIds),
+                    'campo' => $labels['productos'],
+                    'valor_anterior' => json_encode($oldIds),
+                    'valor_nuevo' => json_encode($newIds),
                 ];
             }
 
@@ -322,29 +324,65 @@ class OTController extends Controller
             foreach ($data['productos'] as $item) {
                 $ot->detalleProductos()->create([
                     'id_producto' => $item['id'],
-                    'cantidad'    => $item['cantidad'],
+                    'cantidad' => $item['cantidad'],
                 ]);
             }
 
             // 5) Guardar historial
-            foreach ($cambios as $chg) {
+            if (!empty($cambios)) {
+                // Codificar los cambios en una sola entrada
+                $descripcion = collect($cambios)->map(function ($chg) {
+                    return match ($chg['campo']) {
+                        'Productos Asociados' => (function () use ($chg) {
+                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+
+                                $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                                ->get()
+                                ->map(fn($p) => "{$p->marca} {$p->modelo}")
+                                ->implode(', ');
+
+                                $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                                ->get()
+                                ->map(fn($p) => "{$p->marca} {$p->modelo}")
+                                ->implode(', ');
+
+                                return "<strong>Productos Asociados</strong> de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                            })(),
+                        default => "<strong>{$chg['campo']}</strong> de <em>{$chg['valor_anterior']}</em> a <em>{$chg['valor_nuevo']}</em>",
+                    };
+                })->implode("\n");
+
+
                 HistorialOT::create([
-                    'id_ot'              => $ot->id_ot,
-                    'id_responsable'     => Auth::id(),
-                    'campo_modificado'   => $chg['campo'],
-                    'valor_anterior'     => $chg['valor_anterior'],
-                    'valor_nuevo'        => $chg['valor_nuevo'],
+                    'id_ot' => $ot->id_ot,
+                    'id_responsable' => Auth::id(),
+                    'campo_modificado' => implode(",", collect($cambios)->pluck('campo')->toArray()),
+                    'valor_anterior' => null,
+                    'valor_nuevo' => $descripcion,
                     'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
                 ]);
             }
 
             // 6) Actualizar OT
             $ot->update([
-                'id_cliente'     => $data['id_cliente'],
+                'id_cliente' => $data['id_cliente'],
                 'id_responsable' => $data['id_responsable'],
-                'id_estado'      => $data['id_estado'],
-                'fecha_entrega'  => $data['fecha_entrega'] ?? null,
+                'id_estado' => $data['id_estado'],
+                'fecha_entrega' => $data['fecha_entrega'] ?? null,
             ]);
+            // 7) Archivos adjuntos nuevos
+            if (request()->hasFile('archivos')) {
+                foreach (request()->file('archivos') as $archivo) {
+                    $path = $archivo->store('archivos_ot', 'public');
+
+                    $ot->archivosAdjuntos()->create([
+                        'ruta_archivo' => $path,
+                        'tipo_archivo' => $archivo->getMimeType(),
+                        'nombre_original' => $archivo->getClientOriginalName(),
+                    ]);
+                }
+            }
         });
 
         return redirect()->route('ot.show', $ot->id_ot)
@@ -386,8 +424,12 @@ class OTController extends Controller
             });
         }
         if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
-            $query->whereBetween('fecha_modificacion', [$request->fecha_inicio, $request->fecha_fin]);
+            $fechaInicio = Carbon::parse($request->fecha_inicio)->startOfDay();
+            $fechaFin = Carbon::parse($request->fecha_fin)->endOfDay();
+
+            $query->whereBetween('fecha_modificacion', [$fechaInicio, $fechaFin]);
         }
+
 
         $todos = $query->get();
 
@@ -399,22 +441,24 @@ class OTController extends Controller
             $minId = $group->min('id_historial_ot');
             $first = $group->first(fn($h) => $h->id_historial_ot === $minId);
 
+            $campos = collect($group)->pluck('campo_modificado')->implode(',');
+            $listaCampos = collect(explode(',', $campos))->map(fn($c) => trim($c))->unique()->values()->all();
+
             return [
-                'id_historial'       => $first->id_historial_ot, // usa el ID real
-                'id_ot'              => $first->id_ot,
-                'usuario'            => $first->usuario->nombre ?? 'Sistema',
-                'campos'             => $group->pluck('campo_modificado')->unique()->values()->all(),
+                'id_historial' => $first->id_historial_ot,
+                'id_ot' => $first->id_ot,
+                'usuario' => $first->usuario->nombre ?? 'Sistema',
+                'campos' => $listaCampos,
                 'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
-                'descripciones'      => $group->map(fn($h) => $this->descripcion($h))->all(),
+                'descripciones' => $group->map(fn($h) => $this->descripcion($h))->all(),
             ];
-        })
-            ->sortByDesc('id_historial')
-            ->values();
+        })->sortByDesc('id_historial')->values();
+
 
         // --- aquí definimos página y paginamos ---
-        $page    = $request->get('page', 1);
+        $page = $request->get('page', 1);
         $perPage = 10;
-        $slice   = $historial->slice(($page - 1) * $perPage, $perPage)->all();
+        $slice = $historial->slice(($page - 1) * $perPage, $perPage)->all();
 
         $paginado = new LengthAwarePaginator(
             $slice,
@@ -422,58 +466,30 @@ class OTController extends Controller
             $perPage,
             $page,
             [
-                'path'  => route('ot.historial.global'),
+                'path' => route('ot.historial.global'),
                 'query' => $request->query(),
             ]
         );
 
         return view('ot.historial', ['historial' => $paginado]);
     }
-
-
     protected function descripcion(HistorialOT $h): string
     {
-        switch ($h->campo_modificado) {
-            case 'Cliente':
-                $ant = optional(Cliente::find($h->valor_anterior))->nombre_cliente ?? $h->valor_anterior;
-                $nue = optional(Cliente::find($h->valor_nuevo))->nombre_cliente ?? $h->valor_nuevo;
-                return "<strong>Cliente</strong> de <em>{$ant}</em> a <em>{$nue}</em>";
-            case 'Responsable':
-                $ant = optional(User::find($h->valor_anterior))->nombre ?? $h->valor_anterior;
-                $nue = optional(User::find($h->valor_nuevo))->nombre ?? $h->valor_nuevo;
-                return "<strong>Responsable</strong> de <em>{$ant}</em> a <em>{$nue}</em>";
-            case 'Estado':
-                $ant = optional(EstadoOt::find($h->valor_anterior))->nombre_estado ?? $h->valor_anterior;
-                $nue = optional(EstadoOt::find($h->valor_nuevo))->nombre_estado ?? $h->valor_nuevo;
-                return "<strong>Estado</strong> de <em>{$ant}</em> a <em>{$nue}</em>";
-            case 'Tipo de Trabajo':
-                $ant = Servicio::whereIn('id_servicio', json_decode($h->valor_anterior, true) ?? [])->pluck('nombre_servicio')->implode(', ');
-                $nue = Servicio::whereIn('id_servicio', json_decode($h->valor_nuevo, true) ?? [])->pluck('nombre_servicio')->implode(', ');
-                return "<strong>Tipo de Trabajo</strong> de <em>{$h->valor_anterior}</em> a <em>{$h->valor_nuevo}</em>";
-            case 'Descripción':
-                return "<strong>Descripción</strong> de <em>{$h->valor_anterior}</em> a <em>{$h->valor_nuevo}</em>";
-            case 'Productos Asociados':
-                // Decodifica los JSON guardados
-                $idsAntes = json_decode($h->valor_anterior, true) ?: [];
-                $idsNuevo = json_decode($h->valor_nuevo, true)   ?: [];
-
-                // Construye "Marca Modelo" para cada ID
-                $antesList = Producto::whereIn('id_producto', $idsAntes)
-                    ->get()
-                    ->map(fn($p) => "{$p->marca} {$p->modelo}")
-                    ->implode(', ');
-
-                $nuevoList = Producto::whereIn('id_producto', $idsNuevo)
-                    ->get()
-                    ->map(fn($p) => "{$p->marca} {$p->modelo}")
-                    ->implode(', ');
-
-                return "<strong>Productos Asociados</strong> de <em>{$antesList}</em> a <em>{$nuevoList}</em>";
-
-            case 'Creación':
-                return '<strong>Se ha creado la Orden de Trabajo.</strong>';
-            default:
-                return "<strong>{$h->campo_modificado}</strong> de <em>{$h->valor_anterior}</em> a <em>{$h->valor_nuevo}</em>";
+        if ($h->campo_modificado === 'Creación') {
+            return '<li><strong>Se ha creado la Orden de Trabajo.</strong></li>';
         }
+
+        if (is_string($h->valor_nuevo) && str_contains($h->valor_nuevo, '<strong>')) {
+            // Si es un bloque consolidado con HTML, divídelo en líneas
+            $lineas = preg_split('/\r\n|\r|\n/', $h->valor_nuevo);
+            return collect($lineas)
+                ->filter()
+                ->map(fn($linea) => trim($linea))
+                ->map(fn($linea) => "<li>{$linea}</li>")
+                ->implode('');
+        }
+
+        return "<li><strong>{$h->campo_modificado}</strong> de <em>{$h->valor_anterior}</em> a <em>{$h->valor_nuevo}</em></li>";
     }
+
 }
