@@ -9,41 +9,20 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <!-- Filtros -->
             <form method="GET" action="{{ route('ot.historial.global') }}" class="mb-4 flex flex-wrap gap-4">
-                <input
-                    type="text"
-                    name="ot"
-                    value="{{ request('ot') }}"
-                    placeholder="ID OT"
+                <input type="text" name="ot" value="{{ request('ot') }}" placeholder="ID OT"
                     class="rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" />
-                <input
-                    type="text"
-                    name="campo"
-                    value="{{ request('campo') }}"
-                    placeholder="Campo Modificado"
+                <input type="text" name="campo" value="{{ request('campo') }}" placeholder="Campo Modificado"
                     class="rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" />
-                <input
-                    type="text"
-                    name="responsable"
-                    value="{{ request('responsable') }}"
-                    placeholder="Responsable"
+                <input type="text" name="responsable" value="{{ request('responsable') }}" placeholder="Responsable"
                     class="rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" />
-                <input
-                    type="date"
-                    name="fecha_inicio"
-                    value="{{ request('fecha_inicio') }}"
+                <input type="date" name="fecha_inicio" value="{{ request('fecha_inicio') }}"
                     class="rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" />
-                <input
-                    type="date"
-                    name="fecha_fin"
-                    value="{{ request('fecha_fin') }}"
+                <input type="date" name="fecha_fin" value="{{ request('fecha_fin') }}"
                     class="rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" />
-                <button
-                    type="submit"
-                    class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                <button type="submit" class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                     Filtrar
                 </button>
-                <a
-                    href="{{ route('ot.historial.global') }}"
+                <a href="{{ route('ot.historial.global') }}"
                     class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
                     Limpiar
                 </a>
@@ -64,32 +43,30 @@
                     </thead>
                     <tbody>
                         @forelse ($historial as $grupo)
-                        <tr>
-                            <td class="border-b p-2">{{ $grupo['id_historial'] }}</td>
-                            <td class="border-b p-2">{{ $grupo['id_ot'] }}</td>
-                            <td class="border-b p-2">{{ $grupo['usuario'] }}</td>
-                            <td class="border-b p-2">
-                                <ul class="list-disc list-inside space-y-1">
-                                    @foreach($grupo['campos'] as $campo)
-                                    <li>{{ $campo }}</li>
-                                    @endforeach
-                                </ul>
-                            </td>
-                            <td class="border-b p-2">{{ $grupo['fecha_modificacion'] }}</td>
-                            <td class="border-b p-2">
-                                <ul class="list-disc ps-4">
-                                    @foreach ($grupo['descripciones'] as $desc)
-                                    <li>{!! $desc !!}</li>
-                                    @endforeach
-                                </ul>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td class="border-b p-2">{{ $grupo['id_historial'] }}</td>
+                                <td class="border-b p-2">{{ $grupo['id_ot'] }}</td>
+                                <td class="border-b p-2">{{ $grupo['usuario'] }}</td>
+                                <td class="border-b p-2">
+                                    <ul class="list-disc list-inside space-y-1">
+                                        @foreach(is_array($grupo['campos']) ? $grupo['campos'] : explode(',', $grupo['campos']) as $campo)
+                                            <li>{{ trim($campo) }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td class="border-b p-2">{{ $grupo['fecha_modificacion'] }}</td>
+                                <td class="border-b p-2">
+                                    <ul class="list-disc ps-4">
+                                        {!! implode('', $grupo['descripciones']) !!}
+                                    </ul>
+                                </td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="6" class="text-center p-4 text-gray-500">
-                                No se encontraron registros.
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="6" class="text-center p-4 text-gray-500">
+                                    No se encontraron registros.
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
