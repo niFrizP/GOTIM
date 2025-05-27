@@ -91,6 +91,11 @@
 
                     {{-- Botones --}}
                     <div class="col-span-1 sm:col-span-2 md:col-span-4 flex justify-end space-x-2 mt-2">
+                        <a href="{{ route('ots.exportar.pdf', request()->query()) }}"
+                            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                            Exportar Reporte PDF
+                        </a>
+
                         <a href="{{ route('ot.index') }}"
                             class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
                             Limpiar
@@ -139,6 +144,12 @@
                                     {{-- Editar --}}
                                     <a href="{{ route('ot.edit', $ot->id_ot) }}" class="text-blue-500 hover:underline">
                                         Editar
+                                    </a>
+
+                                    {{-- Exportar PDF --}}
+                                    <a href="{{ route('ot.export', $ot->id_ot) }}" target="_blank"
+                                        class="text-green-600 hover:underline">
+                                        Exportar PDF
                                     </a>
                                     {{-- Inhabilitar si no está finalizada --}}
                                     @if ($ot->estadoOT->nombre_estado !== 'Finalizada')

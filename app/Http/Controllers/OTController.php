@@ -9,12 +9,15 @@ use App\Models\EstadoOt;
 use App\Models\Servicio;
 use App\Models\Producto;
 use App\Models\HistorialOT;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\View;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class OTController extends Controller
 {
@@ -492,4 +495,172 @@ class OTController extends Controller
         return "<li><strong>{$h->campo_modificado}</strong> de <em>{$h->valor_anterior}</em> a <em>{$h->valor_nuevo}</em></li>";
     }
 
+    public function exportOrdenes($id)
+    {
+        // Cargar la OT con sus relaciones
+        $ordenTrabajo = OT::with([
+            'cliente',
+            'responsable',
+            'estadoOT',
+            'detalleProductos.producto',
+            'servicios',
+            'archivosAdjuntos',
+        ])->findOrFail($id);
+
+        // Obtener y agrupar el historial como en el método 'show'
+        $todos = HistorialOT::with('usuario')
+            ->where('id_ot', $id)
+            ->orderByDesc('id_historial_ot')
+            ->get();
+
+        $agrupado = $todos->groupBy(function ($h) {
+            return "{$h->fecha_modificacion->format('Y-m-d H:i:s')}|{$h->id_responsable}";
+        });
+
+        $historialTransformado = $agrupado->map(function ($group) {
+            $first = $group->first();
+            return [
+                'id_historial'       => $group->min('id_historial_ot'),
+                'usuario'            => $first->usuario->nombre ?? 'Sistema',
+                'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
+                'campos'             => $group->pluck('campo_modificado')->unique()->values()->all(),
+                'descripciones'      => $group->map(fn($h) => app(OTController::class)->descripcion($h))->all(),
+            ];
+        })->sortByDesc('id_historial')->values();
+
+        // Generar base64 del logo
+        $logoPath = public_path('images/logo.png');
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoData = file_get_contents($logoPath);
+        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+
+        // Fuente opcional
+        $fontPath = resource_path('fonts/CairoPlay-Regular.ttf');
+        $base64Font = file_exists($fontPath) ? base64_encode(file_get_contents($fontPath)) : '';
+
+        // Convertir archivos adjuntos (solo imágenes)
+        $archivosConvertidos = collect();
+        foreach ($ordenTrabajo->archivosAdjuntos as $archivo) {
+            if (!$archivo->ruta || !Str::startsWith($archivo->ruta, 'storage/')) {
+                continue;
+            }
+
+            $rutaCompleta = public_path($archivo->ruta);
+
+            if (is_file($rutaCompleta)) {
+                $tipo = @getimagesize($rutaCompleta)['mime'] ?? null;
+
+                if ($tipo) {
+                    $datos = file_get_contents($rutaCompleta);
+                    $base64 = 'data:' . $tipo . ';base64,' . base64_encode($datos);
+
+                    $archivosConvertidos->push([
+                        'nombre' => $archivo->nombre_archivo,
+                        'base64' => $base64
+                    ]);
+                }
+            }
+
+            // Si no es imagen o ruta inválida
+            $archivosConvertidos->push([
+                'nombre' => $archivo->nombre_archivo,
+                'base64' => null
+            ]);
+        }
+
+        // Renderizar vista
+        $view = View::make('ot.pdf', [
+            'ordenTrabajo'      => $ordenTrabajo,
+            'historial'         => $historialTransformado,
+            'base64Logo'        => $base64Logo,
+            'base64Font'        => $base64Font,
+            'archivosAdjuntos'  => $archivosConvertidos,
+        ]);
+
+        $html = $view->render();
+
+        // Generar PDF
+        $pdf = Pdf::loadHTML($html)->setPaper('A4', 'portrait');
+
+        // Agregar paginación personalizada
+        $pdf->render(function ($dompdf) {
+            $canvas = $dompdf->getCanvas();
+            $fontMetrics = new \Dompdf\FontMetrics($canvas, $dompdf->getOptions());
+            $font = $fontMetrics->getFont('helvetica', 'normal');
+            $pageCount = $canvas->get_page_count();
+
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $text = "Página $i de $pageCount";
+                $textWidth = $fontMetrics->getTextWidth($text, $font, 9);
+                $x = ($canvas->get_width() - $textWidth) / 2;
+                $y = $canvas->get_height() - 30;
+
+                $canvas->page_text(50, 50, "¡Hola página $i de $pageCount!", $font, 12, [255, 0, 0], $i);
+            }
+        });
+
+        // Descargar el PDF
+        $fechaDescarga = now()->format('Y-m-d_H-i-s');
+        return $pdf->download("OT_{$ordenTrabajo->id_ot}_{$fechaDescarga}.pdf");
+    }
+
+
+    // Exporta el listado de OTs a PDF
+    public function exportarListadoOT(Request $request)
+    {
+        // Validar los parámetros de búsqueda
+        $validator = Validator::make($request->all(), [
+            'buscar' => 'nullable|string|max:255',
+            'estado' => 'nullable|integer|exists:estado_ot,id_estado',
+            'responsable' => 'nullable|integer|exists:users,id',
+            'fechaInicio' => 'nullable|date_format:Y-m-d',  // Solo fecha, sin hora
+        ]);
+
+        // Si la validación falla, redirigir con errores
+        if ($validator->fails()) {
+            // Podés redirigir, lanzar error o devolver algo para que no pete
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        // Si la validación es exitosa, proceder a buscar las órdenes de trabajo
+        $ordenes = OT::with(['cliente', 'responsable', 'estadoOT'])
+            ->when($request->filled('buscar'), function ($query) use ($request) {
+                $search = $request->input('buscar');
+                $query->whereHas('cliente', fn($q) => $q->where('nombre_cliente', 'like', "%$search%"))
+                    ->orWhereHas('responsable', fn($q) => $q->where('nombre', 'like', "%$search%"))
+                    ->orWhereHas('estadoOT', fn($q) => $q->where('nombre_estado', 'like', "%$search%"))
+                    ->orWhere('id_ot', 'like', "%$search%");
+            })
+            ->when($request->filled('estado'), fn($q) => $q->where('id_estado', $request->estado))
+            ->when($request->filled('responsable'), fn($q) => $q->where('id_responsable', $request->responsable))
+            ->when($request->filled('fecha_creacion'), function ($q) use ($request) {
+                $inicio = Carbon::parse($request->fecha_creacion)->startOfDay();
+                $q->where('fecha_creacion', '>=', $inicio);
+            })
+            ->orderByDesc('fecha_creacion')
+            ->get();
+
+        // Generar base64 del logo
+        $logoPath = public_path('images/logo.png');
+        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+        $logoData = file_get_contents($logoPath);
+        $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+
+        if ($ordenes->isEmpty()) {
+            $pdf = Pdf::loadView('ot.ot_listado', [
+                'base64Logo' => $base64Logo,
+                'ordenes' => collect(),
+                'mensaje' => 'No se encontraron órdenes de trabajo con los filtros seleccionados.'
+            ]);
+        } else {
+            $pdf = Pdf::loadView('ot.ot_listado', [
+                'base64Logo' => $base64Logo,
+                'ordenes' => $ordenes
+            ]);
+        }
+
+        $fechaDescarga = now()->format('Y-m-d_H-i-s');
+        return $pdf->download("OrdenesTrabajo_{$fechaDescarga}.pdf");
+    }
 }

@@ -66,6 +66,7 @@
             {{-- Productos Asociados --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Productos Asociados</h3>
+
                 @if($ot->detalleProductos->isEmpty())
                     <p class="text-gray-500">No hay productos asociados.</p>
                 @else
@@ -93,6 +94,7 @@
             {{-- Archivos Adjuntos --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Archivos Adjuntos</h3>
+
                 @if($ot->archivosAdjuntos->isEmpty())
                     <p class="text-gray-500">No hay archivos adjuntos.</p>
                 @else
@@ -112,7 +114,7 @@
             {{-- Historial de Cambios --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Historial de Cambios</h3>
-                @if($historial->isEmpty())
+                @if ($historial->isEmpty())
                     <p class="text-gray-500 dark:text-gray-400">No hay historial de cambios para esta orden.</p>
                 @else
                     <div class="overflow-x-auto">
@@ -127,7 +129,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($historial as $h)
+                                @foreach ($historial as $h)
                                     <tr>
                                         <td class="border-b p-2">{{ $h['id_historial'] }}</td>
                                         <td class="border-b p-2">{{ $h['usuario'] }}</td>
@@ -156,12 +158,16 @@
 
             {{-- Acciones --}}
             <div class="flex justify-end space-x-2">
+                <a href="{{ route('ot.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    Volver
+                </a>
                 <a href="{{ route('ot.edit', $ot->id_ot) }}"
                     class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Editar
                 </a>
-                <a href="{{ route('ot.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
-                    Volver
+                <a href="{{ route('ot.export', $ot->id_ot) }}" target="_blank"
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    Exportar PDF
                 </a>
             </div>
         </div>
