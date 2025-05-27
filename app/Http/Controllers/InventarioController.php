@@ -33,7 +33,19 @@ class InventarioController extends Controller
             'fecha_salida' => 'nullable|date|after_or_equal:fecha_ingreso',
         ]);
 
-        Inventario::create($validated);
+        $inventario = Inventario::create($validated);
+
+        // Registrar historial de creación
+        HistorialInventario::create([
+            'id_inventario' => $inventario->id_inventario,
+            'id_producto' => $inventario->id_producto,
+            'id_responsable' => Auth::id(),
+            'campo_modificado' => 'Creación',
+            'valor_anterior' => null,
+            'valor_nuevo' => 'Nuevo registro de inventario',
+            'fecha_modificacion' => now(),
+        ]);
+
         return redirect()->route('inventario.index')->with('success', 'Registro de inventario creado.');
     }
 
@@ -172,6 +184,10 @@ class InventarioController extends Controller
                     $campo = $item->campo_modificado;
                     $anterior = $item->valor_anterior;
                     $nuevo = $item->valor_nuevo;
+
+                    if ($campo === 'Creación') {
+                        return "<strong>Registro creado</strong>";
+                    }
 
                     switch ($campo) {
                         case 'id_producto':

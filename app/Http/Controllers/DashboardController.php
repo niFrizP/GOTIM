@@ -2,54 +2,74 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\OT;
-use App\Models\Cliente;
-use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\OT;
+use App\Models\EstadoOT;
+use App\Models\Producto;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        // Total órdenes
-        $totalOT = OT::count();
+        // // Tarjetas
+    $totalCliente = DB::table('Clientes')->count();
 
-        // Órdenes en estado "Evaluación"
-        $otEnEvaluacion = OT::whereHas('estadoOT', function ($query) {
-            $query->where('nombre_estado', 'Evaluación');
-        })->count();
+    $totalOrden = DB::table('ot')->count();
 
-        // Órdenes en estado "Completada"
-        $otCompletadas = OT::whereHas('estadoOT', function ($query) {
+    $completedOrden = OT::whereHas('estadoOT', function ($query) {
             $query->where('nombre_estado', 'Completada');
         })->count();
 
-        // Total clientes
-        $totalClientes = Cliente::count();
+    // Órdenes por mes (usando fecha_entrega)
+    $ordersPerMonth = DB::table('ot')
+    ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTHNAME(fecha_entrega) as month'))
+    ->groupBy(DB::raw('MONTH(fecha_entrega)'), DB::raw('MONTHNAME(fecha_entrega)'))
+    ->orderBy(DB::raw('MONTH(fecha_entrega)'))
+    ->pluck('count', 'month');
 
-        // Productos más usados en órdenes (con conteo en detalleProductos)
-        $productosMasUsados = Producto::withCount('detalleProductos')
-            ->orderByDesc('detalle_productos_count')
-            ->take(5)
+    $ordersByStatus = OT::with('estadoOT')
             ->get()
-            ->map(function ($p) {
-                return [
-                    'nombre_producto' => $p->nombre_producto,
-                    'usos' => $p->detalle_productos_count
-                ];
-            });
+            ->groupBy(fn ($ot) => $ot->estadoOT->nombre_estado)
+            ->map->count();
 
-        // Productos con stock menor a 3
-        $productosBajoStock = Producto::where('stock', '<', 3)->get();
+    $productCategories = Producto::with('categoria')
+            ->get()
+            ->groupBy(fn ($producto) => $producto->categoria->nombre_categoria)
+            ->map->count();
 
-        return view('dashboard', compact(
-            'totalOT',
-            'otEnEvaluacion',
-            'otCompletadas',
-            'totalClientes',
-            'productosMasUsados',
-            'productosBajoStock'
-        ));
+    $lowStockProducts = DB::table('inventario')
+            ->join('productos', 'inventario.id_producto', '=', 'productos.id_producto')
+            ->where('inventario.cantidad', '<', 3)
+            ->select('productos.nombre_producto', 'inventario.cantidad')
+            ->get();
+
+        $lowStockProducts = DB::table('inventario')
+            ->join('productos', 'inventario.id_producto', '=', 'productos.id_producto')
+            ->where('inventario.cantidad', '<', 3)
+            ->select('productos.nombre_producto', 'inventario.cantidad')
+            ->get();
+
+$responsableOrders = OT::with('responsable')
+    ->get()
+    ->groupBy(fn ($ot) => optional($ot->responsable)->nombre . ' ' . optional($ot->responsable)->apellido)
+    ->map->count();
+
+
+return view('dashboard', compact(
+    'totalCliente',
+    'totalOrden',
+    'completedOrden',
+    'ordersPerMonth',
+    'ordersByStatus',
+    'productCategories',
+    'lowStockProducts',
+    'responsableOrders'
+));
     }
+
 }

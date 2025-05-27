@@ -35,7 +35,6 @@
                         <dd class="mt-1 text-gray-900 dark:text-gray-100">
                             {{ $ot->fecha_entrega ? $ot->fecha_entrega->format('d/m/Y') : '—' }}
                         </dd>
-
                     </div>
                 </dl>
             </div>
@@ -43,15 +42,15 @@
             {{-- Descripción --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Descripción</h3>
-
-                @if ($ot->detalleOT->isEmpty())
+                @if($ot->detalleOT->isEmpty())
                     <p class="text-gray-500 dark:text-gray-400">—</p>
                 @else
-                    @foreach ($ot->detalleOT as $detalle)
+                    @foreach($ot->detalleOT as $detalle)
                         <p class="text-gray-900 dark:text-gray-100">{{ $detalle->descripcion_actividad }}</p>
                     @endforeach
                 @endif
             </div>
+
             {{-- Tipos de Trabajo --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Tipos de Trabajo</h3>
@@ -67,7 +66,8 @@
             {{-- Productos Asociados --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Productos Asociados</h3>
-                @if ($ot->detalleProductos->isEmpty())
+
+                @if($ot->detalleProductos->isEmpty())
                     <p class="text-gray-500">No hay productos asociados.</p>
                 @else
                     <table class="w-full table-auto text-left text-gray-800 dark:text-gray-100">
@@ -78,9 +78,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($ot->detalleProductos as $d)
+                            @foreach($ot->detalleProductos as $d)
                                 <tr>
-                                    <td class="border-b p-2">{{ $d->producto->marca }} {{ $d->producto->modelo }}</td>
+                                    <td class="border-b p-2">{{ $d->producto->nombre_producto }} {{ $d->producto->marca }}
+                                        {{ $d->producto->modelo }}
+                                    </td>
                                     <td class="border-b p-2">{{ $d->cantidad }}</td>
                                 </tr>
                             @endforeach
@@ -92,11 +94,12 @@
             {{-- Archivos Adjuntos --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Archivos Adjuntos</h3>
-                @if ($ot->archivosAdjuntos->isEmpty())
+
+                @if($ot->archivosAdjuntos->isEmpty())
                     <p class="text-gray-500">No hay archivos adjuntos.</p>
                 @else
                     <ul class="list-disc pl-5 space-y-1">
-                        @foreach ($ot->archivosAdjuntos as $file)
+                        @foreach($ot->archivosAdjuntos as $file)
                             <li>
                                 <a href="{{ asset('storage/' . $file->ruta_archivo) }}" target="_blank"
                                     class="text-blue-600 hover:underline dark:text-blue-400">
@@ -111,7 +114,6 @@
             {{-- Historial de Cambios --}}
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Historial de Cambios</h3>
-
                 @if ($historial->isEmpty())
                     <p class="text-gray-500 dark:text-gray-400">No hay historial de cambios para esta orden.</p>
                 @else
@@ -133,16 +135,16 @@
                                         <td class="border-b p-2">{{ $h['usuario'] }}</td>
                                         <td class="border-b p-2">{{ $h['fecha_modificacion'] }}</td>
                                         <td class="border-b p-2">
-                                            <ul class="list-disc list-inside">
-                                                @foreach ($h['campos'] as $campo)
-                                                    <li>{{ $campo }}</li>
+                                            <ul class="list-disc list-inside space-y-1">
+                                                @foreach(is_array($h['campos']) ? $h['campos'] : explode(',', $h['campos']) as $campo)
+                                                    <li>{{ trim($campo) }}</li>
                                                 @endforeach
                                             </ul>
                                         </td>
                                         <td class="border-b p-2">
-                                            <ul class="list-disc list-inside">
-                                                @foreach ($h['descripciones'] as $desc)
-                                                    <li>{!! $desc !!}</li>
+                                            <ul class="list-disc list-inside space-y-1">
+                                                @foreach($h['descripciones'] as $desc)
+                                                    {!! $desc !!}
                                                 @endforeach
                                             </ul>
                                         </td>
@@ -153,7 +155,6 @@
                     </div>
                 @endif
             </div>
-
 
             {{-- Acciones --}}
             <div class="flex justify-end space-x-2">
@@ -169,8 +170,6 @@
                     Exportar PDF
                 </a>
             </div>
-
-
         </div>
     </div>
 </x-app-layout>
