@@ -76,6 +76,9 @@ Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
 
+Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
+
+
 // Rutas de OT
 Route::middleware(['auth'])->group(function () {
     Route::get('ot/historial', [OTController::class, 'historialGeneral'])
@@ -85,7 +88,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Ruta para exportar OT a PDF
     Route::get('/ot/export/{id}', [OTController::class, 'exportOrdenes'])->name('ot.export');
-    Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
 
 
     // Desactivar (inhabilitar) OT

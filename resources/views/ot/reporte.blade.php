@@ -67,7 +67,7 @@
                     <td>{{ $ot->responsable->nombre }}</td>
                     <td>{{ $ot->estadoOT->nombre_estado }}</td>
                     <td>{{ \Carbon\Carbon::parse($ot->fecha_creacion)->format('d/m/Y') }}</td>
-                    <td>{{ $ot->fecha_entrega ? $ot->fecha_entrega->format('d/m/Y') : '—' }}</td>
+                    <td>{{ $ot->fecha_entrega ? \Carbon\Carbon::parse($ot->fecha_entrega)->format('d/m/Y') : '—' }}</td>
                 </tr>
             @empty
                 <tr>

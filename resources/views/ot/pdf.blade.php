@@ -1,6 +1,5 @@
 @extends('pdf.base')
 
-
 @section('title', "Orden de Trabajo #{$ordenTrabajo->id_ot}")
 
 @section('ot_id', $ordenTrabajo->id_ot)
@@ -48,14 +47,20 @@
     @endif
 
     <h2>Archivos Adjuntos</h2>
-    @if ($ordenTrabajo->archivosAdjuntos->isEmpty())
-        <p>No hay archivos adjuntos.</p>
+    @if ($archivosAdjuntos->isNotEmpty())
+        @foreach ($archivosAdjuntos as $archivo)
+            <div style="margin-bottom: 10px;">
+                <p><strong>{{ $archivo['nombre'] }}</strong></p>
+
+                @if ($archivo['base64'])
+                    <img src="{{ $archivo['base64'] }}" style="width: 200px; height: auto;" alt="Archivo Adjunto">
+                @else
+                    <p style="color: red;">Este archivo no se puede visualizar (no es una imagen válida)</p>
+                @endif
+            </div>
+        @endforeach
     @else
-        <ul>
-            @foreach ($ordenTrabajo->archivosAdjuntos as $file)
-                <li>{{ $file->nombre_original }}</li>
-            @endforeach
-        </ul>
+        <p>No hay archivos adjuntos</p>
     @endif
 
     <h2>Historial de Cambios</h2>

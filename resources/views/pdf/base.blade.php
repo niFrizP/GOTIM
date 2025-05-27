@@ -9,7 +9,7 @@
             font-family: 'DejaVu Sans', sans-serif;
             font-size: 12px;
             color: #2c3e50;
-            margin: 0 30px;
+            margin: 30px;
         }
 
         h1,
@@ -45,10 +45,13 @@
         }
 
         .footer {
-            margin-top: 40px;
+            position: fixed;
+            bottom: 20px;
+            left: 30px;
+            right: 30px;
+            text-align: right;
             font-size: 10px;
             color: #999;
-            text-align: center;
             border-top: 1px solid #ccc;
             padding-top: 6px;
         }
@@ -67,7 +70,9 @@
 <body>
 
     <div class="header">
-        <img src="{{ $base64Logo }}" alt="Logo Plataforma" style="width: 110px; margin-bottom: 5px;">
+        @isset($base64Logo)
+            <img src="{{ $base64Logo }}" alt="Logo Plataforma" style="width: 110px; margin-bottom: 5px;">
+        @endisset
         <h1>Orden de Trabajo #@yield('ot_id')</h1>
         <p><strong>Cliente:</strong> @yield('cliente')</p>
         <p><strong>Responsable:</strong> @yield('responsable')</p>
@@ -84,6 +89,18 @@
         Generado el {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}
     </div>
 
+    {{-- Script de numeración de páginas (solo funciona con DomPDF) --}}
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "Página {PAGE_NUM} de {PAGE_COUNT}";
+            $font = $fontMetrics->getFont("DejaVu Sans", "normal");
+            $size = 9;
+            $width = $pdf->get_width();
+            $x = $width - 100;
+            $y = 820;
+            $pdf->page_text($x, $y, $text, $font, $size, [150, 150, 150]);
+        }
+    </script>
 </body>
 
 </html>

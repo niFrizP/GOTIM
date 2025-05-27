@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class OTController extends Controller
 {
@@ -518,60 +519,133 @@ class OTController extends Controller
         $logoData = file_get_contents($logoPath);
         $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
 
-        // Fuente (aunque ahora usás DejaVu, dejo esto por si volvés a usar Cairo)
+        // Fuente opcional
         $fontPath = resource_path('fonts/CairoPlay-Regular.ttf');
         $base64Font = file_exists($fontPath) ? base64_encode(file_get_contents($fontPath)) : '';
 
-        // Renderizar la vista PDF
+        // Convertir archivos adjuntos (solo imágenes)
+        $archivosConvertidos = collect();
+        foreach ($ordenTrabajo->archivosAdjuntos as $archivo) {
+            if (!$archivo->ruta || !Str::startsWith($archivo->ruta, 'storage/')) {
+                continue;
+            }
+
+            $rutaCompleta = public_path($archivo->ruta);
+
+            if (is_file($rutaCompleta)) {
+                $tipo = @getimagesize($rutaCompleta)['mime'] ?? null;
+
+                if ($tipo) {
+                    $datos = file_get_contents($rutaCompleta);
+                    $base64 = 'data:' . $tipo . ';base64,' . base64_encode($datos);
+
+                    $archivosConvertidos->push([
+                        'nombre' => $archivo->nombre_archivo,
+                        'base64' => $base64
+                    ]);
+                }
+            }
+
+            // Si no es imagen o ruta inválida
+            $archivosConvertidos->push([
+                'nombre' => $archivo->nombre_archivo,
+                'base64' => null
+            ]);
+        }
+
+        // Renderizar vista
         $view = View::make('ot.pdf', [
-            'ordenTrabajo' => $ordenTrabajo,
-            'historial'    => $historialTransformado,
-            'base64Logo'   => $base64Logo,
-            'base64Font'   => $base64Font,
+            'ordenTrabajo'      => $ordenTrabajo,
+            'historial'         => $historialTransformado,
+            'base64Logo'        => $base64Logo,
+            'base64Font'        => $base64Font,
+            'archivosAdjuntos'  => $archivosConvertidos,
         ]);
 
         $html = $view->render();
 
-        // Generar y retornar el PDF
+        // Generar PDF
         $pdf = Pdf::loadHTML($html)->setPaper('A4', 'portrait');
-        $fechaDescarga = now()->format('Y-m-d_H-i-s');
 
-        return $pdf->download("OrdenTrabajo_{$ordenTrabajo->id_ot}_{$fechaDescarga}.pdf");
+        // Agregar paginación personalizada
+        $pdf->render(function ($dompdf) {
+            $canvas = $dompdf->getCanvas();
+            $fontMetrics = new \Dompdf\FontMetrics($canvas, $dompdf->getOptions());
+            $font = $fontMetrics->getFont('helvetica', 'normal');
+            $pageCount = $canvas->get_page_count();
+
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $text = "Página $i de $pageCount";
+                $textWidth = $fontMetrics->getTextWidth($text, $font, 9);
+                $x = ($canvas->get_width() - $textWidth) / 2;
+                $y = $canvas->get_height() - 30;
+
+                $canvas->page_text(50, 50, "¡Hola página $i de $pageCount!", $font, 12, [255, 0, 0], $i);
+            }
+        });
+
+        // Descargar el PDF
+        $fechaDescarga = now()->format('Y-m-d_H-i-s');
+        return $pdf->download("OT_{$ordenTrabajo->id_ot}_{$fechaDescarga}.pdf");
     }
 
+
+    // Exporta el listado de OTs a PDF
     public function exportarListadoOT(Request $request)
     {
-        $query = OT::with(['cliente', 'responsable', 'estadoOT']);
+        // Validar los parámetros de búsqueda
+        $validator = Validator::make($request->all(), [
+            'buscar' => 'nullable|string|max:255',
+            'estado' => 'nullable|integer|exists:estado_ot,id_estado',
+            'responsable' => 'nullable|integer|exists:users,id',
+            'fechaInicio' => 'nullable|date_format:Y-m-d',  // Solo fecha, sin hora
+        ]);
 
-        if ($request->filled('cliente')) {
-            $query->where('id_cliente', $request->cliente);
+        // Si la validación falla, redirigir con errores
+        if ($validator->fails()) {
+            // Podés redirigir, lanzar error o devolver algo para que no pete
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
-        if ($request->filled('responsable')) {
-            $query->where('id_responsable', $request->responsable);
-        }
-        if ($request->filled('estado')) {
-            $query->where('id_estado', $request->estado);
-        }
-        if ($request->filled('fecha_creacion')) {
-            $query->whereDate('fecha_creacion', $request->fecha_creacion);
-        }
+        // Si la validación es exitosa, proceder a buscar las órdenes de trabajo
+        $ordenes = OT::with(['cliente', 'responsable', 'estadoOT'])
+            ->when($request->filled('buscar'), function ($query) use ($request) {
+                $search = $request->input('buscar');
+                $query->whereHas('cliente', fn($q) => $q->where('nombre_cliente', 'like', "%$search%"))
+                    ->orWhereHas('responsable', fn($q) => $q->where('nombre', 'like', "%$search%"))
+                    ->orWhereHas('estadoOT', fn($q) => $q->where('nombre_estado', 'like', "%$search%"))
+                    ->orWhere('id_ot', 'like', "%$search%");
+            })
+            ->when($request->filled('estado'), fn($q) => $q->where('id_estado', $request->estado))
+            ->when($request->filled('responsable'), fn($q) => $q->where('id_responsable', $request->responsable))
+            ->when($request->filled('fecha_creacion'), function ($q) use ($request) {
+                $inicio = Carbon::parse($request->fecha_creacion)->startOfDay();
+                $q->where('fecha_creacion', '>=', $inicio);
+            })
+            ->orderByDesc('fecha_creacion')
+            ->get();
 
-        $ordenes = $query->orderBy('fecha_creacion', 'desc')->get();
-
-        // Base64 logo si querés incluirlo
+        // Generar base64 del logo
         $logoPath = public_path('images/logo.png');
         $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
         $logoData = file_get_contents($logoPath);
         $base64Logo = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
 
-        $view = View::make('ot.reporte', [
-            'ordenes' => $ordenes,
-            'base64Logo' => $base64Logo,
-        ]);
+        if ($ordenes->isEmpty()) {
+            $pdf = Pdf::loadView('ot.ot_listado', [
+                'base64Logo' => $base64Logo,
+                'ordenes' => collect(),
+                'mensaje' => 'No se encontraron órdenes de trabajo con los filtros seleccionados.'
+            ]);
+        } else {
+            $pdf = Pdf::loadView('ot.ot_listado', [
+                'base64Logo' => $base64Logo,
+                'ordenes' => $ordenes
+            ]);
+        }
 
-        $pdf = Pdf::loadHTML($view->render())->setPaper('A4', 'landscape');
-
-        $fecha = now()->format('Y-m-d_H-i-s');
-        return $pdf->download("Listado_OTs_{$fecha}.pdf");
+        $fechaDescarga = now()->format('Y-m-d_H-i-s');
+        return $pdf->download("OrdenesTrabajo_{$fechaDescarga}.pdf");
     }
 }
