@@ -15,16 +15,266 @@
         </h2>
      <?php $__env->endSlot(); ?>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-2">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <!-- Usuario conectado -->
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <?php echo e(Auth::user()->nombre); ?> <?php echo e(Auth::user()->apellido); ?> <?php echo e(__(' está conectado!')); ?>
 
                 </div>
             </div>
+
+            <!-- Tarjetas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <?php
+                    $cards = [
+                        [
+                            'title' => 'Clientes',
+                            'value' => $totalCliente,
+                            'bg' => 'bg-gray-600',
+                            'icon' => 'users',
+                        ],
+                        [
+                            'title' => 'Órdenes Totales',
+                            'value' => $totalOrden,
+                            'bg' => 'bg-red-600',
+                            'icon' => 'clipboard-list',
+                        ],
+                        [
+                            'title' => 'Órdenes Completadas',
+                            'value' => $completedOrden,
+                            'bg' => 'bg-indigo-600',
+                            'icon' => 'check-circle',
+                        ],
+                    ];
+                ?>
+
+                <?php $__currentLoopData = $cards; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $card): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="<?php echo e($card['bg']); ?> text-white p-6 rounded shadow flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-medium uppercase tracking-wide"><?php echo e($card['title']); ?></div>
+                            <div class="text-3xl font-bold"><?php echo e($card['value']); ?></div>
+                        </div>
+                        <i data-lucide="<?php echo e($card['icon']); ?>" class="w-10 h-10 opacity-80"></i>
+                    </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <?php
+                    $charts = [
+                        ['id' => 'ordersChart', 'title' => 'Órdenes por Mes', 'icon' => 'calendar'],
+                        ['id' => 'ordersByStatusChart', 'title' => 'Órdenes por Estado', 'icon' => 'bar-chart-3'],
+                        ['id' => 'productsByCategoryChart', 'title' => 'Productos por Categoría', 'icon' => 'layers'],
+                        ['id' => 'ordersByResponsableChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
+                    ];
+                ?>
+
+                <?php $__currentLoopData = $charts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chart): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+                        <div class="mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100 font-bold">
+                            <i data-lucide="<?php echo e($chart['icon']); ?>" class="w-5 h-5"></i>
+                            <?php echo e($chart['title']); ?>
+
+                        </div>
+                        <canvas id="<?php echo e($chart['id']); ?>" class="h-64 w-full"></canvas>
+                    </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+
+            <!-- Productos con bajo stock -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+                <div class="mb-4 font-bold text-gray-900 dark:text-gray-100 text-lg flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-400"></i>
+                    Productos con Stock Bajo
+                </div>
+
+                <?php if($lowStockProducts->where('cantidad', '<=', 3)->isNotEmpty()): ?>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                            <thead
+                                class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 uppercase text-xs tracking-wider">
+                                <tr>
+                                    <th scope="col" class="px-4 py-2 text-left">Producto</th>
+                                    <th scope="col" class="px-4 py-2 text-left">Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <?php $__currentLoopData = $lowStockProducts->where('cantidad', '<=', 3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="px-4 py-2">
+<a href="<?php echo e(route('productos.show', $product->id_producto)); ?>" class="text-blue-400 hover:underline">
+    <span class="font-medium"><?php echo e($product->nombre_producto); ?></span> - Stock: <?php echo e($product->cantidad); ?>
+
+  </a>
+                            </td>
+                            <td class="px-4 py-2 font-bold text-red-600 dark:text-red-400">
+                                <?php echo e($product->cantidad); ?>
+
+                            </td>
+                        </tr>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </tbody>
+            </table>
+        </div>
+<?php else: ?>
+<div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock suficiente.</div>
+<?php endif; ?>
+</div>
+
         </div>
     </div>
+
+
+    <?php $__env->startPush('scripts'); ?>
+<script>
+    const integerYAxisOptions = {
+        beginAtZero: true,
+        ticks: {
+            stepSize: 1,
+            callback: function(value) {
+                return Number.isInteger(value) ? value : null;
+            }
+        }
+    };
+
+    const integerTooltipOptions = {
+        callbacks: {
+            label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                label += Number.isInteger(context.parsed.y) ? context.parsed.y : Math.round(context.parsed.y);
+                return label;
+            }
+        }
+    };
+
+    // Traducir los meses (solo si vienen en inglés, de lo contrario ignorar)
+    const monthLabels = <?php echo json_encode($ordersPerMonth->keys()); ?>.map(month => {
+        const map = {
+            'January': 'Enero',
+            'February': 'Febrero',
+            'March': 'Marzo',
+            'April': 'Abril',
+            'May': 'Mayo',
+            'June': 'Junio',
+            'July': 'Julio',
+            'August': 'Agosto',
+            'September': 'Septiembre',
+            'October': 'Octubre',
+            'November': 'Noviembre',
+            'December': 'Diciembre'
+        };
+        return map[month] || month;
+    });
+
+    const ordersChart = new Chart(document.getElementById('ordersChart'), {
+        type: 'bar',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Órdenes',
+                data: <?php echo json_encode($ordersPerMonth->values()); ?>,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        },
+        options: {
+            scales: {
+                y: integerYAxisOptions
+            },
+            plugins: {
+                tooltip: integerTooltipOptions
+            }
+        }
+    });
+
+    const ordersByStatusChart = new Chart(document.getElementById('ordersByStatusChart'), {
+        type: 'pie',
+        data: {
+            labels: <?php echo json_encode($ordersByStatus->keys()); ?>,
+            datasets: [{
+                data: <?php echo json_encode($ordersByStatus->values()); ?>,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                    '#9966FF', '#FF9F40', '#00A36C', '#C71585'
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        weight: 'bold'
+                    },
+                    formatter: (value, context) => {
+                        const data = context.chart.data.datasets[0].data;
+                        const total = data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${percentage}% (${value})`;
+                    }
+                },
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.parsed}`;
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+
+    const productsByCategoryChart = new Chart(document.getElementById('productsByCategoryChart'), {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode($productCategories->keys()); ?>,
+            datasets: [{
+                label: 'Productos por Categoría',
+                data: <?php echo json_encode($productCategories->values()); ?>,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+            }]
+        },
+        options: {
+            scales: {
+                y: integerYAxisOptions
+            },
+            plugins: {
+                tooltip: integerTooltipOptions
+            }
+        }
+    });
+
+    const ordersByResponsableChart = new Chart(document.getElementById('ordersByResponsableChart'), {
+        type: 'bar',
+        data: {
+            labels: <?php echo json_encode($responsableOrders->keys()); ?>,
+            datasets: [{
+                label: 'Órdenes por Responsable',
+                data: <?php echo json_encode($responsableOrders->values()); ?>,
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: integerYAxisOptions
+            },
+            plugins: {
+                tooltip: integerTooltipOptions
+            }
+        }
+    });
+</script>
+<?php $__env->stopPush(); ?>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
@@ -34,5 +284,5 @@
 <?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
 <?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
 <?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
-<?php endif; ?>
+<?php endif; ?>)
 <?php /**PATH D:\CAPSTONE 2025\GOTIM\resources\views/dashboard.blade.php ENDPATH**/ ?>

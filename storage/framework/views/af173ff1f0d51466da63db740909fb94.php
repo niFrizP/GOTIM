@@ -15,6 +15,11 @@
     <!-- Scripts -->
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <script src="https://kit.fontawesome.com/f00d5bcc97.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
 
     <!-- CDN para jQuery y Select2 -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -59,7 +64,11 @@
     <?php echo $__env->yieldPushContent('scripts'); ?>
 
 
-    <!-- Scripts adicionales (si es necesario) -->
+    <!-- Scripts adicionales-->
+    <script>
+    lucide.createIcons();
+</script>
+
 </body>
 
 </html>
