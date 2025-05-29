@@ -105,7 +105,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-                        Inhabilitar
+                        Eliminar
                     </button>
                 </form>
             </div>

@@ -13,7 +13,8 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\OTController;
 use App\Http\Controllers\DashboardController;
 
-// Rutas de categorías
+// Rutas de servicios
+Route::get('/servicios/validar-nombre', [ServicioController::class, 'validarNombre']);
 Route::resource('servicios', ServicioController::class);
 
 // Ruta para la página de inicio de sesión

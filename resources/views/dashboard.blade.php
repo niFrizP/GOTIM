@@ -117,6 +117,7 @@
 
     @push('scripts')
 <script>
+    // Configuración de Chart.js
     const integerYAxisOptions = {
         beginAtZero: true,
         ticks: {
@@ -126,7 +127,7 @@
             }
         }
     };
-
+    // Configuración de tooltips para mostrar enteros
     const integerTooltipOptions = {
         callbacks: {
             label: function(context) {
@@ -138,25 +139,26 @@
         }
     };
 
-    // Traducir los meses (solo si vienen en inglés, de lo contrario ignorar)
+    // Traducción de meses
     const monthLabels = {!! json_encode($ordersPerMonth->keys()) !!}.map(month => {
         const map = {
-            'January': 'Enero',
-            'February': 'Febrero',
-            'March': 'Marzo',
-            'April': 'Abril',
-            'May': 'Mayo',
-            'June': 'Junio',
-            'July': 'Julio',
-            'August': 'Agosto',
-            'September': 'Septiembre',
-            'October': 'Octubre',
-            'November': 'Noviembre',
-            'December': 'Diciembre'
+            'January': 'enero',
+            'February': 'febrero',
+            'March': 'marzo',
+            'April': 'abril',
+            'May': 'mayo',
+            'June': 'junio',
+            'July': 'julio',
+            'August': 'agosto',
+            'September': 'septiembre',
+            'October': 'octubre',
+            'November': 'noviembre',
+            'December': 'diciembre'
         };
         return map[month] || month;
     });
 
+    // Gráfico de órdenes por mes
     const ordersChart = new Chart(document.getElementById('ordersChart'), {
         type: 'bar',
         data: {
@@ -177,8 +179,10 @@
         }
     });
 
+    // Gráfico de órdenes por estado
     const ordersByStatusChart = new Chart(document.getElementById('ordersByStatusChart'), {
         type: 'pie',
+        width: '50%',
         data: {
             labels: {!! json_encode($ordersByStatus->keys()) !!},
             datasets: [{
@@ -199,7 +203,7 @@
                     formatter: (value, context) => {
                         const data = context.chart.data.datasets[0].data;
                         const total = data.reduce((a, b) => a + b, 0);
-                        const percentage = ((value / total) * 100).toFixed(1);
+                        const percentage = ((value / total) * 100).toFixed(0);
                         return `${percentage}% (${value})`;
                     }
                 },
@@ -218,6 +222,7 @@
         plugins: [ChartDataLabels]
     });
 
+    // Gráfico de productos por categoría
     const productsByCategoryChart = new Chart(document.getElementById('productsByCategoryChart'), {
         type: 'bar',
         data: {
@@ -238,6 +243,7 @@
         }
     });
 
+    // Gráfico de órdenes por responsable
     const ordersByResponsableChart = new Chart(document.getElementById('ordersByResponsableChart'), {
         type: 'bar',
         data: {
