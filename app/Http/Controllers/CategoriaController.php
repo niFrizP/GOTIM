@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categoria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoriaController extends Controller
 {
@@ -19,12 +20,23 @@ class CategoriaController extends Controller
     {
         return view('categorias.create');
     }
+    // Validar y guardar una nueva categoría
+    public function validarNombre(Request $request)
+    {
+        $nombre = $request->query('nombre');
+
+        $existe = DB::table('categorias')
+            ->where('nombre_categoria', $nombre)
+            ->exists();
+
+        return response()->json(['disponible' => !$existe]);
+    }
 
     // Guardar una nueva categoría
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_categoria' => 'required|string|max:255',
+            'nombre_categoria' => 'unique:categorias,nombre_categoria|required|string|max:255',
             'descripcion' => 'nullable|string|max:1000',
         ]);
 
@@ -56,7 +68,7 @@ class CategoriaController extends Controller
         }
 
         $request->validate([
-            'nombre_categoria' => 'required|string|max:255',
+            'nombre_categoria' => 'unique:categorias,nombre_categoria,' . $id . '|required|string|max:255',
             'descripcion' => 'nullable|string|max:1000',
         ]);
 
@@ -70,10 +82,10 @@ class CategoriaController extends Controller
         $categoria = Categoria::findOrFail($id);
         $categoria->estado = 'Inactiva';
         $categoria->save();
-    
+
         return redirect()->route('categorias.index')->with('success', 'Categoría desactivada correctamente.');
     }
-    
+
 
     // Reactivar una categoría
     public function reactivar($id)

@@ -54,6 +54,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
 Route::delete('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
 
+// Ruta para validar el nombre de la categoría
+Route::get('/categorias/validar-nombre', [CategoriaController::class, 'validarNombre']);
+
 // Ruta para mostrar categorías inactivas
 Route::get('/categorias/inactivas', [CategoriaController::class, 'inactivas'])->name('categorias.inactivas');
 
