@@ -6,13 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('clientes', function (Blueprint $table) {
             $table->id('id_cliente');
+            $table->unsignedBigInteger('id_empresa');
             $table->string('nombre_cliente');
             $table->string('apellido_cliente');
             $table->string('rut')->nullable();
@@ -21,12 +19,12 @@ return new class extends Migration
             $table->string('nro_contacto')->nullable();
             $table->enum('estado', ['activo', 'inhabilitado'])->default('activo');
             $table->timestamps();
+
+            // Clave foránea sin onDelete
+            $table->foreign('id_empresa')->references('id_empresa')->on('empresas');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('clientes');

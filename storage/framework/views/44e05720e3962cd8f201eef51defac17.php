@@ -91,6 +91,10 @@
                     <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-400"></i>
                     Productos con Stock Bajo
                 </div>
+                <p class="text-gray-700 dark:text-gray-300 mb-4">
+                    Los siguientes productos tienen un stock de 3 unidades o menos. Por favor, considere reabastecerlos.
+                </p>
+
 
                 <?php if($lowStockProducts->where('cantidad', '<=', 3)->isNotEmpty()): ?>
                     <div class="overflow-x-auto">
