@@ -54,3 +54,18 @@
         /* text-gray-100 */
     }
 }
+
+.dark .select2-container--default .select2-selection--single {
+    background-color: #1f2937;
+    color: white;
+    border-color: #4b5563;
+}
+
+.dark .select2-dropdown {
+    background-color: #1f2937;
+    color: white;
+}
+
+.dark .select2-results__option--highlighted {
+    background-color: #374151;
+}

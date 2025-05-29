@@ -126,45 +126,101 @@
                 formatRut(this);
             });
 
-            document.getElementById('id_region').addEventListener('change', async function() {
-                const regionId = this.value;
-                console.log('Seleccionaste región ID:', regionId);
-
+            document.addEventListener('DOMContentLoaded', function() {
+                const $region = $('#id_region');
                 const $ciudad = $('#id_ciudad');
 
-                if (regionId) {
-                    try {
-                        const response = await fetch(`/cxr/${regionId}`);
+                // Inicializar select2 por única vez
+                $region.select2({
+                    placeholder: "Seleccione una región",
+                    allowClear: true,
+                    width: 'resolve'
+                });
 
-                        if (!response.ok) {
-                            throw new Error('Error al cargar ciudades');
+                $ciudad.select2({
+                    placeholder: "Seleccione una ciudad",
+                    allowClear: true,
+                    width: 'resolve'
+                });
+
+                // Al inicio: desactivar el campo ciudad
+                $ciudad.prop('disabled', true);
+
+                estilizarSelect2();
+
+                // Evento cambio de región
+                $region.on('change', async function() {
+                    const regionId = $(this).val();
+
+                    if (regionId) {
+                        try {
+                            const response = await fetch(`/cxr/${regionId}`);
+                            if (!response.ok) throw new Error('Error al cargar ciudades');
+
+                            const ciudades = await response.json();
+
+                            // Destruir instancia previa para evitar conflictos
+                            $ciudad.select2('destroy');
+
+                            // Vaciar y cargar nuevas opciones
+                            $ciudad.empty().append('<option value="">Seleccione una ciudad</option>');
+                            ciudades.forEach(ciudad => {
+                                $ciudad.append(
+                                    `<option value="${ciudad.id_ciudad}">${ciudad.nombre_ciudad}</option>`
+                                );
+                            });
+                            $ciudad.prop('disabled', false);
+
+                            // Volver a inicializar select2 con las nuevas opciones
+                            $ciudad.select2({
+                                placeholder: "Seleccione una ciudad",
+                                allowClear: true,
+                                width: 'resolve'
+                            });
+
+                            // Aplicar estilos de nuevo
+                            estilizarSelect2();
+
+                        } catch (error) {
+                            console.error('Error cargando ciudades:', error);
                         }
-
-                        const ciudades = await response.json();
-                        console.log('Ciudades recibidas:', ciudades);
-
-                        // Vaciar y actualizar las opciones
-                        $ciudad.empty();
-                        $ciudad.append('<option value="">Seleccione una ciudad</option>');
-
-                        ciudades.forEach(function(ciudad) {
-                            $ciudad.append(
-                                `<option value="${ciudad.id_ciudad}">${ciudad.nombre_ciudad}</option>`
-                            );
-                        });
-
-                        // Refrescar Select2 solo para el selector de ciudades
+                    } else {
+                        // Si se deselecciona la región, limpiar el campo ciudad
+                        $ciudad.select2('destroy');
+                        $ciudad.empty().append('<option value="">Seleccione una ciudad</option>');
                         $ciudad.select2({
-                            placeholder: "Seleccione una opción",
-                            allowClear: true
+                            placeholder: "Seleccione una ciudad",
+                            allowClear: true,
+                            width: 'resolve'
+                        });
+                        estilizarSelect2();
+                    }
+                });
+
+                function estilizarSelect2() {
+                    setTimeout(() => {
+                        $('.select2-container--default .select2-selection--single').each(function() {
+                            $(this).css({
+                                'background-color': '#fff',
+                                'border': '1px solid #d1d5db',
+                                'border-radius': '0.5rem',
+                                'height': '42px',
+                                'padding': '0.5rem 0.75rem',
+                                'font-size': '0.875rem',
+                                'color': '#000'
+                            });
                         });
 
-                        // Resetear selección
-                        $ciudad.val(null).trigger('change');
+                        $('.select2-selection__rendered').css({
+                            'color': '#000',
+                            'line-height': '1.5rem',
+                        });
 
-                    } catch (error) {
-                        console.error('Error cargando ciudades:', error);
-                    }
+                        $('.select2-selection__arrow').css({
+                            'top': '8px',
+                            'right': '0.75rem'
+                        });
+                    }, 10);
                 }
             });
         </script>
