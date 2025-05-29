@@ -20,12 +20,11 @@
                                 class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white"
                                 required>
                                 <option value="">Seleccione un cliente</option>
-                                @foreach($clientes as $id => $nombre)
+                                @foreach ($clientes as $id => $nombre)
                                     <option value="{{ $id }}">{{ $nombre }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('id_cliente')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('id_cliente')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Responsable --}}
@@ -35,12 +34,11 @@
                                 class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white"
                                 required>
                                 <option value="">Seleccione un responsable</option>
-                                @foreach($responsables as $id => $nombre)
+                                @foreach ($responsables as $id => $nombre)
                                     <option value="{{ $id }}">{{ $nombre }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('id_responsable')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('id_responsable')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Estado --}}
@@ -49,20 +47,18 @@
                             <select id="id_estado" name="id_estado"
                                 class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" required>
                                 <option value="">Seleccione un estado</option>
-                                @foreach($estados as $id => $nombre)
+                                @foreach ($estados as $id => $nombre)
                                     <option value="{{ $id }}">{{ $nombre }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('id_estado')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('id_estado')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Fecha entrega --}}
                         <div>
                             <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega" />
                             <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full" />
-                            <x-input-error :messages="$errors->get('fecha_entrega')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('fecha_entrega')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Descripción --}}
@@ -71,8 +67,7 @@
                             <textarea id="descripcion" name="descripcion" rows="4"
                                 class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
                                 placeholder="Escribe una descripción detallada..."></textarea>
-                            <x-input-error :messages="$errors->get('descripcion')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('descripcion')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
                     </div>
 
@@ -81,12 +76,11 @@
                         <x-input-label for="servicios" value="Tipos de Servicio" />
                         <select id="servicios" name="servicios[]"
                             class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" multiple>
-                            @foreach($servicios as $id => $nombre)
+                            @foreach ($servicios as $id => $nombre)
                                 <option value="{{ $id }}">{{ $nombre }}</option>
                             @endforeach
                         </select>
-                        <x-input-error :messages="$errors->get('servicios')"
-                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-error :messages="$errors->get('servicios')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Productos asociados con cantidad --}}
@@ -95,8 +89,7 @@
                         <div class="grid gap-2" id="productosContainer"></div>
                         <button type="button" class="mt-2 px-4 py-2 bg-green-500 text-white rounded"
                             onclick="addProductoSelect()">+ Agregar Producto</button>
-                        <x-input-error :messages="$errors->get('productos')"
-                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-error :messages="$errors->get('productos')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Archivos Adjuntos --}}
@@ -104,8 +97,7 @@
                         <x-input-label for="archivos" value="Archivos Adjuntos" />
                         <input id="archivos" name="archivos[]" type="file" multiple
                             class="w-full text-sm text-gray-900 dark:text-gray-200" />
-                        <x-input-error :messages="$errors->get('archivos')"
-                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-error :messages="$errors->get('archivos')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Botones --}}
@@ -123,13 +115,12 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('js/select2Utils.js') }}"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.select2').select2({
-                placeholder: 'Seleccione una opción',
-                allowClear: true,
-                width: '100%'
+        document.addEventListener('DOMContentLoaded', function() {
+            $('select.select2').each(function() {
+                inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
         });
 
@@ -139,7 +130,7 @@
             <div class="producto-item flex items-center gap-2 mb-2">
                 <select name="productos[${idx}][id]" class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" required>
                     <option value="">Seleccione un producto</option>
-                    @foreach($productos as $prod)
+                    @foreach ($productos as $prod)
                         <option value="{{ $prod->id_producto }}">{{ $prod->nombre_producto }} {{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ optional($prod->inventario->first())->cantidad ?? 0 }}</option>
                     @endforeach
                 </select>
@@ -147,7 +138,9 @@
                 <button type="button" class="bg-red-500 text-white rounded px-2 py-1" onclick="$(this).parent().remove()">✕</button>
             </div>`;
             $('#productosContainer').append(html);
-            $('#productosContainer .producto-item:last-child .select2').select2({ width: '100%' });
+            $('#productosContainer .producto-item:last-child .select2').select2({
+                width: '100%'
+            });
         }
     </script>
 
