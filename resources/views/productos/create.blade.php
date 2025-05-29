@@ -15,7 +15,8 @@
                         <!-- Nombre del Producto -->
                         <div>
                             <x-input-label for="nombre_producto" value="Nombre" />
-                            <x-text-input id="nombre_producto" name="nombre_producto" type="text" class="w-full" value="{{ old('nombre_producto') }}" />
+                            <x-text-input id="nombre_producto" name="nombre_producto" type="text" class="w-full"
+                                value="{{ old('nombre_producto') }}" />
                             <x-input-error :messages="$errors->get('nombre_producto')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
@@ -28,7 +29,8 @@
                                 <select id="id_categoria" name="id_categoria" class="w-full" required>
                                     <option value="">Seleccione una categoría</option>
                                     @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->id_categoria }}">{{ $categoria->nombre_categoria }}</option>
+                                        <option value="{{ $categoria->id_categoria }}">
+                                            {{ $categoria->nombre_categoria }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('id_categoria')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
@@ -40,7 +42,7 @@
                                 <select id="tipo_producto_id" name="tipo_producto_id" class="w-full">
                                     <option value="">Seleccione un tipo</option>
                                     @foreach ($tiposProducto as $tipo)
-                                    <option value="{{ $tipo->tipo_producto_id }}">{{ $tipo->nombre }}</option>
+                                        <option value="{{ $tipo->tipo_producto_id }}">{{ $tipo->nombre }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('tipo_producto_id')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
@@ -52,14 +54,16 @@
                             <!-- Marca -->
                             <div>
                                 <x-input-label for="marca" value="Marca" />
-                                <x-text-input id="marca" name="marca" type="text" class="w-full" value="{{ old('marca') }}" />
+                                <x-text-input id="marca" name="marca" type="text" class="w-full"
+                                    value="{{ old('marca') }}" />
                                 <x-input-error :messages="$errors->get('marca')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                             </div>
 
                             <!-- Modelo -->
                             <div>
                                 <x-input-label for="modelo" value="Modelo" />
-                                <x-text-input id="modelo" name="modelo" type="text" class="w-full" value="{{ old('modelo') }}" />
+                                <x-text-input id="modelo" name="modelo" type="text" class="w-full"
+                                    value="{{ old('modelo') }}" />
                                 <x-input-error :messages="$errors->get('modelo')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                             </div>
                         </div>
@@ -74,13 +78,17 @@
                         <!-- Código -->
                         <div>
                             <x-input-label for="codigo" value="Código" />
-                            <x-text-input id="codigo" name="codigo" type="text" class="w-full" value="{{ old('codigo') }}" required />
+                            <x-text-input id="codigo" name="codigo" type="text" class="w-full"
+                                value="{{ old('codigo') }}" required />
                             <x-input-error :messages="$errors->get('codigo')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
                         <!-- Imagen -->
                         <div class="mb-4">
-                            <label for="imagen" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen del producto (opcional)</label>
-                            <input type="file" name="imagen" id="imagen" class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-200">
+                            <label for="imagen"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">Imagen del producto
+                                (opcional)</label>
+                            <input type="file" name="imagen" id="imagen"
+                                class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-200">
                         </div>
                     </div>
 

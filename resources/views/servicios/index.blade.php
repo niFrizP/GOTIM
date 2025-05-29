@@ -53,12 +53,14 @@
 
     <!-- Modal de Confirmación -->
     <div id="confirmModal"
-        class="fixed inset-0 z-50 hidden opacity-0 pointer-events-none bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
+        class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
         <div
             class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white text-center">Confirmar Eliminación</h3>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white text-center">
+                Confirmar Eliminación
+            </h3>
             <p id="confirmMessage" class="mt-4 text-center text-gray-600 dark:text-gray-300">
-                ¿Estás seguro de que deseas eliminar este servicio?
+                ¿Estás seguro de que desea eliminar el servicio?
             </p>
             <div class="mt-6 flex justify-center space-x-4">
                 <button onclick="cerrarModal()" class="rounded bg-gray-300 px-4 py-2 text-gray-800 hover:bg-gray-400">
@@ -81,8 +83,8 @@
             const form = document.getElementById('deleteForm');
             const message = document.getElementById('confirmMessage');
 
-            form.action = `/servicios/${id}`;
-            message.innerHTML = `¿Estás seguro de que deseas eliminar el servicio <strong>${nombreServicio}</strong>?`;
+            form.action = `/servicios/${id}`; // Ajustado según tu ruta personalizada
+            message.innerHTML = `¿Estás seguro de que deseas inhabilitar el servicio <strong>${nombreServicio}</strong>?`;
 
             modal.classList.remove('hidden');
             setTimeout(() => {
@@ -101,8 +103,7 @@
 
             setTimeout(() => {
                 modal.classList.add('hidden');
-                // Resetea el mensaje
-                message.innerHTML = `¿Estás seguro de que deseas eliminar este servicio?`;
+                message.innerHTML = `¿Estás seguro de que deseas inhabilitar este servicio?`;
             }, 300);
         }
     </script>

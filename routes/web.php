@@ -13,7 +13,8 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\OTController;
 use App\Http\Controllers\DashboardController;
 
-// Rutas de categorías
+// Rutas de servicios
+Route::get('/servicios/validar-nombre', [ServicioController::class, 'validarNombre']);
 Route::resource('servicios', ServicioController::class);
 
 // Ruta para la página de inicio de sesión
@@ -52,6 +53,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Rutas de estado de categorías
 Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
 Route::delete('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
+
+// Ruta para validar el nombre de la categoría
+Route::get('/categorias/validar-nombre', [CategoriaController::class, 'validarNombre']);
 
 // Ruta para mostrar categorías inactivas
 Route::get('/categorias/inactivas', [CategoriaController::class, 'inactivas'])->name('categorias.inactivas');

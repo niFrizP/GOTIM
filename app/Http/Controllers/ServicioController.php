@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Servicio;
+use Illuminate\Support\Facades\DB;
+
 
 class ServicioController extends Controller
 {
@@ -18,10 +20,23 @@ class ServicioController extends Controller
         return view('servicios.create');
     }
 
+    public function validarNombre(Request $request)
+    {
+        $nombre = $request->query('nombre');
+
+        $existe = DB::table('servicios')
+            ->where('nombre_servicio', $nombre)
+            ->exists();
+
+        return response()->json(['disponible' => !$existe]);
+    }
+
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre_servicio' => 'required|string|max:150',
+            'nombre_servicio' => 'unique:servicios,nombre_servicio|required|string|max:150',
             'descripcion' => 'nullable|string',
         ]);
 
@@ -46,7 +61,7 @@ class ServicioController extends Controller
         $servicio = Servicio::findOrFail($id);
 
         $validated = $request->validate([
-            'nombre_servicio' => 'required|string|max:150',
+            'nombre_servicio' => 'unique:servicios,nombre_servicio|required|string|max:150',
             'descripcion' => 'nullable|string',
         ]);
 
