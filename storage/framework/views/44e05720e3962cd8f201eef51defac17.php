@@ -285,6 +285,7 @@
     });
 </script>
 <?php $__env->stopPush(); ?>
+
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
@@ -294,5 +295,5 @@
 <?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
 <?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
 <?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
-<?php endif; ?>)
+<?php endif; ?>
 <?php /**PATH D:\CAPSTONE 2025\GOTIM\resources\views/dashboard.blade.php ENDPATH**/ ?>
