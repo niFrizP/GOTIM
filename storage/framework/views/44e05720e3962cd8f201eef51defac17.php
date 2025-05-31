@@ -107,184 +107,54 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                <?php $__currentLoopData = $lowStockProducts->where('cantidad', '<=', 3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-<tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td class="px-4 py-2">
-<a href="<?php echo e(route('productos.show', $product->id_producto)); ?>" class="text-blue-400 hover:underline">
-    <span class="font-medium"><?php echo e($product->nombre_producto); ?></span> - Stock: <?php echo e($product->cantidad); ?>
+                                <?php
+                                    $filteredProducts = $lowStockProducts->where('cantidad', '<=', 3);
+                                ?>
 
-  </a>
-                            </td>
-                            <td class="px-4 py-2 font-bold text-red-600 dark:text-red-400">
-                                <?php echo e($product->cantidad); ?>
+                                <?php $__empty_1 = true; $__currentLoopData = $filteredProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <td class="px-4 py-2">
+                                            <a href="<?php echo e(route('productos.show', $product->id_producto)); ?>"
+                                                class="text-blue-400 hover:underline">
+                                                <span class="font-medium"><?php echo e($product->nombre_producto); ?></span>
+                                            </a>
+                                        </td>
+                                        <td class="px-4 py-2 font-bold text-red-600 dark:text-red-400">
+                                            <?php echo e($product->cantidad); ?>
 
-                            </td>
-                        </tr>
-<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </tbody>
-            </table>
-        </div>
-<?php else: ?>
-<div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock suficiente.</div>
-<?php endif; ?>
-</div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                    <tr>
+                                        <td colspan="2" class="px-4 py-2 text-center text-gray-500">
+                                            No hay productos con stock bajo.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock
+                        suficiente.</div>
+                <?php endif; ?>
+            </div>
 
         </div>
     </div>
 
 
     <?php $__env->startPush('scripts'); ?>
-<script>
-    // Configuración de Chart.js
-    const integerYAxisOptions = {
-        beginAtZero: true,
-        ticks: {
-            stepSize: 1,
-            callback: function(value) {
-                return Number.isInteger(value) ? value : null;
-            }
+        <script type="application/json" id="dashboard-data">
+        {
+            "ordersByStatus": <?php echo json_encode($ordersByStatus, 15, 512) ?>,
+            "ordersByMonth": <?php echo json_encode($ordersByMonth, 15, 512) ?>,
+            "productCategories": <?php echo json_encode($productCategories, 15, 512) ?>,
+            "responsableOrders": <?php echo json_encode($responsableOrders, 15, 512) ?>
         }
-    };
-    // Configuración de tooltips para mostrar enteros
-    const integerTooltipOptions = {
-        callbacks: {
-            label: function(context) {
-                let label = context.dataset.label || '';
-                if (label) label += ': ';
-                label += Number.isInteger(context.parsed.y) ? context.parsed.y : Math.round(context.parsed.y);
-                return label;
-            }
-        }
-    };
-
-    // Traducción de meses
-    const monthLabels = <?php echo json_encode($ordersPerMonth->keys()); ?>.map(month => {
-        const map = {
-            'January': 'enero',
-            'February': 'febrero',
-            'March': 'marzo',
-            'April': 'abril',
-            'May': 'mayo',
-            'June': 'junio',
-            'July': 'julio',
-            'August': 'agosto',
-            'September': 'septiembre',
-            'October': 'octubre',
-            'November': 'noviembre',
-            'December': 'diciembre'
-        };
-        return map[month] || month;
-    });
-
-    // Gráfico de órdenes por mes
-    const ordersChart = new Chart(document.getElementById('ordersChart'), {
-        type: 'bar',
-        data: {
-            labels: monthLabels,
-            datasets: [{
-                label: 'Órdenes',
-                data: <?php echo json_encode($ordersPerMonth->values()); ?>,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }]
-        },
-        options: {
-            scales: {
-                y: integerYAxisOptions
-            },
-            plugins: {
-                tooltip: integerTooltipOptions
-            }
-        }
-    });
-
-    // Gráfico de órdenes por estado
-    const ordersByStatusChart = new Chart(document.getElementById('ordersByStatusChart'), {
-        type: 'pie',
-        width: '50%',
-        data: {
-            labels: <?php echo json_encode($ordersByStatus->keys()); ?>,
-            datasets: [{
-                data: <?php echo json_encode($ordersByStatus->values()); ?>,
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                    '#9966FF', '#FF9F40', '#00A36C', '#C71585'
-                ]
-            }]
-        },
-        options: {
-            plugins: {
-                datalabels: {
-                    color: '#fff',
-                    font: {
-                        weight: 'bold'
-                    },
-                    formatter: (value, context) => {
-                        const data = context.chart.data.datasets[0].data;
-                        const total = data.reduce((a, b) => a + b, 0);
-                        const percentage = ((value / total) * 100).toFixed(0);
-                        return `${percentage}% (${value})`;
-                    }
-                },
-                legend: {
-                    position: 'bottom'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.parsed}`;
-                        }
-                    }
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
-    });
-
-    // Gráfico de productos por categoría
-    const productsByCategoryChart = new Chart(document.getElementById('productsByCategoryChart'), {
-        type: 'bar',
-        data: {
-            labels: <?php echo json_encode($productCategories->keys()); ?>,
-            datasets: [{
-                label: 'Productos por Categoría',
-                data: <?php echo json_encode($productCategories->values()); ?>,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)'
-            }]
-        },
-        options: {
-            scales: {
-                y: integerYAxisOptions
-            },
-            plugins: {
-                tooltip: integerTooltipOptions
-            }
-        }
-    });
-
-    // Gráfico de órdenes por responsable
-    const ordersByResponsableChart = new Chart(document.getElementById('ordersByResponsableChart'), {
-        type: 'bar',
-        data: {
-            labels: <?php echo json_encode($responsableOrders->keys()); ?>,
-            datasets: [{
-                label: 'Órdenes por Responsable',
-                data: <?php echo json_encode($responsableOrders->values()); ?>,
-                backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: integerYAxisOptions
-            },
-            plugins: {
-                tooltip: integerTooltipOptions
-            }
-        }
-    });
-</script>
-<?php $__env->stopPush(); ?>
+    </script>
+    <?php $__env->stopPush(); ?>
 
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

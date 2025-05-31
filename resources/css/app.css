@@ -69,3 +69,17 @@
 .dark .select2-results__option--highlighted {
     background-color: #374151;
 }
+
+html.dark canvas {
+    background-color: #1f2937 !important;
+    /* gray-800 */
+    color: #f9fafb !important;
+    /* gray-100 */
+}
+
+html.light canvas {
+    background-color: #ffffff !important;
+    /* blanco */
+    color: #1f2937 !important;
+    /* gray-800 */
+}
