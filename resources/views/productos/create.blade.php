@@ -77,11 +77,12 @@
 
                         <!-- Código -->
                         <div>
-                            <x-input-label for="codigo" value="Código" />
-                            <x-text-input id="codigo" name="codigo" type="text" class="w-full"
-                                value="{{ old('codigo') }}" required />
+                            <x-input-label for="codigo" value="Código de producto *" />
+                            <x-text-input id="codigo" name="codigo" type="text" class="w-full" value="{{ old('codigo') }}" required />
                             <x-input-error :messages="$errors->get('codigo')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <p id="mensaje-codigo" class="text-sm mt-1"></p>
                         </div>
+
                         <!-- Imagen -->
                         <div class="mb-4">
                             <label for="imagen"
