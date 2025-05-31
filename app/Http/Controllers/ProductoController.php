@@ -158,4 +158,13 @@ class ProductoController extends Controller
 
         return redirect()->route('productos.index')->with('success', 'Producto inhabilitado correctamente.');
     }
+
+    public function validarCodigo(Request $request)
+    {
+        $codigo = $request->query('codigo');
+
+        $existe = Producto::where('codigo', $codigo)->exists();
+
+        return response()->json(['disponible' => !$existe]);
+    }
 }
