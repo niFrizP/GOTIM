@@ -82,7 +82,8 @@ Route::resource('productos', ProductoController::class);
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
 
 Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
-
+// Ruta para validar el código de producto
+Route::get('/productos/validar-codigo', [ProductoController::class, 'validarCodigo'])->name('productos.validar.codigo');
 
 // Rutas de OT
 Route::middleware(['auth'])->group(function () {
