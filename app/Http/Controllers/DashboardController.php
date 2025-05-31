@@ -26,7 +26,7 @@ class DashboardController extends Controller
         })->count();
 
         // Órdenes por mes (usando fecha_entrega)
-        $ordersPerMonth = DB::table('ot')
+        $ordersByMonth = DB::table('ot')
             ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTHNAME(fecha_entrega) as month'))
             ->groupBy(DB::raw('MONTH(fecha_entrega)'), DB::raw('MONTHNAME(fecha_entrega)'))
             ->orderBy(DB::raw('MONTH(fecha_entrega)'))
@@ -53,12 +53,26 @@ class DashboardController extends Controller
             ->groupBy(fn($ot) => optional($ot->responsable)->nombre . ' ' . optional($ot->responsable)->apellido)
             ->map->count();
 
+        // Órdenes por técnico
+        $ordersByTechnician = OT::with('responsable')
+            ->get()
+            ->groupBy(fn($ot) => optional($ot->responsable)->nombre . ' ' . optional($ot->responsable)->apellido)
+            ->where('user.rol', 'tecnico')
+            ->map->count();
+
+        // Órdenes por cliente
+        $ordersByClient = OT::with('cliente')
+            ->get()
+            ->groupBy(fn($ot) => optional($ot->id_cliente->clientes)->nombre . ' ' . optional($ot->id_cliente->clientes)->apellido)
+            ->map->count();
 
         return view('dashboard', compact(
             'totalCliente',
             'totalOrden',
+            'ordersByClient',
+            'ordersByTechnician',
             'completedOrden',
-            'ordersPerMonth',
+            'ordersByMonth',
             'ordersByStatus',
             'productCategories',
             'lowStockProducts',
