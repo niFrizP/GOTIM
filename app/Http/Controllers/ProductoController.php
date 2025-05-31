@@ -35,21 +35,25 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre_producto' =>'required|string|max:255', 
+            'nombre_producto' => 'required|string|max:255',
             'id_categoria' => 'required|exists:categorias,id_categoria',
             'tipo_producto_id' => 'nullable|exists:tipo_productos,tipo_producto_id',
             'marca' => 'nullable|string|max:255',
             'modelo' => 'nullable|string|max:255',
             'descripcion' => 'nullable|string',
-            'codigo' => 'required|string|unique:productos,codigo',
+            'codigo' => [
+                'required',
+                'regex:/^(\d{8}|\d{13})$/',
+                'unique:productos,codigo',
+            ],
             'imagen' => 'nullable|image|max:2048',
         ]);
 
-            // Manejo del archivo de imagen
-    if ($request->hasFile('imagen')) {
-        $ruta = $request->file('imagen')->store('imagenes_productos', 'public');
-        $validated['imagen'] = $ruta;
-    }
+        // Manejo del archivo de imagen
+        if ($request->hasFile('imagen')) {
+            $ruta = $request->file('imagen')->store('imagenes_productos', 'public');
+            $validated['imagen'] = $ruta;
+        }
 
         Producto::create($validated);
         return redirect()->route('productos.index')->with('success', 'Producto creado exitosamente.');
@@ -82,14 +86,18 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
 
-        $validated =$request->validate([
-            'nombre_producto'=>'required|string|max:255',
+        $validated = $request->validate([
+            'nombre_producto' => 'required|string|max:255',
             'id_categoria' => 'required|exists:categorias,id_categoria',
             'tipo_producto_id' => 'nullable|exists:tipo_productos,tipo_producto_id',
             'marca' => 'nullable|string|max:255',
             'modelo' => 'nullable|string|max:255',
             'descripcion' => 'nullable|string',
-            'codigo' => 'required|string|unique:productos,codigo,' . $producto->id_producto . ',id_producto',
+            'codigo' => [
+                'required',
+                'regex:/^(\d{8}|\d{13})$/',
+                'unique:productos,codigo,' . $producto->id_producto . ',id_producto',
+            ],
             'imagen' => 'nullable|image|max:2048',
         ]);
 
@@ -107,7 +115,7 @@ class ProductoController extends Controller
      * metodo para inabilitar los producto
      */
 
-    
+
     // Método para buscar Producto por nombre 
     public function buscarPorNombre(Request $request)
     {
@@ -115,7 +123,7 @@ class ProductoController extends Controller
         $productos = Producto::where('nombre_producto', 'like', "%$nombre%")->get();
         return view('productos.index', compact('productos'));
     }
-    
+
 
 
     /*Obtener el tipo producto*/
@@ -128,8 +136,8 @@ class ProductoController extends Controller
     /*Obtener Categoria*/
     public function obtenercategoria($id_categoria)
     {
-        $categorias=Categoria::where('id_categoria',$id_categoria)->get();
-        return response()-> json($categorias);
+        $categorias = Categoria::where('id_categoria', $id_categoria)->get();
+        return response()->json($categorias);
     }
 
     // Activar el producto
@@ -150,5 +158,4 @@ class ProductoController extends Controller
 
         return redirect()->route('productos.index')->with('success', 'Producto inhabilitado correctamente.');
     }
-
 }
