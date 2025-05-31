@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('direccion')->nullable();
             $table->string('nro_contacto')->nullable();
+            $table->enum('tipo_cliente', ['natural', 'empresa'])->default('natural');
             $table->enum('estado', ['activo', 'inhabilitado'])->default('activo');
             $table->timestamps();
 

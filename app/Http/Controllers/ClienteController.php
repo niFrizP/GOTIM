@@ -6,79 +6,77 @@ use Illuminate\Http\Request;
 use App\Models\Cliente;
 use App\Models\Ciudad;
 use App\Models\Region;
+use App\Models\Empresa;
 
+/**
+ * Controlador para manejar las operaciones relacionadas con los clientes.
+ */
 class ClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Muestra la lista de clientes
     public function index()
     {
-        $clientes = Cliente::all();
-        return view('clientes.index', compact('clientes')); // Correcto
+        $clientes = Cliente::with(['empresa', 'region', 'ciudad'])->get();
+        return view('clientes.index', compact('clientes'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Muestra el formulario de creación de un nuevo cliente
     public function create()
     {
-
         $regiones = Region::all();
         $ciudades = Ciudad::all();
-        return view('clientes.create', compact('regiones', 'ciudades'));
+        $empresas = Empresa::where('estado', 'activo')->get(); // Solo activas
+        return view('clientes.create', compact('regiones', 'ciudades', 'empresas'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Almacena un nuevo cliente
     public function store(Request $request)
     {
+        // Valida los datos del formulario
         $validated = $request->validate([
+            'id_empresa' => 'required|exists:empresas,id_empresa',
             'nombre_cliente' => 'required|string|max:255',
             'apellido_cliente' => 'required|string|max:255',
             'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
             'id_region' => 'required|integer|exists:regiones,id_region',
             'id_ciudad' => 'required|integer|exists:ciudades,id_ciudad',
-            'email' => 'required|email|unique:clientes,email',
             'rut' => 'required|string|max:20|unique:clientes,rut',
-            'nro_contacto' => 'required|string|max:20',
+            'email' => 'required|email|unique:clientes,email',
             'direccion' => 'nullable|string|max:255',
+            'nro_contacto' => 'required|string|max:20',
+            'tipo_cliente' => 'required|in:natural,empresa',
         ]);
 
+        // Verifica si el RUT ya existe
         Cliente::create($validated);
         return redirect()->route('clientes.index')->with('success', 'Cliente creado exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Muestra los detalles de un cliente específico
     public function show(string $id)
     {
-        $cliente = Cliente::findOrFail($id);
+        $cliente = Cliente::with(['empresa', 'region', 'ciudad'])->findOrFail($id);
         return view('clientes.show', compact('cliente'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Muestra el formulario de edición para un cliente específico
     public function edit(string $id)
     {
         $cliente = Cliente::findOrFail($id);
-        $regiones = Region::all(); // Obtener todas las regiones
-        $ciudades = Ciudad::all(); // Obtener todas las ciudades
-        return view('clientes.edit', compact('cliente', 'regiones', 'ciudades'));
+        $regiones = Region::all();
+        $ciudades = Ciudad::all();
+        $empresas = Empresa::where('estado', 'activo')->get();
+        return view('clientes.edit', compact('cliente', 'regiones', 'ciudades', 'empresas'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // Actualiza un cliente existente
     public function update(Request $request, string $id)
     {
         $cliente = Cliente::findOrFail($id);
 
         $validated = $request->validate([
+            'id_empresa' => 'required|exists:empresas,id_empresa',
             'nombre_cliente' => 'required|string|max:255',
             'apellido_cliente' => 'required|string|max:255',
             'razon_social' => 'nullable|string|max:255',
@@ -89,13 +87,14 @@ class ClienteController extends Controller
             'rut' => 'required|string|max:20|unique:clientes,rut,' . $cliente->id_cliente . ',id_cliente',
             'nro_contacto' => 'required|string|max:20',
             'direccion' => 'nullable|string|max:255',
+            'tipo_cliente' => 'required|in:natural,empresa',
         ]);
 
         $cliente->update($validated);
         return redirect()->route('clientes.index')->with('success', 'Cliente actualizado correctamente.');
     }
 
-    // Método para inhabilitar cliente
+    // Inhabilita un cliente
     public function destroy($id_cliente)
     {
         $cliente = Cliente::findOrFail($id_cliente);
@@ -105,7 +104,7 @@ class ClienteController extends Controller
         return redirect()->route('clientes.index')->with('success', 'Cliente inhabilitado correctamente.');
     }
 
-    // Método para reactivar cliente
+    // Reactiva un cliente inhabilitado
     public function reactivar($id_cliente)
     {
         $cliente = Cliente::findOrFail($id_cliente);
@@ -114,12 +113,11 @@ class ClienteController extends Controller
 
         return redirect()->route('clientes.index')->with('success', 'Cliente reactivado correctamente.');
     }
-    // Método para buscar cliente por RUT
+
+    // Busca clientes por RUT
     public function buscarPorRut(Request $request)
     {
-        $request->validate([
-            'rut' => 'required|string|max:20',
-        ]);
+        $request->validate(['rut' => 'required|string|max:20']);
 
         $cliente = Cliente::where('rut', $request->rut)->first();
 
@@ -129,12 +127,11 @@ class ClienteController extends Controller
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
     }
-    // Método para buscar cliente por nombre
+
+    // Busca clientes por nombre
     public function buscarPorNombre(Request $request)
     {
-        $request->validate([
-            'nombre_cliente' => 'required|string|max:255',
-        ]);
+        $request->validate(['nombre_cliente' => 'required|string|max:255']);
 
         $clientes = Cliente::where('nombre_cliente', 'like', '%' . $request->nombre_cliente . '%')->get();
 
@@ -144,11 +141,18 @@ class ClienteController extends Controller
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
     }
-    // Método para obtener ciudades por región
+
+    // Obtiene las ciudades de una región específica
     public function obtenerCiudades($region_id)
     {
         $ciudades = Ciudad::where('id_region', $region_id)->get();
-
         return response()->json($ciudades);
+    }
+
+    // Obtiene todas las regiones
+    public function obtenerRegiones()
+    {
+        $regiones = Region::all();
+        return response()->json($regiones);
     }
 }
