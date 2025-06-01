@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\TipoProducto;
-
+use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
@@ -163,7 +163,7 @@ class ProductoController extends Controller
     {
         $codigo = $request->query('codigo');
 
-        $existe = Producto::where('codigo', $codigo)->exists();
+        $existe = DB::where('codigo', $codigo)->exists();
 
         return response()->json(['disponible' => !$existe]);
     }

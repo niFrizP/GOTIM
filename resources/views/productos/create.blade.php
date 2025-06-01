@@ -78,7 +78,9 @@
                         <!-- Código -->
                         <div>
                             <x-input-label for="codigo" value="Código de producto *" />
-                            <x-text-input id="codigo" name="codigo" type="text" class="w-full" value="{{ old('codigo') }}" required />
+                            <x-text-input id="codigo" name="codigo" type="text" class="w-full"
+                                value="{{ old('codigo') }}"
+                                maxlength="13" minlength="8" required />
                             <x-input-error :messages="$errors->get('codigo')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                             <p id="mensaje-codigo" class="text-sm mt-1"></p>
                         </div>
@@ -108,4 +110,49 @@
             </div>
         </div>
     </div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const codigoInput = document.getElementById('codigo');
+    const mensajeCodigo = document.getElementById('mensaje-codigo');
+
+    codigoInput.addEventListener('input', function () {
+        const codigo = this.value;
+
+        // Validar que solo haya números
+        if (!/^\d*$/.test(codigo)) {
+            mensajeCodigo.textContent = 'Solo se permiten números.';
+            mensajeCodigo.style.color = 'orange';
+            return;
+        }
+
+        // Validar longitud (8 o 13 dígitos)
+        if (codigo.length !== 8 && codigo.length !== 13) {
+            mensajeCodigo.textContent = 'El código debe tener 8 o 13 dígitos.';
+            mensajeCodigo.style.color = 'orange';
+            return;
+        }
+        // Validar disponibilidad del código
+        fetch(`/productos/validar-codigo?codigo=${codigo}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.disponible) {
+                    mensajeCodigo.textContent = '✔ Código disponible';
+                    mensajeCodigo.style.color = 'green';
+                } else {
+                    mensajeCodigo.textContent = '✖ Este código ya está registrado';
+                    mensajeCodigo.style.color = 'red';
+                }
+            })
+            .catch(() => {
+                mensajeCodigo.textContent = 'Error al verificar el código.';
+                mensajeCodigo.style.color = 'red';
+            });
+    });
+});
+</script>
+
+
 </x-app-layout>
