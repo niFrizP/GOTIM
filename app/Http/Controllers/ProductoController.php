@@ -163,7 +163,9 @@ class ProductoController extends Controller
     {
         $codigo = $request->query('codigo');
 
-        $existe = DB::where('codigo', $codigo)->exists();
+        $existe = DB::table('codigo')
+            ->where('codigo', $codigo)
+            ->exists();
 
         return response()->json(['disponible' => !$existe]);
     }
