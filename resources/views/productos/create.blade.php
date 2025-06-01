@@ -114,45 +114,60 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const codigoInput = document.getElementById('codigo');
-    const mensajeCodigo = document.getElementById('mensaje-codigo');
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('codigo');
+        const msg = document.getElementById('mensaje-codigo');
+        const btnGuardar = document.getElementById('btnGuardar');
+        let timeout;
 
-    codigoInput.addEventListener('input', function () {
-        const codigo = this.value;
+        const validarCodigo = async (codigo) => {
+            try {
+                const response = await fetch(`/productos/validar-codigo?codigo=${encodeURIComponent(codigo)}`);
+                const data = await response.json();
 
-        // Validar que solo haya números
-        if (!/^\d*$/.test(codigo)) {
-            mensajeCodigo.textContent = 'Solo se permiten números.';
-            mensajeCodigo.style.color = 'orange';
-            return;
-        }
-
-        // Validar longitud (8 o 13 dígitos)
-        if (codigo.length !== 8 && codigo.length !== 13) {
-            mensajeCodigo.textContent = 'El código debe tener 8 o 13 dígitos.';
-            mensajeCodigo.style.color = 'orange';
-            return;
-        }
-        // Validar disponibilidad del código
-        fetch(`/productos/validar-codigo?codigo=${codigo}`)
-            .then(response => response.json())
-            .then(data => {
                 if (data.disponible) {
-                    mensajeCodigo.textContent = '✔ Código disponible';
-                    mensajeCodigo.style.color = 'green';
+                    msg.textContent = '✅ Código disponible';
+                    msg.className = 'mt-1 text-sm text-green-600';
+                    btnGuardar.disabled = false;
                 } else {
-                    mensajeCodigo.textContent = '✖ Este código ya está registrado';
-                    mensajeCodigo.style.color = 'red';
+                    msg.textContent = '❌ Este código ya está registrado';
+                    msg.className = 'mt-1 text-sm text-red-600';
+                    btnGuardar.disabled = true;
                 }
-            })
-            .catch(() => {
-                mensajeCodigo.textContent = 'Error al verificar el código.';
-                mensajeCodigo.style.color = 'red';
-            });
+            } catch (error) {
+                msg.textContent = '⚠️ Error al verificar el código.';
+                msg.className = 'mt-1 text-sm text-red-600';
+                btnGuardar.disabled = true;
+            }
+        };
+
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+            const codigo = input.value.trim();
+
+            // Validar que solo haya números
+            if (!/^\d*$/.test(codigo)) {
+                msg.textContent = '⚠️ Solo se permiten números.';
+                msg.className = 'mt-1 text-sm text-yellow-600';
+                btnGuardar.disabled = true;
+                return;
+            }
+
+            // Validar longitud (8 o 13 dígitos)
+            if (codigo.length !== 8 && codigo.length !== 13) {
+                msg.textContent = '⚠️ El código debe tener 8 o 13 dígitos.';
+                msg.className = 'mt-1 text-sm text-yellow-600';
+                btnGuardar.disabled = true;
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                validarCodigo(codigo);
+            }, 400);
+        });
     });
-});
 </script>
+
 
 
 </x-app-layout>
