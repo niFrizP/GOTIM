@@ -24,8 +24,10 @@ class EmpresaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre_empresa' => 'required|string|max:255|unique:empresas,nombre_empresa',
+            'nom_emp' => 'required|string|max:255|unique:empresas,nom_emp',
             'rut_empresa' => 'required|string|max:20|unique:empresas,rut_empresa',
+            'telefono' => 'nullable|string|max:20',
+            'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
             'direccion' => 'nullable|string|max:255',
         ]);
@@ -57,8 +59,10 @@ class EmpresaController extends Controller
         $empresa = Empresa::findOrFail($id);
 
         $validated = $request->validate([
-            'nombre_empresa' => 'required|string|max:255|unique:empresas,nombre_empresa,' . $empresa->id_empresa . ',id_empresa',
+            'nom_emp' => 'required|string|max:255|unique:empresas,nom_emp,' . $empresa->id_empresa . ',id_empresa',
             'rut_empresa' => 'required|string|max:20|unique:empresas,rut_empresa,' . $empresa->id_empresa . ',id_empresa',
+            'telefono' => 'nullable|string|max:20',
+            'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
             'direccion' => 'nullable|string|max:255',
         ]);
@@ -100,5 +104,36 @@ class EmpresaController extends Controller
         } else {
             return response()->json(['message' => 'Empresa no encontrada'], 404);
         }
+    }
+
+    // Buscar empresa por RUT (respuesta JSON)
+    public function ComprobarPorRut($rut)
+    {
+        $rut = strtoupper(str_replace('.', '', $rut));
+
+        $empresa = Empresa::whereRaw("REPLACE(UPPER(rut_empresa), '.', '') = ?", [$rut])->first();
+
+        if ($empresa) {
+            return response()->json([
+                'existe' => true,
+                'id_empresa' => $empresa->id_empresa,
+                'razon_social' => $empresa->razon_social,
+                'giro' => $empresa->giro,
+                'nom_emp' => $empresa->nom_emp
+            ]);
+        } else {
+            return response()->json(['existe' => false]);
+        }
+    }
+
+
+    // Validar nombre de empresa
+    public function comprobarNombre(Request $request)
+    {
+        $request->validate(['nom_emp' => 'required|string|max:255']);
+
+        $existe = Empresa::where('nom_emp', $request->nom_emp)->exists();
+
+        return response()->json(['existe' => $existe]);
     }
 }

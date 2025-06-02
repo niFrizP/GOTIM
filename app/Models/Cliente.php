@@ -26,6 +26,8 @@ class Cliente extends Model
         'nro_contacto',
         'id_region',
         'id_ciudad',
+        'id_empresa',
+        'tipo_cliente',
     ];
 
     /**
@@ -43,9 +45,16 @@ class Cliente extends Model
     {
         return $this->belongsTo(Region::class, 'id_region', 'id_region');
     }
+
     // Un cliente pertenece a una ciudad
     public function ciudad()
     {
         return $this->belongsTo(Ciudad::class, 'id_ciudad', 'id_ciudad');
+    }
+
+    // Un cliente puede pertenecer a una empresa
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class, 'id_empresa', 'id_empresa');
     }
 }
