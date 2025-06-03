@@ -89,6 +89,7 @@ Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, '
 Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
 Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
 
+
 // Rutas de inventario
 Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
 Route::resource('inventario', InventarioController::class);
