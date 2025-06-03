@@ -46,6 +46,9 @@ Route::get('/clientes/validar-email', [ClienteController::class, 'validarEmail']
 Route::get('/clientes/{id}/validar-rut', [ClienteController::class, 'validarRutEditar'])->name('clientes.validar.rut.editar');
 // Ruta personalizada para validar el email de un cliente al editar
 Route::get('/clientes/{id}/validar-email', [ClienteController::class, 'validarEmailEditar'])->name('clientes.validar.email.editar');
+// Ruta personalizada para reactivar clientes
+Route::post('/clientes/{id}/reactivar', [ClienteController::class, 'reactivar'])->name('clientes.reactivar');
+
 
 // Rutas de empresas
 Route::resource('empresas', \App\Http\Controllers\EmpresaController::class);
@@ -57,8 +60,6 @@ Route::post('/empresas/{id}/reactivar', [EmpresaController::class, 'reactivar'])
 Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNombre'])->name('empresas.comprobar.nombre');
 
 
-// Ruta personalizada para reactivar clientes
-Route::post('/clientes/{id}/reactivar', [ClienteController::class, 'reactivar'])->name('clientes.reactivar');
 
 // Rutas de ciudades y regiones
 Route::get('/cxr/{regionId}', [CiudadController::class, 'getCiudadesPorRegion']);

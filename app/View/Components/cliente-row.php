@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class cliente-row extends Component
+class ClienteRow extends Component
 {
     /**
      * Create a new component instance.

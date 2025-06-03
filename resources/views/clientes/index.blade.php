@@ -50,7 +50,12 @@
             const form = document.getElementById('deleteForm');
             const message = document.getElementById('confirmMessage');
 
-            form.action = `/clientes/${id}`;
+            if (!form || !modal || !message) {
+                console.error('❌ No se encontró el modal o el formulario');
+                return;
+            }
+
+            form.action = `/clientes/${id}`; // Cambiá si es para otra entidad
             message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`;
 
             modal.classList.remove('hidden');
@@ -64,14 +69,18 @@
         function cerrarModal() {
             const modal = document.getElementById('confirmModal');
             const message = document.getElementById('confirmMessage');
+
+            if (!modal || !message) return;
+
             modal.classList.remove('opacity-100');
             modal.querySelector('div').classList.remove('scale-100');
             modal.querySelector('div').classList.add('scale-95');
 
             setTimeout(() => {
                 modal.classList.add('hidden');
-                message.innerHTML = `¿Estás seguro de que deseas inhabilitar este cliente?`;
+                message.innerHTML = `¿Estás seguro de que deseas inhabilitar este elemento?`;
             }, 300);
         }
     </script>
+
 </x-app-layout>

@@ -7,14 +7,13 @@
             Confirmar Inhabilitación
         </h3>
         <p id="confirmMessage" class="mt-4 text-center text-gray-600 dark:text-gray-300">
-            ¿Estás seguro de que deseas inhabilitar al cliente <strong>{{ $cliente->nombre_cliente }}
-                {{ $cliente->apellido_cliente }}</strong>?
+            ¿Estás seguro de que deseas inhabilitar a este cliente?
         </p>
         <div class="mt-6 flex justify-center space-x-4">
             <button onclick="cerrarModal()" class="rounded bg-gray-300 px-4 py-2 text-gray-800 hover:bg-gray-400">
                 Cancelar
             </button>
-            <form method="POST" action="{{ route('clientes.destroy', $cliente->id_cliente) }}">
+            <form id="deleteForm" method="POST">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">

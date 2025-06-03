@@ -15,8 +15,8 @@
                     <x-detail-item label="{{ $cliente->tipo_cliente === 'empresa' ? 'RUT Empresa' : 'RUT' }}"
                         :value="($cliente->tipo_cliente === 'empresa' ? $cliente->empresa->rut_empresa : $cliente->rut)" />
                     <x-detail-item label="Nombre de Empresa" :value="($cliente->tipo_cliente === 'empresa' ? $cliente->empresa->nom_emp : 'No aplica')" />
-                    <x-detail-item label="Razón Social" :value="($cliente->tipo_cliente === 'empresa' ? $cliente->empresa->razon_social : 'No aplica')" />
-                    <x-detail-item label="Giro" :value="($cliente->tipo_cliente === 'empresa' ? $cliente->empresa->giro : 'No aplica')" />
+                    <x-detail-item label="Razón Social" :value="($cliente->tipo_cliente === 'empresa' ? $cliente->razon_social : 'No aplica')" />
+                    <x-detail-item label="Giro" :value="($cliente->tipo_cliente === 'empresa' ? $cliente->giro : 'No aplica')" />
                     <x-detail-item label="Teléfono" :value="$cliente->nro_contacto" />
                     <x-detail-item label="Dirección" :value="$cliente->direccion" />
                     <x-detail-item label="Región" :value="$cliente->Region->nombre_region" />
