@@ -9,7 +9,7 @@ use App\Models\Categoria;
 class TipoProductoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Mostrar un listado del recurso.
      */
     public function index()
     {
@@ -18,15 +18,17 @@ class TipoProductoController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Muestra el formulario para crear un nuevo recurso.
      */
     public function create()
     {
         return view('tipo_productos.create');
     }
 
+    
+
     /**
-     * Store a newly created resource in storage.
+     * Almacena un recurso recién creado en el almacén.
      */
     public function store(Request $request)
     {
@@ -45,7 +47,7 @@ class TipoProductoController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el recurso especificado.
      */
     public function show(string $id)
     {
@@ -55,7 +57,7 @@ class TipoProductoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Mostrar el formulario para editar el recurso especificado.
      */
     public function edit(string $id)
     {
@@ -73,7 +75,7 @@ class TipoProductoController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza el recurso especificado en el almacenamiento.
      */
     public function update(Request $request, string $id)
     {
