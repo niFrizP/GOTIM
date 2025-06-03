@@ -114,48 +114,45 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const codigoInput = document.getElementById('codigo');
-    const mensajeCodigo = document.getElementById('mensaje-codigo');
+    document.addEventListener('DOMContentLoaded', function () {
+        const codigoInput = document.getElementById('codigo');
+        const mensajeCodigo = document.getElementById('mensaje-codigo');
 
-    codigoInput.addEventListener('input', function () {
-        const codigo = this.value;
+        codigoInput.addEventListener('input', function () {
+            const codigo = this.value;
 
-        // Validar que solo haya números
-        if (!/^\d*$/.test(codigo)) {
-            mensajeCodigo.textContent = 'Solo se permiten números.';
-            mensajeCodigo.style.color = 'orange';
-            return;
-        }
+            // Validar que solo haya números
+            if (!/^\d*$/.test(codigo)) {
+                mensajeCodigo.textContent = 'Solo se permiten números.';
+                mensajeCodigo.style.color = 'orange';
+                return;
+            }
 
-        // Validar longitud (8 o 13 dígitos)
-        if (codigo.length !== 8 && codigo.length !== 13) {
-            mensajeCodigo.textContent = 'El código debe tener 8 o 13 dígitos.';
-            mensajeCodigo.style.color = 'orange';
-            return;
-        }
+            // Validar longitud (8 o 13 dígitos)
+            if (codigo.length !== 8 && codigo.length !== 13) {
+                mensajeCodigo.textContent = 'El código debe tener 8 o 13 dígitos.';
+                mensajeCodigo.style.color = 'orange';
+                return;
+            }
 
-        // Validar disponibilidad del código
-        fetch(`/productos/validar-codigo?codigo=${codigo}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.disponible) {
-                    mensajeCodigo.textContent = '✅ Código disponible';
-                    mensajeCodigo.style.color = 'green';
-                } else {
-                    mensajeCodigo.textContent = '❌ Este código ya está registrado';
+            // Validar disponibilidad del código
+            fetch(`/productos/validar-codigo?codigo=${codigo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.disponible) {
+                        mensajeCodigo.textContent = '✅ Código disponible';
+                        mensajeCodigo.style.color = 'green';
+                    } else {
+                        mensajeCodigo.textContent = '❌ Este código ya está registrado';
+                        mensajeCodigo.style.color = 'red';
+                    }
+                })
+                .catch(() => {
+                    mensajeCodigo.textContent = '⚠️ Error al verificar el código.';
                     mensajeCodigo.style.color = 'red';
-                }
-            })
-            .catch(() => {
-                mensajeCodigo.textContent = '⚠️ Error al verificar el código.';
-                mensajeCodigo.style.color = 'red';
-            });
+                });
+        });
     });
-});
-</script>
-
-
-
+    </script>
 
 </x-app-layout>
