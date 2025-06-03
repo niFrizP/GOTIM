@@ -362,6 +362,16 @@
                     }, 10);
                 }
             });
+            document.addEventListener('DOMContentLoaded', () => {
+
+        // Validar solo números en teléfono de cliente
+        const telefonoCliente = document.getElementById('nro_contacto');
+        if (telefonoCliente) {
+            telefonoCliente.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+    });
         </script>
     @endpush
 </x-app-layout>

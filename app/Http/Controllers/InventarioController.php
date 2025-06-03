@@ -29,13 +29,21 @@ class InventarioController extends Controller
         $validated = $request->validate([
             'id_producto' => 'required|exists:productos,id_producto',
             'cantidad' => 'required|integer|min:1',
-            'fecha_ingreso' => 'nullable|date',
-            'fecha_salida' => 'nullable|date|after_or_equal:fecha_ingreso',
+            'fecha_salida' => 'nullable|date',
         ]);
 
+        $validated['fecha_ingreso'] = now();
         $inventario = Inventario::create($validated);
 
-        // Registrar historial de creación
+        // Actualizar estado del producto si la cantidad total queda <= 0
+        $totalStock = Inventario::where('id_producto', $validated['id_producto'])->sum('cantidad');
+
+        if ($totalStock <= 0) {
+            Producto::where('id_producto', $validated['id_producto'])->update(['estado' => false]);
+        } else {
+            Producto::where('id_producto', $validated['id_producto'])->update(['estado' => true]);
+        }
+
         HistorialInventario::create([
             'id_inventario' => $inventario->id_inventario,
             'id_producto' => $inventario->id_producto,
@@ -48,6 +56,7 @@ class InventarioController extends Controller
 
         return redirect()->route('inventario.index')->with('success', 'Registro de inventario creado.');
     }
+
 
     public function show($id)
     {
@@ -69,9 +78,9 @@ class InventarioController extends Controller
         $validated = $request->validate([
             'id_producto' => 'required|exists:productos,id_producto',
             'cantidad' => 'required|integer|min:1',
-            'fecha_ingreso' => 'nullable|date',
             'fecha_salida' => 'nullable|date|after_or_equal:fecha_ingreso',
         ]);
+        unset($validated['fecha_ingreso']);
 
         $campos = ['id_producto', 'cantidad', 'fecha_ingreso', 'fecha_salida'];
 
@@ -113,8 +122,18 @@ class InventarioController extends Controller
 
         $inventario->update($validated);
 
+        // ✅ Ahora sí, recalcular total con el nuevo valor aplicado
+        $totalStock = Inventario::where('id_producto', $validated['id_producto'])->sum('cantidad');
+
+        if ($totalStock <= 0) {
+            Producto::where('id_producto', $validated['id_producto'])->update(['estado' => false]);
+        } else {
+            Producto::where('id_producto', $validated['id_producto'])->update(['estado' => true]);
+        }
+
         return redirect()->route('inventario.index')->with('success', 'Inventario actualizado correctamente.');
     }
+
 
     public function destroy($id)
     {

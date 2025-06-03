@@ -31,9 +31,10 @@
 
                         <!-- Telefono -->
                         <div>
-                            <x-input-label for="telefono" value="Teléfono" class="dark:text-gray-300" />
+                            <x-input-label for="telefono" value="Teléfono *" class="dark:text-gray-300" />
                             <x-text-input id="telefono" name="telefono" type="tel" class="w-full"
-                                value="{{ old('telefono') }}" required />
+                                maxlength="9" minlength="9" value="{{ old('telefono') }}" required />
+                            <small class="text-gray-500 dark:text-gray-400">Ingrese el número sin el prefijo +56</small>
                             <x-input-error :messages="$errors->get('telefono')" class="mt-1 text-sm text-red-600" />
                         </div>
 
@@ -47,7 +48,7 @@
 
                         <!-- Giro de la empresa -->
                         <div>
-                            <x-input-label for="giro" value="Giro de la empresa" class="dark:text-gray-300" />
+                            <x-input-label for="giro" value="Giro de la empresa" class="dark:Ftext-gray-300" />
                             <x-text-input id="giro" name="giro" type="text" class="w-full"
                                 value="{{ old('giro') }}" required />
                             <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600" />
@@ -64,60 +65,64 @@
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const input = document.getElementById('nom_emp');
-            const msg = document.getElementById('nom_emp_msg');
-            const btnGuardar = document.getElementById('btnGuardar');
-            let timeout;
+ <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Validación nombre empresa (AJAX)
+        const input = document.getElementById('nom_emp');
+        const msg = document.getElementById('nom_emp_msg');
+        const btnGuardar = document.getElementById('btnGuardar');
+        let timeout;
 
-            // Función para validar el nombre del servicio
-            const validarNombre = async (nombre) => {
-                try {
-                    const response = await fetch(
-                        `/empresas/comprobar-nombre?nombre=${encodeURIComponent(nom_empbre)}`, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .getAttribute('content')
-                            }
-                        };
-                    );
-                    const data = await response.json();
-
-                    if (data.disponible) {
-                        msg.textContent = '✅ Nombre de Empresa disponible';
-                        msg.className = 'mt-1 text-sm text-green-600';
-                        btnGuardar.disabled = false; // Habilitar botón si el nombre es válido
-                    } else {
-                        msg.textContent = '❌ Empresa ya existe';
-                        msg.className = 'mt-1 text-sm text-red-600';
-                        btnGuardar.disabled = true; // Deshabilitar botón si el nombre no es válido
+        const validarNombre = async (nombre) => {
+            try {
+                const response = await fetch(`/empresas/comprobar-nombre?nombre=${encodeURIComponent(nombre)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
-                } catch (error) {
-                    msg.textContent = '⚠️ Error al validar';
-                    msg.className = 'mt-1 text-sm text-yellow-600';
-                    btnGuardar.disabled = true; // Deshabilitar botón en caso de error
-                }
-            };
-            input.addEventListener('input', () => {
-                clearTimeout(timeout);
-                const nombre = input.value.trim();
+                });
+                const data = await response.json();
 
-                if (nombre.length === 0) {
-                    msg.textContent = '';
-                    btnGuardar.disabled =
-                        false; // Si está vacío, permitimos guardar (validará server-side)
-                    return;
+                if (data.disponible) {
+                    msg.textContent = '✅ Nombre de Empresa disponible';
+                    msg.className = 'mt-1 text-sm text-green-600';
+                    btnGuardar.disabled = false;
+                } else {
+                    msg.textContent = '❌ Empresa ya existe';
+                    msg.className = 'mt-1 text-sm text-red-600';
+                    btnGuardar.disabled = true;
                 }
+            } catch (error) {
+                msg.textContent = '⚠️ Error al validar';
+                msg.className = 'mt-1 text-sm text-yellow-600';
+                btnGuardar.disabled = true;
+            }
+        };
 
-                timeout = setTimeout(() => {
-                    validarNombre(nombre);
-                }, 400);
-            });
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+            const nombre = input.value.trim();
+            if (nombre.length === 0) {
+                msg.textContent = '';
+                btnGuardar.disabled = false;
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                validarNombre(nombre);
+            }, 400);
         });
-    </script>
+
+        // Validar solo números en teléfono
+        const telefonoEmpresa = document.getElementById('telefono');
+        if (telefonoEmpresa) {
+            telefonoEmpresa.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+    });
+</script>
 </x-app-layout>
 
 

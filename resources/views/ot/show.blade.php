@@ -14,11 +14,23 @@
                 <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <dt class="font-medium text-gray-700 dark:text-gray-300">Cliente</dt>
-                        <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ $ot->cliente->nombre_cliente }}</dd>
+                        <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ $ot->cliente->nombre_cliente }}
+                            {{ $ot->cliente->apellido_cliente }}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="font-medium text-gray-700 dark:text-gray-300">Rut</dt>
+                        <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ $ot->cliente->rut }}</dd>
+                    </div>
+                    <div>
+                        <dt class="font-medium text-gray-700 dark:text-gray-300">Tipo Cliente</dt>
+                        <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ $ot->cliente->tipo_cliente }}</dd>
                     </div>
                     <div>
                         <dt class="font-medium text-gray-700 dark:text-gray-300">Responsable</dt>
-                        <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ $ot->responsable->nombre }}</dd>
+                        <dd class="mt-1 text-gray-900 dark:text-gray-100">{{ $ot->responsable->nombre }}
+                            {{ $ot->responsable->apellido }}
+                        </dd>
                     </div>
                     <div>
                         <dt class="font-medium text-gray-700 dark:text-gray-300">Estado</dt>

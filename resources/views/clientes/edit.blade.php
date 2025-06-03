@@ -40,10 +40,12 @@
                         <!-- Teléfono -->
                         <div>
                             <x-input-label for="nro_contacto" value="Teléfono" class="dark:text-gray-300" />
-                            <x-text-input id="nro_contacto" name="nro_contacto" type="text" class="w-full"
-                                value="{{ old('nro_contacto', $cliente->nro_contacto) }}" required />
+                            <x-text-input id="nro_contacto" name="nro_contacto" type="tel" class="w-full"
+                                value="{{ old('nro_contacto', $cliente->nro_contacto) }}" maxlength="9" minlength="9" required />
+                            <small class="text-gray-500 dark:text-gray-400">Ingrese el número sin el prefijo +56</small>
                             <x-input-error :messages="$errors->get('nro_contacto')" class="mt-1 text-sm text-red-600" />
                         </div>
+
                         <!-- Razón Social -->
                         <div>
                             <x-input-label for="razon_social" value="Razón Social" class="dark:text-gray-300" />
@@ -119,6 +121,15 @@
         </div>
     </div>
     <script>
+        // Validar solo números en teléfono de cliente
+        const telefonoCliente = document.getElementById('nro_contacto');
+        if (telefonoCliente) {
+            telefonoCliente.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+
+        // RUT formateado
         function formatRut(input) {
             let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
             if (value.length === 9) {
@@ -129,10 +140,11 @@
             input.value = value;
         }
 
-        document.getElementById('rut').addEventListener('input', function() {
+        document.getElementById('rut').addEventListener('input', function () {
             formatRut(this);
         });
     </script>
+
 </x-app-layout>
 
 <!-- Simplicity is the ultimate sophistication. - Leonardo da Vinci -->
