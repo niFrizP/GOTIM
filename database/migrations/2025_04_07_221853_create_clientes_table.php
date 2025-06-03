@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('clientes', function (Blueprint $table) {
             $table->id('id_cliente');
-            $table->unsignedBigInteger('id_empresa');
+            $table->unsignedBigInteger('id_empresa')->nullable();
             $table->string('nombre_cliente');
             $table->string('apellido_cliente');
             $table->string('rut')->nullable();
@@ -21,7 +21,6 @@ return new class extends Migration
             $table->enum('estado', ['activo', 'inhabilitado'])->default('activo');
             $table->timestamps();
 
-            // Clave foránea sin onDelete
             $table->foreign('id_empresa')->references('id_empresa')->on('empresas');
         });
     }
