@@ -102,10 +102,11 @@ Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'
 Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
-
+// Ruta personalizada para desactivar Producto
 Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
 // Ruta para validar el código de producto
 Route::get('/productos/validar-codigo', [ProductoController::class, 'validarCodigo']);
+
 
 // Rutas de OT
 Route::middleware(['auth'])->group(function () {

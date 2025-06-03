@@ -163,7 +163,7 @@ class ProductoController extends Controller
     {
         $codigo = $request->query('codigo');
 
-        $existe = DB::table('codigo')
+        $existe = DB::table('productos')
             ->where('codigo', $codigo)
             ->exists();
 
