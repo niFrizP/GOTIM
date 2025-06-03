@@ -343,7 +343,7 @@ class OTController extends Controller
 
                     // Actualizar estado del producto
                     $producto = $detalle->producto;
-                    $inventario->estado = $inventario->cantidad > 0 ? 'activo' : 'eliminado';
+                    $inventario->estado = $inventario->cantidad > 0 ? 'activo' : 'agotado';
                     $inventario->save();
 
 
@@ -379,7 +379,7 @@ class OTController extends Controller
                 $inventario->save();
 
                 // Actualizar estado del producto
-                $inventario->estado = $inventario->cantidad > 0 ? 'activo' : 'eliminado';
+                $inventario->estado = $inventario->cantidad > 0 ? 'activo' : 'agotado';
                 $inventario->save();
 
 
