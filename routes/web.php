@@ -12,6 +12,7 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\OTController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmpresaController;
 
 // Rutas de servicios
 Route::get('/servicios/validar-nombre', [ServicioController::class, 'validarNombre']);
@@ -35,9 +36,30 @@ Route::middleware('auth')->group(function () {
 });
 // Rutas de clientes
 Route::resource('clientes', ClienteController::class);
+Route::get('/ciudades-por-region/{id_region}', [CiudadController::class, 'getCiudadesPorRegion']);
 
+// Ruta personalizada para validar el RUT de un cliente
+Route::get('/clientes/validar-rut', [ClienteController::class, 'validarRut'])->name('clientes.validar.rut');
+// Ruta personalizada para validar el email de un cliente
+Route::get('/clientes/validar-email', [ClienteController::class, 'validarEmail'])->name('clientes.validar.email');
+// Ruta personalizada para validar el RUT de un cliente al editar
+Route::get('/clientes/{id}/validar-rut', [ClienteController::class, 'validarRutEditar'])->name('clientes.validar.rut.editar');
+// Ruta personalizada para validar el email de un cliente al editar
+Route::get('/clientes/{id}/validar-email', [ClienteController::class, 'validarEmailEditar'])->name('clientes.validar.email.editar');
 // Ruta personalizada para reactivar clientes
 Route::post('/clientes/{id}/reactivar', [ClienteController::class, 'reactivar'])->name('clientes.reactivar');
+
+
+// Rutas de empresas
+Route::resource('empresas', \App\Http\Controllers\EmpresaController::class);
+// Ruta personalizada para validar el RUT de una empresa
+Route::get('/empresas/comprobar/{rut}', [EmpresaController::class, 'ComprobarPorRut']);
+// Ruta Reactivar Empresa
+Route::post('/empresas/{id}/reactivar', [EmpresaController::class, 'reactivar'])->name('empresas.reactivar');
+// Ruta Validar Nombre Empresa
+Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNombre'])->name('empresas.comprobar.nombre');
+
+
 
 // Rutas de ciudades y regiones
 Route::get('/cxr/{regionId}', [CiudadController::class, 'getCiudadesPorRegion']);

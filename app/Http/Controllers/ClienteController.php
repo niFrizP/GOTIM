@@ -30,28 +30,69 @@ class ClienteController extends Controller
     }
 
     // Almacena un nuevo cliente
+
     public function store(Request $request)
     {
-        // Valida los datos del formulario
-        $validated = $request->validate([
-            'id_empresa' => 'required|exists:empresas,id_empresa',
+        $request->validate([
             'nombre_cliente' => 'required|string|max:255',
-            'apellido_cliente' => 'required|string|max:255',
-            'razon_social' => 'nullable|string|max:255',
-            'giro' => 'nullable|string|max:255',
-            'id_region' => 'required|integer|exists:regiones,id_region',
-            'id_ciudad' => 'required|integer|exists:ciudades,id_ciudad',
-            'rut' => 'required|string|max:20|unique:clientes,rut',
+            'apellido_cliente' => 'nullable|string|max:255',
             'email' => 'required|email|unique:clientes,email',
-            'direccion' => 'nullable|string|max:255',
             'nro_contacto' => 'required|string|max:20',
             'tipo_cliente' => 'required|in:natural,empresa',
+            'id_region' => 'required|exists:regiones,id_region',
+            'id_ciudad' => 'required|exists:ciudades,id_ciudad',
+            'direccion' => 'required|string|max:255',
+            'razon_social' => 'nullable|string|max:255',
+            'giro' => 'nullable|string|max:255',
+            'rut_natural' => 'nullable|required_if:tipo_cliente,natural|string|max:20',
+            'rut_empresa' => 'nullable|required_if:tipo_cliente,empresa|string|max:20',
+        ], [
+            'rut_natural.required_if' => 'Debes ingresar el RUT si es persona natural.',
+            'rut_empresa.required_if' => 'Debes ingresar el RUT si es empresa.',
         ]);
 
-        // Verifica si el RUT ya existe
-        Cliente::create($validated);
-        return redirect()->route('clientes.index')->with('success', 'Cliente creado exitosamente.');
+        $cliente = new Cliente();
+        $cliente->nombre_cliente = $request->nombre_cliente;
+        $cliente->apellido_cliente = $request->apellido_cliente;
+        $cliente->email = $request->email;
+        $cliente->nro_contacto = $request->nro_contacto;
+        $cliente->tipo_cliente = $request->tipo_cliente;
+        $cliente->id_region = $request->id_region;
+        $cliente->id_ciudad = $request->id_ciudad;
+        $cliente->direccion = $request->direccion;
+        $cliente->estado = 'activo';
+
+        if ($request->tipo_cliente === 'empresa') {
+            $rutEmpresa = $request->rut_empresa;
+
+            $empresa = Empresa::where('rut_empresa', $rutEmpresa)->first();
+            if (!$empresa) {
+                return back()->withErrors(['rut_empresa' => 'La empresa con ese RUT no está registrada.'])->withInput();
+            }
+
+            $cliente->id_empresa = $empresa->id_empresa;
+            $cliente->razon_social = $empresa->razon_social;
+            $cliente->giro = $request->giro;
+            $cliente->rut = $empresa->rut_empresa;
+        } else {
+            $rutNatural = $request->rut_natural;
+
+            // ⚠️ Validar que no esté en tabla empresas
+            if (Empresa::where('rut_empresa', $rutNatural)->exists()) {
+                return back()->withErrors(['rut_natural' => 'Este RUT ya está registrado como empresa.'])->withInput();
+            }
+
+            $cliente->rut = $rutNatural;
+            $cliente->id_empresa = null;
+            $cliente->razon_social = null;
+            $cliente->giro = null;
+        }
+
+        $cliente->save();
+
+        return redirect()->route('clientes.index')->with('success', 'Cliente registrado exitosamente.');
     }
+
 
     // Muestra los detalles de un cliente específico
     public function show(string $id)
@@ -84,7 +125,7 @@ class ClienteController extends Controller
             'id_region' => 'required|integer|exists:regiones,id_region',
             'id_ciudad' => 'required|integer|exists:ciudades,id_ciudad',
             'email' => 'required|email|unique:clientes,email,' . $cliente->id_cliente . ',id_cliente',
-            'rut' => 'required|string|max:20|unique:clientes,rut,' . $cliente->id_cliente . ',id_cliente',
+            'rut' => 'required|string|max:20|clientes,rut,' . $cliente->id_cliente . ',id_cliente',
             'nro_contacto' => 'required|string|max:20',
             'direccion' => 'nullable|string|max:255',
             'tipo_cliente' => 'required|in:natural,empresa',
@@ -154,5 +195,12 @@ class ClienteController extends Controller
     {
         $regiones = Region::all();
         return response()->json($regiones);
+    }
+
+    public function getCiudadesPorRegion($id_region)
+    {
+        $ciudades = Ciudad::where('id_region', $id_region)->get();
+
+        return response()->json($ciudades);
     }
 }
