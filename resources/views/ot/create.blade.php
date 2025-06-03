@@ -21,7 +21,7 @@
                                 required>
                                 <option value="">Seleccione un cliente</option>
                                 @foreach ($clientes as $id => $nombre)
-                                    <option value="{{ $id }}">{{ $nombre }}</option>
+                                    <option value="{{ $id }}">{{ $nombre }} </option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('id_cliente')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
@@ -41,23 +41,20 @@
                             <x-input-error :messages="$errors->get('id_responsable')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
-                        {{-- Estado --}}
-                        <div>
-                            <x-input-label for="id_estado" value="Estado" />
-                            <select id="id_estado" name="id_estado"
-                                class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2" required>
-                                <option value="">Seleccione un estado</option>
-                                @foreach ($estados as $id => $nombre)
-                                    <option value="{{ $id }}">{{ $nombre }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('id_estado')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        {{-- Estado: fijo "Recepcionada" --}}
+                        <div class="sm:col-span-2">
+                            <x-input-label value="Estado de la Orden" />
+                            <p
+                                class="py-2 px-3 rounded border border-gray-300 dark:bg-gray-700 dark:text-gray-300 bg-gray-100 font-semibold">
+                                Recepcionada</p>
+                            <input type="hidden" name="id_estado" value="1" />
                         </div>
 
                         {{-- Fecha entrega --}}
                         <div>
                             <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega" />
-                            <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full" />
+                            <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full"
+                                min="{{ now()->format('Y-m-d') }}" />
                             <x-input-error :messages="$errors->get('fecha_entrega')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
@@ -81,15 +78,6 @@
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('servicios')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-                    </div>
-
-                    {{-- Productos asociados con cantidad --}}
-                    <div class="mt-6">
-                        <x-input-label for="productos" value="Productos Asociados" />
-                        <div class="grid gap-2" id="productosContainer"></div>
-                        <button type="button" class="mt-2 px-4 py-2 bg-green-500 text-white rounded"
-                            onclick="addProductoSelect()">+ Agregar Producto</button>
-                        <x-input-error :messages="$errors->get('productos')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Archivos Adjuntos --}}
@@ -119,29 +107,81 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Select2
             $('select.select2').each(function() {
                 inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
-        });
 
-        function addProductoSelect() {
-            let idx = $('#productosContainer .producto-item').length;
-            const html = `
-            <div class="producto-item flex items-center gap-2 mb-2">
-                <select name="productos[${idx}][id]" class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" required>
-                    <option value="">Seleccione un producto</option>
-                    @foreach ($productos as $prod)
-                        <option value="{{ $prod->id_producto }}">{{ $prod->nombre_producto }} {{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ optional($prod->inventario->first())->cantidad ?? 0 }}</option>
-                    @endforeach
-                </select>
-                <input type="number" name="productos[${idx}][cantidad]" min="1" value="1" class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white" placeholder="Cant." required />
-                <button type="button" class="bg-red-500 text-white rounded px-2 py-1" onclick="$(this).parent().remove()">✕</button>
-            </div>`;
-            $('#productosContainer').append(html);
-            $('#productosContainer .producto-item:last-child .select2').select2({
-                width: '100%'
+            // Validación sincrónica en tiempo real
+            const campos = {
+                'id_cliente': 'Debe seleccionar un cliente.',
+                'id_responsable': 'Debe seleccionar un responsable.',
+                'fecha_entrega': 'Debe seleccionar una fecha válida.',
+                'descripcion': 'Debe escribir una descripción.',
+                'servicios': 'Debe seleccionar al menos un servicio.',
+            };
+
+            Object.entries(campos).forEach(([id, mensaje]) => {
+                const input = document.getElementById(id);
+                if (!input) return;
+
+                input.addEventListener('change', () => validarCampo(id, mensaje));
+                input.addEventListener('input', () => validarCampo(id, mensaje));
             });
-        }
+
+            function validarCampo(id, mensaje) {
+                const campo = document.getElementById(id);
+                const errorContainer = campo.closest('div').querySelector('.text-red-600, .text-red-400');
+
+                let invalido = false;
+
+                if (campo.tagName === 'SELECT' && campo.multiple) {
+                    invalido = campo.selectedOptions.length === 0;
+                } else if (campo.type === 'date') {
+                    const hoy = new Date().toISOString().split('T')[0];
+                    invalido = !campo.value || campo.value < hoy;
+                } else {
+                    invalido = !campo.value.trim();
+                }
+
+                if (invalido) {
+                    errorContainer.textContent = mensaje;
+                    campo.classList.add('border-red-500');
+                } else {
+                    errorContainer.textContent = '';
+                    campo.classList.remove('border-red-500');
+                }
+            }
+
+            // Fecha mínima: hoy
+            const fechaEntrega = document.getElementById('fecha_entrega');
+            if (fechaEntrega) {
+                const hoy = new Date().toISOString().split('T')[0];
+                fechaEntrega.min = hoy;
+            }
+
+            // Servicios con búsqueda personalizada
+            $('#servicios').select2({
+                placeholder: 'Seleccione uno o más servicios',
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return `
+                        <div class="text-center">
+                            <p class="text-gray-700 dark:text-gray-300">No se encontró ese servicio</p>
+                            <a href="${crearServicioURL()}" target="_blank" class="mt-2 inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">+ Crear nuevo servicio</a>
+                        </div>`;
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                }
+            });
+
+            function crearServicioURL() {
+                return "{{ route('servicios.create') }}";
+            }
+        });
     </script>
 
 </x-app-layout>

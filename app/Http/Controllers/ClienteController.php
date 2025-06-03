@@ -73,7 +73,7 @@ class ClienteController extends Controller
             $cliente->id_empresa = $empresa->id_empresa;
             $cliente->razon_social = $empresa->razon_social;
             $cliente->giro = $request->giro;
-            $cliente->rut = null;
+            $cliente->rut = $empresa->rut_empresa;
         } else {
             $rutNatural = $request->rut_natural;
 

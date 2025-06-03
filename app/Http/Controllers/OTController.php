@@ -40,7 +40,7 @@ class OTController extends Controller
 
         $ordenes = $query->orderBy('fecha_creacion', 'desc')->paginate(10);
 
-        $clientes = Cliente::pluck('nombre_cliente', 'id_cliente');
+        $clientes = Cliente::pluck('nombre_cliente', 'apellido_cliente', 'id_cliente', 'rut');
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
         $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
 
@@ -49,13 +49,19 @@ class OTController extends Controller
 
     public function create()
     {
-        $clientes = Cliente::pluck('nombre_cliente', 'id_cliente');
-        $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
-        $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
+        $clientes = Cliente::select('id_cliente', 'nombre_cliente', 'apellido_cliente', 'rut')
+            ->get()
+            ->mapWithKeys(function ($cliente) {
+                return [$cliente->id_cliente => $cliente->nombre_cliente . ' ' . $cliente->apellido_cliente . ' (' . $cliente->rut . ')'];
+            });
+        $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->nombre . ' ' . $user->apellido];
+            });
         $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
-        $productos = Producto::with('inventario')->where('estado', true)->get();
 
-        return view('ot.create', compact('clientes', 'responsables', 'estados', 'servicios', 'productos'));
+        return view('ot.create', compact('clientes', 'responsables', 'servicios'));
     }
 
     public function store(Request $request)
@@ -63,16 +69,15 @@ class OTController extends Controller
         $data = $request->validate([
             'id_cliente' => 'required|exists:clientes,id_cliente',
             'id_responsable' => 'required|exists:users,id',
-            'id_estado' => 'required|exists:estado_ot,id_estado',
-            'fecha_entrega' => 'nullable|date',
+            'fecha_entrega' => ['required', 'date', 'after_or_equal:today'],
             'descripcion' => 'nullable|string',
             'servicios' => 'array',
             'servicios.*' => 'exists:servicios,id_servicio',
-            'productos' => 'array',
-            'productos.*.id' => 'required|exists:productos,id_producto',
-            'productos.*.cantidad' => 'required|integer|min:1',
             'archivos.*' => 'file',
         ]);
+        // Asignar el estado inicial de la OT
+        $data['id_estado'] = 1; // Estado "Recepcionada"
+
 
         DB::transaction(function () use ($data, $request) {
             // 1) Creo la OT
@@ -102,12 +107,6 @@ class OTController extends Controller
 
             $ot->servicios()->sync($data['servicios'] ?? []);
 
-            foreach ($data['productos'] as $prod) {
-                $ot->detalleProductos()->create([
-                    'id_producto' => $prod['id'],
-                    'cantidad' => $prod['cantidad'],
-                ]);
-            }
 
             if ($request->hasFile('archivos')) {
                 foreach ($request->file('archivos') as $file) {
@@ -337,21 +336,21 @@ class OTController extends Controller
                 $descripcion = collect($cambios)->map(function ($chg) {
                     return match ($chg['campo']) {
                         'Productos Asociados' => (function () use ($chg) {
-                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
-                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+                            $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                            $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
 
-                                $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                            $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
                                 ->get()
                                 ->map(fn($p) => "{$p->marca} {$p->modelo}")
                                 ->implode(', ');
 
-                                $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                            $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
                                 ->get()
                                 ->map(fn($p) => "{$p->marca} {$p->modelo}")
                                 ->implode(', ');
 
-                                return "<strong>Productos Asociados</strong> de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
-                            })(),
+                            return "<strong>Productos Asociados</strong> de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                        })(),
                         default => "<strong>{$chg['campo']}</strong> de <em>{$chg['valor_anterior']}</em> a <em>{$chg['valor_nuevo']}</em>",
                     };
                 })->implode("\n");
