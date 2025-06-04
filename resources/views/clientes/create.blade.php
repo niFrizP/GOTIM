@@ -207,10 +207,9 @@
                     $('#rut_field').toggle(tipo === 'natural');
                     $('#rut_empresa_field, #razon_social_field, #giro_field, #nombre_empresa_field').toggle(tipo ===
                         'empresa');
-
-                    // 💣 Esta línea se asegura de limpiar campos si cambian a natural
                     limpiarIdEmpresaSiNatural();
                 }
+
                 // Limpiar campos de empresa si se selecciona persona natural
                 function limpiarIdEmpresaSiNatural() {
                     const tipo = $('input[name="tipo_cliente"]:checked').val();
@@ -223,10 +222,11 @@
                     }
                 }
 
+                // Evento para cambio de tipo de cliente
                 $('input[name="tipo_cliente"]').on('change', toggleFields);
-                toggleFields(); // Ejecutar al cargar
+                toggleFields();
 
-                // Formateo de RUT
+                // Formatear RUT chileno
                 function formatRut(input) {
                     let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
                     if (value.length === 9) {
@@ -236,60 +236,64 @@
                     }
                     input.value = value;
                 }
-
                 $('#rut_natural, #rut_empresa').on('input', function() {
                     formatRut(this);
                 });
 
-                // Buscar empresa por RUT
+                // Buscar empresa por RUT (async/await con control de errores)
                 $('#rut_empresa').on('input', async function() {
                     formatRut(this);
                     const rut = $(this).val().toUpperCase();
+                    const rutRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
 
-                    if (/^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/.test(rut)) {
-                        try {
-                            const response = await fetch(`/empresas/comprobar/${rut}`);
-                            const data = await response.json();
+                    if (!rutRegex.test(rut)) {
+                        limpiarEmpresaNoEncontrada();
+                        return;
+                    }
 
-                            if (data.existe) {
-                                $('#razon_social').val(data.razon_social).prop('readonly', true).addClass(
-                                    'bg-gray-100');
-                                $('#giro').val(data.giro).prop('readonly', false).removeClass(
-                                    'bg-gray-100');
-                                $('#id_empresa').val(data.id_empresa);
-                                $('#nombre_empresa_label').text(data.nom_emp);
-                                $('#empresa_no_encontrada').hide();
-                                $('#id_empresa').val(data.id_empresa);
-                            } else {
-                                $('#razon_social').val('').prop('readonly', false).removeClass(
-                                    'bg-gray-100');
-                                $('#nombre_empresa_label').hide();
-                                $('#giro').val('').prop('readonly', false).removeClass('bg-gray-100');
-                                $('#empresa_no_encontrada').show();
-                            }
-                        } catch (error) {
-                            console.error('Error al buscar empresa:', error);
+                    try {
+                        const response = await fetch(`/empresas/comprobar/${rut}`);
+                        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                        const data = await response.json();
+
+                        if (data.existe) {
+                            $('#razon_social').val(data.razon_social).prop('readonly', true).addClass(
+                                'bg-gray-100');
+                            $('#giro').val(data.giro).prop('readonly', false).removeClass('bg-gray-100');
+                            $('#id_empresa').val(data.id_empresa);
+                            $('#nombre_empresa_label').text(data.nom_emp).show();
+                            $('#empresa_no_encontrada').hide();
+                        } else {
+                            limpiarEmpresaNoEncontrada();
                         }
-                    } else {
-                        $('#razon_social').val('').prop('readonly', false).removeClass('bg-gray-100');
-                        $('#giro').val('').prop('readonly', false).removeClass('bg-gray-100');
-                        $('#nombre_empresa_label').text('Empresa no encontrada o campo inválido');
-                        $('#empresa_no_encontrada').show();
-                        $('#id_empresa').val('');
-
+                    } catch (error) {
+                        console.error('Error al buscar empresa:', error);
+                        limpiarEmpresaNoEncontrada();
                     }
                 });
 
-                // Botón para abrir nueva pestaña
-                $('#btn_crear_empresa').on('click', function() {
+                // Limpiar campos cuando empresa no existe o RUT inválido
+                function limpiarEmpresaNoEncontrada() {
+                    $('#razon_social').val('').prop('readonly', false).removeClass('bg-gray-100');
+                    $('#giro').val('').prop('readonly', false).removeClass('bg-gray-100');
+                    $('#nombre_empresa_label').hide();
+                    $('#empresa_no_encontrada').show();
+                    $('#id_empresa').val('');
+                }
+
+                // Botón para abrir nueva empresa en pestaña aparte
+                $('#btn_crear_empresa').on('click', () => {
                     window.open('{{ route('empresas.create') }}', '_blank');
                 });
 
-                // Inicializar Select2
+                // Inicializar Select2 para todos los selects con clase select2
                 $('select.select2').each(function() {
-                    inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
+                    if (typeof inicializarSelect2 === 'function') {
+                        inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
+                    }
                 });
 
+                // Configurar Select2 para región y ciudad
                 $region.select2({
                     placeholder: "Seleccione una región",
                     allowClear: true,
@@ -302,17 +306,29 @@
                     width: 'resolve'
                 }).prop('disabled', true);
 
-                $region.on('change', async function() {
-                    const regionId = $(this).val();
-                    $ciudad.select2('destroy').empty().append(
-                        '<option value="">Cargando ciudades...</option>');
+                // Evento cambio de región para cargar ciudades dinámicamente
+                $region.on('change', function() {
+                    (async () => {
+                        const regionId = $(this).val();
+                        $ciudad.select2('destroy').empty().append(
+                            '<option value="">Cargando ciudades...</option>');
 
-                    if (regionId) {
+                        if (!regionId) {
+                            $ciudad.empty().append('<option value="">Seleccione una ciudad</option>')
+                                .prop('disabled', true);
+                            $ciudad.select2({
+                                placeholder: "Seleccione una ciudad",
+                                allowClear: true,
+                                width: 'resolve'
+                            });
+                            return;
+                        }
+
                         try {
                             const response = await fetch(`/cxr/${regionId}`);
-                            if (!response.ok) throw new Error('No se pudo cargar');
-
+                            if (!response.ok) throw new Error('No se pudo cargar las ciudades');
                             const ciudades = await response.json();
+
                             $ciudad.empty().append('<option value="">Seleccione una ciudad</option>');
                             ciudades.forEach(c => {
                                 $ciudad.append(
@@ -320,24 +336,27 @@
                                 );
                             });
                             $ciudad.prop('disabled', false);
-                        } catch (err) {
-                            console.error('Error cargando ciudades:', err);
+                        } catch (error) {
+                            console.error('Error cargando ciudades:', error);
                             $ciudad.empty().append('<option value="">Error al cargar</option>').prop(
                                 'disabled', true);
                         }
-                    } else {
-                        $ciudad.empty().append('<option value="">Seleccione una ciudad</option>').prop(
-                            'disabled', true);
-                    }
 
-                    $ciudad.select2({
-                        placeholder: "Seleccione una ciudad",
-                        allowClear: true,
-                        width: 'resolve'
-                    });
-                    estilizarSelect2();
+                        $ciudad.select2({
+                            placeholder: "Seleccione una ciudad",
+                            allowClear: true,
+                            width: 'resolve'
+                        });
+                        if (typeof estilizarSelect2 === 'function') estilizarSelect2();
+                    })();
                 });
 
+                // Validar solo números en teléfono cliente
+                $('#nro_contacto').on('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+
+                // Función para estilizar Select2 (opcional)
                 function estilizarSelect2() {
                     setTimeout(() => {
                         $('.select2-container--default .select2-selection--single').css({
@@ -349,12 +368,10 @@
                             'font-size': '0.875rem',
                             'color': '#000'
                         });
-
                         $('.select2-selection__rendered').css({
                             'color': '#000',
                             'line-height': '1.5rem',
                         });
-
                         $('.select2-selection__arrow').css({
                             'top': '8px',
                             'right': '0.75rem'
@@ -362,16 +379,6 @@
                     }, 10);
                 }
             });
-            document.addEventListener('DOMContentLoaded', () => {
-
-        // Validar solo números en teléfono de cliente
-        const telefonoCliente = document.getElementById('nro_contacto');
-        if (telefonoCliente) {
-            telefonoCliente.addEventListener('input', function () {
-                this.value = this.value.replace(/[^0-9]/g, '');
-            });
-        }
-    });
         </script>
     @endpush
 </x-app-layout>
