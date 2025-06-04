@@ -484,7 +484,7 @@ class OTController extends Controller
                         'id_responsable' => Auth::id(),
                         'campo_modificado' => 'Archivos Adjuntos',
                         'valor_anterior' => null,
-                        'valor_nuevo' => '<strong>Archivo(s) agregado(s)</strong>: <em>' . implode(', ', $nombresNuevos) . '</em>',
+                        'valor_nuevo' => '<span class="text-green-600 dark:text-green-400"><i class="fa-solid fa-circle-plus"></i> Archivo(s) agregado(s)</span>: <em>' . implode(', ', $nombresNuevos) . '</em>',
                         'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
                     ]);
                 }
@@ -709,7 +709,6 @@ class OTController extends Controller
     public function eliminarArchivo($id)
     {
         $archivo = ArchivoAdjuntoOT::findOrFail($id);
-
         $nombre = $archivo->nombre_original;
         $id_ot = $archivo->id_ot;
 
@@ -727,12 +726,13 @@ class OTController extends Controller
             'id_responsable' => Auth::id(),
             'campo_modificado' => 'Archivos Adjuntos',
             'valor_anterior' => $nombre,
-            'valor_nuevo' => '<strong>Archivo eliminado</strong>: <em>' . $nombre . '</em>',
+            'valor_nuevo' => '<span class="text-red-600 dark:text-red-400"><i class="fa-solid fa-trash"></i> Archivo eliminado</span>: <em>' . $nombre . '</em>',
             'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
         ]);
 
         return redirect()->back()->with('success', 'Archivo eliminado correctamente.');
     }
+
 
     // Exporta el listado de OTs a PDF
     public function exportarListadoOT(Request $request)
