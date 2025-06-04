@@ -11,7 +11,8 @@
                     <div class="sm:col-span-2">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Producto</dt>
                         <dd class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                            {{ $inventario->producto->marca ?? '-' }} {{ $inventario->producto->modelo ?? '' }}
+                            {{ $inventario->producto->nombre_producto ?? '' }} {{ $inventario->producto->marca ?? '-' }}
+                            {{ $inventario->producto->modelo ?? '' }}
                         </dd>
                     </div>
                     <div>
@@ -29,7 +30,8 @@
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Estado</dt>
                         <dd class="mt-1">
-                            <span class="inline-block rounded px-2 py-1 text-xs font-semibold
+                            <span
+                                class="inline-block rounded px-2 py-1 text-xs font-semibold
                                 {{ $inventario->estado === 'activo' ? 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' : 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300' }}">
                                 {{ ucfirst($inventario->estado) }}
                             </span>
@@ -42,15 +44,15 @@
                         ← Volver a la lista
                     </a>
                     @if ($inventario->estado === 'activo')
-                    <button onclick="mostrarModal({{ $inventario->id_inventario }})"
-                        class="ml-2 inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-                        Desactivar
-                    </button>
+                        <button onclick="mostrarModal({{ $inventario->id_inventario }})"
+                            class="ml-2 inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                            Desactivar
+                        </button>
                     @else
-                    <a href="{{ route('inventario.reactivar', $inventario->id_inventario) }}"
-                        class="ml-2 inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">
-                        Reactivar
-                    </a>
+                        <a href="{{ route('inventario.reactivar', $inventario->id_inventario) }}"
+                            class="ml-2 inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+                            Reactivar
+                        </a>
                     @endif
                 </div>
             </div>
@@ -59,7 +61,8 @@
     <!-- Modal de Confirmación -->
     <div id="confirmModal"
         class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center transition-opacity duration-300">
-        <div class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
+        <div
+            class="transform rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md scale-95 transition-transform duration-300 ease-in-out w-full max-w-md">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white text-center">
                 Confirmar Desactivación
             </h3>
@@ -72,8 +75,7 @@
                 </button>
                 <form id="deleteForm" method="GET" action="">
                     @csrf
-                    <button type="submit"
-                        class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                    <button type="submit" class="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
                         Desactivar
                     </button>
                 </form>

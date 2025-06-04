@@ -24,7 +24,8 @@
                                     <option value="{{ $id }}">{{ $nombre }} </option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('id_cliente')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('id_cliente')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Responsable --}}
@@ -38,7 +39,8 @@
                                     <option value="{{ $id }}">{{ $nombre }}</option>
                                 @endforeach
                             </select>
-                            <x-input-error :messages="$errors->get('id_responsable')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('id_responsable')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Estado: fijo "Recepcionada" --}}
@@ -52,10 +54,11 @@
 
                         {{-- Fecha entrega --}}
                         <div>
-                            <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega" />
+                            <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega*" />
                             <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full"
                                 min="{{ now()->format('Y-m-d') }}" />
-                            <x-input-error :messages="$errors->get('fecha_entrega')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('fecha_entrega')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         {{-- Descripción --}}
@@ -64,7 +67,8 @@
                             <textarea id="descripcion" name="descripcion" rows="4"
                                 class="w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
                                 placeholder="Escribe una descripción detallada..."></textarea>
-                            <x-input-error :messages="$errors->get('descripcion')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('descripcion')"
+                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
                     </div>
 
@@ -77,7 +81,8 @@
                                 <option value="{{ $id }}">{{ $nombre }}</option>
                             @endforeach
                         </select>
-                        <x-input-error :messages="$errors->get('servicios')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-error :messages="$errors->get('servicios')"
+                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Archivos Adjuntos --}}
@@ -85,7 +90,8 @@
                         <x-input-label for="archivos" value="Archivos Adjuntos" />
                         <input id="archivos" name="archivos[]" type="file" multiple
                             class="w-full text-sm text-gray-900 dark:text-gray-200" />
-                        <x-input-error :messages="$errors->get('archivos')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-error :messages="$errors->get('archivos')"
+                            class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
 
                     {{-- Botones --}}
@@ -106,9 +112,9 @@
     <script src="{{ asset('js/select2Utils.js') }}"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Inicializar Select2
-            $('select.select2').each(function() {
+            $('select.select2').each(function () {
                 inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
 
@@ -165,7 +171,7 @@
                 placeholder: 'Seleccione uno o más servicios',
                 width: '100%',
                 language: {
-                    noResults: function() {
+                    noResults: function () {
                         return `
                         <div class="text-center">
                             <p class="text-gray-700 dark:text-gray-300">No se encontró ese servicio</p>
@@ -173,7 +179,7 @@
                         </div>`;
                     }
                 },
-                escapeMarkup: function(markup) {
+                escapeMarkup: function (markup) {
                     return markup;
                 }
             });

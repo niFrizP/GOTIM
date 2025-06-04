@@ -130,7 +130,7 @@
                                         @foreach ($productos as $prod)
                                             <option value="{{ $prod->id_producto }}"
                                                 {{ $prod->id_producto == $p->id_producto ? 'selected' : '' }}>
-                                                {{ $prod->marca }} {{ $prod->modelo }} — Stock:
+                                                {{ $prod->nombre_producto }} {{ $prod->marca }} {{ $prod->modelo }} — Stock:
                                                 {{ optional($prod->inventario->first())->cantidad ?? 0 }}
                                             </option>
                                         @endforeach
@@ -203,7 +203,10 @@
                     <select name="productos[${idx}][id]" class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" required>
                         <option value="">Seleccione un producto</option>
                         @foreach ($productos as $prod)
-                            <option value="{{ $prod->id_producto }}">{{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ optional($prod->inventario->first())->cantidad ?? 0 }}</option>
+                            @php
+                                $stock = optional($prod->inventario->first())->cantidad ?? 0;
+                            @endphp
+                            <option value="{{ $prod->id_producto }}">{{ $prod->nombre_producto }} {{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ $stock }}</option>
                         @endforeach
                     </select>
                     <input type="number" name="productos[${idx}][cantidad]" min="1" value="1" class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white" required />
@@ -214,5 +217,6 @@
                 width: '100%'
             });
         }
+
     </script>
 </x-app-layout>

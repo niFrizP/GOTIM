@@ -37,12 +37,12 @@
                             <x-input-error :messages="$errors->get('cantidad')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
-                        <!-- Fecha Ingreso -->
+                        <!-- Fecha Ingreso (solo lectura) -->
                         <div>
-                            <x-input-label for="fecha_ingreso" value="Fecha Ingreso" />
-                            <x-text-input id="fecha_ingreso" name="fecha_ingreso" type="datetime-local" class="w-full"
-                                value="{{ old('fecha_ingreso', \Carbon\Carbon::parse($inventario->fecha_ingreso)->format('Y-m-d\TH:i')) }}" />
-                            <x-input-error :messages="$errors->get('fecha_ingreso')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                        <x-input-label for="fecha_ingreso" value="Fecha Ingreso" />
+                        <x-text-input id="fecha_ingreso" name="fecha_ingreso" type="datetime-local" class="w-full bg-gray-100 dark:bg-gray-700"
+                            value="{{ \Carbon\Carbon::parse($inventario->fecha_ingreso)->format('Y-m-d\TH:i') }}" disabled readonly />
+                        <small class="text-gray-500 dark:text-gray-400">Esta fecha se establece automáticamente y no puede editarse.</small>
                         </div>
 
                         <!-- Fecha Salida -->

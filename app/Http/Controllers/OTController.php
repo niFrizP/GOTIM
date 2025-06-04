@@ -185,7 +185,14 @@ class OTController extends Controller
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
         $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
         $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
-        $productos = Producto::with('inventario')->where('estado', true)->get();
+
+        // 🔴 Solo productos con inventario > 0
+        $productos = Producto::where('estado', true)
+            ->whereHas('inventario', function ($q) {
+                $q->where('cantidad', '>', 0);
+            })
+            ->with('inventario')
+            ->get();
 
         return view('ot.edit', compact(
             'ot',
@@ -196,6 +203,7 @@ class OTController extends Controller
             'productos'
         ));
     }
+
 
     public function update(Request $request, $id)
     {
@@ -301,7 +309,7 @@ class OTController extends Controller
             foreach ($oldProducts as $prodId => $oldQty) {
                 if (isset($newProducts[$prodId]) && $newProducts[$prodId] != $oldQty) {
                     $prod = Producto::find($prodId);
-                    $label = "{$prod->marca} {$prod->modelo}";
+                    $label = "{$prod->nombre_producto} {$prod->marca} {$prod->modelo}";
                     $cambios[] = [
                         'campo' => "Cantidad de {$label}",
                         'valor_anterior' => $oldQty,
@@ -321,50 +329,129 @@ class OTController extends Controller
                 ];
             }
 
-            // 4.3) Reemplazo los detalles
+            // 4.3) Reemplazo los detalles con control de inventario y registro en historial
+            $oldDetalle = $ot->detalleProductos()->get();
+
+            // 4.3.1. Revertir stock de productos eliminados o modificados
+            foreach ($oldDetalle as $detalle) {
+                $inventario = $detalle->producto->inventario->first();
+
+                if ($inventario) {
+                    $stockAnterior = $inventario->cantidad;
+                    $inventario->cantidad += $detalle->cantidad;
+                    $inventario->save();
+
+                    // Actualizar estado del producto
+                    $producto = $detalle->producto;
+                    $inventario->estado = $inventario->cantidad > 0 ? 'activo' : 'agotado';
+                    $inventario->save();
+
+
+                    // Registrar devolución en historial
+                    \App\Models\HistorialInventario::create([
+                        'id_inventario' => $inventario->id_inventario,
+                        'id_producto' => $detalle->id_producto,
+                        'id_responsable' => Auth::id(),
+                        'campo_modificado' => 'cantidad',
+                        'valor_anterior' => $stockAnterior,
+                        'valor_nuevo' => $inventario->cantidad,
+                        'fecha_modificacion' => now(),
+                    ]);
+                }
+            }
+            // 4.3.2. Eliminar detalles anteriores
             $ot->detalleProductos()->delete();
-            foreach ($data['productos'] as $item) {
+
+            // 4.3.3. Registrar nuevos productos y descontar del inventario
+            foreach ($data['productos'] ?? [] as $item) {
+                $producto = \App\Models\Producto::with('inventario')->find($item['id']);
+                $inventario = $producto->inventario->first();
+                $stockAnterior = $inventario->cantidad ?? 0;
+
+                if ($stockAnterior < $item['cantidad']) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        "productos.{$item['id']}" => "Stock insuficiente para el producto {$producto->marca} {$producto->modelo}. Disponible: {$stockAnterior}, requerido: {$item['cantidad']}",
+                    ]);
+                }
+
+                // Descontar del stock
+                $inventario->cantidad -= $item['cantidad'];
+                $inventario->save();
+
+                // Actualizar estado del producto
+                $inventario->estado = $inventario->cantidad > 0 ? 'activo' : 'agotado';
+                $inventario->save();
+
+
+                // Registrar descuento en historial
+                \App\Models\HistorialInventario::create([
+                    'id_inventario' => $inventario->id_inventario,
+                    'id_producto' => $item['id'],
+                    'id_responsable' => Auth::id(),
+                    'campo_modificado' => 'cantidad',
+                    'valor_anterior' => $stockAnterior,
+                    'valor_nuevo' => $inventario->cantidad,
+                    'fecha_modificacion' => now(),
+                ]);
+
+                // Asociar a la OT
                 $ot->detalleProductos()->create([
                     'id_producto' => $item['id'],
                     'cantidad' => $item['cantidad'],
                 ]);
             }
 
+
             // 5) Guardar historial
-            if (!empty($cambios)) {
-                // Codificar los cambios en una sola entrada
-                $descripcion = collect($cambios)->map(function ($chg) {
+            $cambiosReales = collect($cambios)->reject(fn($c) => $c['valor_anterior'] === $c['valor_nuevo']);
+
+            if ($cambiosReales->isNotEmpty()) {
+                $descripcion = $cambiosReales->map(function ($chg) {
                     return match ($chg['campo']) {
                         'Productos Asociados' => (function () use ($chg) {
-                            $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
-                            $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
 
-                            $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
-                                ->get()
-                                ->map(fn($p) => "{$p->marca} {$p->modelo}")
-                                ->implode(', ');
+                                $agregados = array_diff($idsNuevo, $idsAntes);
+                                $eliminados = array_diff($idsAntes, $idsNuevo);
 
-                            $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
-                                ->get()
-                                ->map(fn($p) => "{$p->marca} {$p->modelo}")
-                                ->implode(', ');
+                                if (!empty($agregados) && empty($eliminados)) {
+                                    $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
+                                    ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
+                                    return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
+                                }
 
-                            return "<strong>Productos Asociados</strong> de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
-                        })(),
+                                if (!empty($eliminados) && empty($agregados)) {
+                                    $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
+                                    ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
+                                    return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
+                                }
+
+                                if (!empty($agregados) && !empty($eliminados)) {
+                                    $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                                    ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
+                                    $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                                    ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
+
+                                    return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                                }
+
+                                return null;
+                            })(),
                         default => "<strong>{$chg['campo']}</strong> de <em>{$chg['valor_anterior']}</em> a <em>{$chg['valor_nuevo']}</em>",
                     };
                 })->implode("\n");
 
-
                 HistorialOT::create([
                     'id_ot' => $ot->id_ot,
                     'id_responsable' => Auth::id(),
-                    'campo_modificado' => implode(",", collect($cambios)->pluck('campo')->toArray()),
+                    'campo_modificado' => implode(',', $cambiosReales->pluck('campo')->toArray()),
                     'valor_anterior' => null,
                     'valor_nuevo' => $descripcion,
                     'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
                 ]);
             }
+
 
             // 6) Actualizar OT
             $ot->update([
@@ -519,11 +606,11 @@ class OTController extends Controller
         $historialTransformado = $agrupado->map(function ($group) {
             $first = $group->first();
             return [
-                'id_historial'       => $group->min('id_historial_ot'),
-                'usuario'            => $first->usuario->nombre ?? 'Sistema',
+                'id_historial' => $group->min('id_historial_ot'),
+                'usuario' => $first->usuario->nombre ?? 'Sistema',
                 'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
-                'campos'             => $group->pluck('campo_modificado')->unique()->values()->all(),
-                'descripciones'      => $group->map(fn($h) => app(OTController::class)->descripcion($h))->all(),
+                'campos' => $group->pluck('campo_modificado')->unique()->values()->all(),
+                'descripciones' => $group->map(fn($h) => app(OTController::class)->descripcion($h))->all(),
             ];
         })->sortByDesc('id_historial')->values();
 
@@ -569,11 +656,11 @@ class OTController extends Controller
 
         // Renderizar vista
         $view = View::make('ot.pdf', [
-            'ordenTrabajo'      => $ordenTrabajo,
-            'historial'         => $historialTransformado,
-            'base64Logo'        => $base64Logo,
-            'base64Font'        => $base64Font,
-            'archivosAdjuntos'  => $archivosConvertidos,
+            'ordenTrabajo' => $ordenTrabajo,
+            'historial' => $historialTransformado,
+            'base64Logo' => $base64Logo,
+            'base64Font' => $base64Font,
+            'archivosAdjuntos' => $archivosConvertidos,
         ]);
 
         $html = $view->render();

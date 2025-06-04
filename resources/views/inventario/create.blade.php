@@ -37,13 +37,13 @@
                         </div>
 
                         <!-- Fecha Ingreso -->
-                        <div>
+                        <!-- <div>
                             <x-input-label for="fecha_ingreso" value="Fecha Ingreso" />
                             <x-text-input id="fecha_ingreso" name="fecha_ingreso" type="datetime-local" class="w-full"
                                 value="{{ old('fecha_ingreso') }}" />
                             <x-input-error :messages="$errors->get('fecha_ingreso')"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400" />
-                        </div>
+                        </div> -->
 
                         <!-- Fecha Salida -->
                         <div>
