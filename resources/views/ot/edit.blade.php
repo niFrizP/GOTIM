@@ -45,8 +45,8 @@
                         <div class="sm:col-span-2">
                             <x-input-label for="id_cliente" value="Cliente" />
                             <select id="id_cliente" name="id_cliente"
-                                class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white"
-                                required>
+                                class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
+                                data-placeholder="Seleccione un cliente" required>
                                 <option value="">Seleccione un cliente</option>
                                 @foreach ($clientes as $id => $nombre)
                                     <option value="{{ $id }}" {{ $id == $ot->id_cliente ? 'selected' : '' }}>
@@ -144,8 +144,13 @@
                                 </div>
                             @endforeach
                         </div>
-                        <button type="button" class="mt-2 px-4 py-2 bg-green-500 text-white rounded"
-                            onclick="addProductoSelect()">+ Agregar Producto</button>
+                        <button type="button"
+                            class="mt-2 flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200 ease-in-out shadow"
+                            onclick="addProductoSelect()">
+                            <i class="fa-solid fa-plus"></i>
+                            Agregar Producto
+                        </button>
+
                         <x-input-error :messages="$errors->get('productos')" class="mt-1" />
                     </div>
 
@@ -182,41 +187,51 @@
         </div>
     </div>
 
-    {{-- Select2 CDN --}}
+    @push('scripts')
+    {{-- Select2 CSS y JS --}}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    {{-- Archivo de utilidades personalizado --}}
+    <script src="{{ asset('js/select2Utils.js') }}"></script>
+
     <script>
-        $(document).ready(function() {
-            $('.select2').select2({
-                placeholder: 'Seleccione una opción',
-                allowClear: true,
-                width: '100%',
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar todos los select2 visibles
+            $('select.select2').each(function () {
+                inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
+
+            // Función para agregar un nuevo producto con estilo select2
+            window.addProductoSelect = function () {
+                let idx = $('#productosContainer .producto-item').length;
+                const html = `
+                    <div class="producto-item flex items-center gap-2 mb-2">
+                        <select name="productos[${idx}][id]"
+                            class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white p-2"
+                            data-placeholder="Seleccione un producto" required>
+                            <option value="">Seleccione un producto</option>
+                            @foreach ($productos as $prod)
+                                <option value="{{ $prod->id_producto }}">
+                                    {{ $prod->nombre_producto }} {{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ optional($prod->inventario->first())->cantidad ?? 0 }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <input type="number" name="productos[${idx}][cantidad]" min="1" value="1"
+                            class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white" required />
+                        <button type="button" class="bg-red-500 text-white rounded px-2 py-1"
+                            onclick="$(this).parent().remove()">✕</button>
+                    </div>`;
+                $('#productosContainer').append(html);
+                // Reaplicar Select2 y estilo
+                $('#productosContainer .producto-item:last-child .select2').each(function () {
+                    inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
+                });
+            };
         });
-
-        function addProductoSelect() {
-            let idx = $('#productosContainer .producto-item').length;
-            const html = `
-                <div class="producto-item flex items-center gap-2 mb-2">
-                    <select name="productos[${idx}][id]" class="select2 w-full rounded border-gray-300 dark:bg-gray-700 dark:text-white" required>
-                        <option value="">Seleccione un producto</option>
-                        @foreach ($productos as $prod)
-                            @php
-                                $stock = optional($prod->inventario->first())->cantidad ?? 0;
-                            @endphp
-                            <option value="{{ $prod->id_producto }}">{{ $prod->nombre_producto }} {{ $prod->marca }} {{ $prod->modelo }} — Stock: {{ $stock }}</option>
-                        @endforeach
-                    </select>
-                    <input type="number" name="productos[${idx}][cantidad]" min="1" value="1" class="w-20 rounded p-2 border-gray-300 dark:bg-gray-700 dark:text-white" required />
-                    <button type="button" class="bg-red-500 text-white rounded px-2 py-1" onclick="$(this).parent().remove()">✕</button>
-                </div>`;
-            $('#productosContainer').append(html);
-            $('#productosContainer .producto-item:last-child .select2').select2({
-                width: '100%'
-            });
-        }
-
     </script>
+@endpush
+
 </x-app-layout>
