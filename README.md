@@ -107,7 +107,6 @@ Accede a `http://127.0.0.1:8000` en tu navegador.
    - **Admin:** Control total de la plataforma.
    - **Supervisor:** Gestión y seguimiento de órdenes.
    - **Técnico:** Registro de servicios realizados.
-   - **Cliente:** Visualización de sus órdenes.
 3. Navega al módulo de Clientes para agregar o editar datos.
 4. Pronto encontrarás nuevos módulos en el menú principal.
 
