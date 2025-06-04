@@ -36,24 +36,42 @@
                                 <td class="border-b p-2">{{ $empresa->nom_emp }}</td>
                                 <td class="border-b p-2">{{ $empresa->rut_empresa }}</td>
                                 <td class="border-b p-2">{{ $empresa->giro }}</td>
-                                <td class="border-b p-2">{{ ucfirst($empresa->estado) }}</td>
+                                <td class="border-b p-2">
+                                    @if ($empresa->estado === 'activo')
+                                        <span
+                                            class="inline-block rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                                            Activo
+                                        </span>
+                                    @else
+                                        <span
+                                            class="inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 dark:bg-red-900/20 dark:text-red-300">
+                                            Inhabilitado
+                                        </span>
+                                    @endif
+                                </td>
+
                                 <td class="border-b p-2">
                                     <a href="{{ route('empresas.show', $empresa->id_empresa) }}"
-                                        class="btn btn-info">Ver</a>
+                                        class="text-gray-600 hover:underline dark:text-gray-300">
+                                        Ver
+                                    </a>
                                     <a href="{{ route('empresas.edit', $empresa->id_empresa) }}"
-                                        class="btn btn-warning">Editar</a>
+                                        class="text-blue-500 hover:underline">
+                                        Editar
+                                    </a>
+
                                     @if ($empresa->estado === 'activo')
                                         <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}" method="POST"
                                             class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Inhabilitar</button>
+                                            <button type="submit" class="text-red-500 hover:underline">Inhabilitar</button>
                                         </form>
                                     @else
                                         <form action="{{ route('empresas.reactivar', $empresa->id_empresa) }}" method="POST"
                                             class="inline">
                                             @csrf
-                                            <button type="submit" class="btn btn-success">Reactivar</button>
+                                            <button type="submit" class="text-green-500 hover:underline">Reactivar</button>
                                         </form>
                                     @endif
                                 </td>
