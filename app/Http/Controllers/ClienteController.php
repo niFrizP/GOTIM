@@ -62,6 +62,7 @@ class ClienteController extends Controller
         $cliente->direccion = $request->direccion;
         $cliente->estado = 'activo';
 
+        // Validación del RUT 
         if ($request->tipo_cliente === 'empresa') {
             $rutEmpresa = $request->rut_empresa;
 
@@ -116,22 +117,60 @@ class ClienteController extends Controller
     {
         $cliente = Cliente::findOrFail($id);
 
-        $validated = $request->validate([
-            'id_empresa' => 'required|exists:empresas,id_empresa',
+        $request->validate([
             'nombre_cliente' => 'required|string|max:255',
-            'apellido_cliente' => 'required|string|max:255',
+            'apellido_cliente' => 'nullable|string|max:255',
+            'email' => 'required|email|unique:clientes,email,' . $cliente->id_cliente . ',id_cliente',
+            'nro_contacto' => 'required|string|max:20',
+            'tipo_cliente' => 'required|in:natural,empresa',
+            'id_region' => 'required|exists:regiones,id_region',
+            'id_ciudad' => 'required|exists:ciudades,id_ciudad',
+            'direccion' => 'required|string|max:255',
             'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
-            'id_region' => 'required|integer|exists:regiones,id_region',
-            'id_ciudad' => 'required|integer|exists:ciudades,id_ciudad',
-            'email' => 'required|email|unique:clientes,email,' . $cliente->id_cliente . ',id_cliente',
-            'rut' => 'required|string|max:20|clientes,rut,' . $cliente->id_cliente . ',id_cliente',
-            'nro_contacto' => 'required|string|max:20',
-            'direccion' => 'nullable|string|max:255',
-            'tipo_cliente' => 'required|in:natural,empresa',
+            'rut' => 'required|string|max:20',
+            'id_empresa' => 'nullable|exists:empresas,id_empresa',
         ]);
 
-        $cliente->update($validated);
+        // Campos comunes
+        $cliente->nombre_cliente = $request->nombre_cliente;
+        $cliente->apellido_cliente = $request->apellido_cliente;
+        $cliente->email = $request->email;
+        $cliente->nro_contacto = $request->nro_contacto;
+        $cliente->tipo_cliente = $request->tipo_cliente;
+        $cliente->id_region = $request->id_region;
+        $cliente->id_ciudad = $request->id_ciudad;
+        $cliente->direccion = $request->direccion;
+        $cliente->giro = $request->giro;
+
+        // Validación del RUT 
+        if ($request->tipo_cliente === 'empresa') {
+            $rutEmpresa = $request->rut_empresa;
+
+            $empresa = Empresa::where('rut_empresa', $rutEmpresa)->first();
+            if (!$empresa) {
+                return back()->withErrors(['rut_empresa' => 'La empresa con ese RUT no está registrada.'])->withInput();
+            }
+
+            $cliente->id_empresa = $empresa->id_empresa;
+            $cliente->razon_social = $empresa->razon_social;
+            $cliente->giro = $request->giro;
+            $cliente->rut = $empresa->rut_empresa;
+        } else {
+            $rutNatural = $request->rut_natural;
+
+            // ⚠️ Validar que no esté en tabla empresas
+            if (Empresa::where('rut_empresa', $rutNatural)->exists()) {
+                return back()->withErrors(['rut_natural' => 'Este RUT ya está registrado como empresa.'])->withInput();
+            }
+
+            $cliente->rut = $rutNatural;
+            $cliente->id_empresa = null;
+            $cliente->razon_social = null;
+            $cliente->giro = null;
+        }
+        $cliente->save();
+
         return redirect()->route('clientes.index')->with('success', 'Cliente actualizado correctamente.');
     }
 
