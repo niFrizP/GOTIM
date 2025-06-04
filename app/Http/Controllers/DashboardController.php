@@ -63,8 +63,9 @@ class DashboardController extends Controller
         // Órdenes por cliente
         $ordersByClient = OT::with('cliente')
             ->get()
-            ->groupBy(fn($ot) => optional($ot->id_cliente->clientes)->nombre . ' ' . optional($ot->id_cliente->clientes)->apellido)
+            ->groupBy(fn($ot) => optional($ot->cliente)->nombre . ' ' . optional($ot->cliente)->apellido)
             ->map->count();
+
 
         return view('dashboard', compact(
             'totalCliente',
