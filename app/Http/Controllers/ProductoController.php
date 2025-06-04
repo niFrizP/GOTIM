@@ -29,6 +29,19 @@ class ProductoController extends Controller
         return view('productos.create', compact('categorias', 'tiposProducto'));
     }
 
+
+    public function validarCodigo(Request $request)
+    {
+        $codigo = $request->query('codigo');
+
+        $existe = DB::table('productos')
+            ->where('codigo', $codigo)
+            ->exists();
+
+        return response()->json(['disponible' => !$existe]);
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */
@@ -159,14 +172,5 @@ class ProductoController extends Controller
         return redirect()->route('productos.index')->with('success', 'Producto inhabilitado correctamente.');
     }
 
-    public function validarCodigo(Request $request)
-    {
-        $codigo = $request->query('codigo');
 
-        $existe = DB::table('productos')
-            ->where('codigo', $codigo)
-            ->exists();
-
-        return response()->json(['disponible' => !$existe]);
-    }
 }

@@ -64,6 +64,7 @@ Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNo
 // Rutas de ciudades y regiones
 Route::get('/cxr/{regionId}', [CiudadController::class, 'getCiudadesPorRegion']);
 
+
 // Rutas de administración
 Route::middleware(['auth', 'admin'])->group(function () {
     //Rutas Usuarios
@@ -71,6 +72,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Ruta personalizada para reactivar usuarios
     Route::post('/users/{user}/reactivar', [UserController::class, 'reactivar'])->name('users.reactivar');
 });
+
 
 // Rutas de estado de categorías
 Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
