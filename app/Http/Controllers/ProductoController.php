@@ -30,13 +30,11 @@ class ProductoController extends Controller
     }
 
 
+    // ProductoController.php
     public function validarCodigo(Request $request)
     {
         $codigo = $request->query('codigo');
-
-        $existe = DB::table('productos')
-            ->where('codigo', $codigo)
-            ->exists();
+        $existe = DB::table('productos')->where('codigo', $codigo)->exists();
 
         return response()->json(['disponible' => !$existe]);
     }
@@ -56,7 +54,6 @@ class ProductoController extends Controller
             'descripcion' => 'nullable|string',
             'codigo' => [
                 'required',
-                'regex:/^(\d{8}|\d{13})$/',
                 'unique:productos,codigo',
             ],
             'imagen' => 'nullable|image|max:2048',
@@ -91,6 +88,9 @@ class ProductoController extends Controller
         $tiposProducto = TipoProducto::all();
         return view('productos.edit', compact('producto', 'categorias', 'tiposProducto'));
     }
+
+
+    
 
     /**
      * Update the specified resource in storage.

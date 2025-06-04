@@ -77,13 +77,14 @@
 
                         <!-- Código -->
                         <div>
-                            <x-input-label for="codigo" value="Código de producto *" />
-                            <x-text-input id="codigo" name="codigo" type="text" class="w-full"
-                                value="{{ old('codigo') }}"
-                                maxlength="13" minlength="8" required />
-                            <x-input-error :messages="$errors->get('codigo')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-                            <p id="mensaje-codigo" class="text-sm mt-1"></p>
+                            <x-input-label for="codigo" value="Código" />
+                            <x-text-input id="codigo" name="codigo" type="number" class="w-full" maxlength="13" minlength="8" 
+                                value="{{ old('codigo') }}" required  />
+                            <span id="codigo_msg" class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                <x-input-error :messages="$errors->get('codigo')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            </span>
                         </div>
+
 
                         <!-- Imagen -->
                         <div class="mb-4">
@@ -114,9 +115,15 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const codigoInput = document.getElementById('codigo');
-        const mensajeCodigo = document.getElementById('mensaje-codigo');
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('codigo');
+        const msg = document.createElement('span');
+        input.parentNode.appendChild(msg);
+        msg.id = "codigo_msg";
+        msg.className = "mt-1 text-sm text-gray-600 dark:text-gray-300";
+
+        const btn = document.querySelector('button[type="submit"]');
+        let timeout;
 
         codigoInput.addEventListener('input', function () {
             const codigo = this.value;
@@ -128,31 +135,44 @@
                 return;
             }
 
-            // Validar longitud (8 o 13 dígitos)
-            if (codigo.length !== 8 && codigo.length !== 13) {
-                mensajeCodigo.textContent = 'El código debe tener 8 o 13 dígitos.';
-                mensajeCodigo.style.color = 'orange';
+
+        // Validación del código
+        const validarCodigo = async (codigo) => {
+            try {
+                const response = await fetch("{{ route('productos.validar.codigo') }}?codigo=" + encodeURIComponent(codigo));
+                const data = await response.json();
+
+                if (data.disponible) {
+                    msg.textContent = '✅ Código disponible';
+                    msg.className = 'mt-1 text-sm text-green-600';
+                    btn.disabled = false;
+                } else {
+                    msg.textContent = '❌ Código ya registrado';
+                    msg.className = 'mt-1 text-sm text-red-600';
+                    btn.disabled = true;
+                }
+            } catch (error) {
+                msg.textContent = '⚠️ Error al validar';
+                msg.className = 'mt-1 text-sm text-yellow-600';
+                btn.disabled = true;
+            }
+        };
+
+        input.addEventListener('input', () => {
+            clearTimeout(timeout);
+            const codigo = input.value.trim();
+
+            if (codigo.length === 0) {
+                msg.textContent = '';
+                btn.disabled = false;
                 return;
             }
 
-            // Validar disponibilidad del código
-            fetch(`/productos/validar-codigo?codigo=${codigo}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.disponible) {
-                        mensajeCodigo.textContent = '✅ Código disponible';
-                        mensajeCodigo.style.color = 'green';
-                    } else {
-                        mensajeCodigo.textContent = '❌ Este código ya está registrado';
-                        mensajeCodigo.style.color = 'red';
-                    }
-                })
-                .catch(() => {
-                    mensajeCodigo.textContent = '⚠️ Error al verificar el código.';
-                    mensajeCodigo.style.color = 'red';
-                });
+            timeout = setTimeout(() => {
+                validarCodigo(codigo);
+            }, 400);
         });
     });
-    </script>
+</script>
 
 </x-app-layout>

@@ -104,6 +104,8 @@ Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name(
 Route::get('/inventario/{id}/edit', [InventarioController::class, 'edit'])->name('inventario.edit');
 Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
 
+// Ruta para validar el código de producto
+Route::get('/productos/create/validar-codigo', [ProductoController::class, 'validarCodigo'])->name('productos.validar.codigo');
 // Rutas de productos
 Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
@@ -111,10 +113,9 @@ Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'
 // Ruta personalizada para desactivar Producto
 // Ruta personalizada para desactivar Producto
 Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
-// Ruta para validar el código de producto
-Route::get('/productos/validar-codigo', [ProductoController::class, 'validarCodigo']);
-// Ruta para validar el código de producto
-Route::get('/productos/validar-codigo', [ProductoController::class, 'validarCodigo']);
+
+
+
 
 
 // Rutas de OT
