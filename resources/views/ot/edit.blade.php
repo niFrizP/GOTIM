@@ -157,25 +157,54 @@
                     {{-- Archivos Adjuntos --}}
                     <div class="mt-6">
                         <x-input-label for="archivos" value="Archivos Adjuntos" />
-                        <input id="archivos" name="archivos[]" type="file" multiple
-                            class="w-full text-sm text-gray-900 dark:text-gray-200" />
+
+                        {{-- Botón de selección de archivos --}}
+                        <label for="archivos"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow cursor-pointer transition duration-200 ease-in-out">
+                            <i class="fa-solid fa-upload mr-2"></i>
+                            Elegir Archivos
+                            <input id="archivos" name="archivos[]" type="file" multiple class="hidden"
+                                onchange="mostrarArchivosSeleccionados()" />
+                        </label>
+
+                        {{-- Vista previa de archivos seleccionados --}}
+                        <div class="mt-3 border border-blue-300 dark:border-blue-700 rounded-md p-3 bg-blue-50 dark:bg-blue-900/10">
+                            <div class="font-semibold text-blue-800 dark:text-blue-300 mb-1">
+                                Archivos seleccionados para subir
+                            </div>
+                            <div id="archivosSeleccionados"
+                                class="text-sm text-gray-800 dark:text-gray-200 space-y-1 italic">
+                                <!-- JS insertará aquí -->
+                            </div>
+                        </div>
+
                         <x-input-error :messages="$errors->get('archivos')" class="mt-1" />
                     </div>
 
                     {{-- Archivos ya cargados --}}
                     @if ($ot->archivosAdjuntos->count())
-                        <div class="mt-4">
-                            <x-input-label value="Archivos ya cargados" />
-                            <ul class="list-disc pl-6 text-sm text-gray-800 dark:text-gray-200">
+                        <div class="mt-6 border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-gray-50 dark:bg-gray-800/50">
+                            <div class="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                                Archivos ya cargados
+                            </div>
+                            <ul class="list-disc pl-6 text-sm text-gray-800 dark:text-gray-200 space-y-2">
                                 @foreach ($ot->archivosAdjuntos as $archivo)
-                                    <li>
+                                    <li class="flex items-center justify-between gap-2">
                                         <a href="{{ Storage::url($archivo->ruta_archivo) }}" target="_blank"
-                                            class="text-blue-500 underline">{{ $archivo->nombre_original }}</a>
+                                            class="text-blue-500 underline hover:text-blue-700 flex-1">
+                                            {{ $archivo->nombre_original }}
+                                        </a>
+                                        <button type="button"
+                                            class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs"
+                                            onclick="eliminarArchivo('{{ route('archivos_ot.eliminar', $archivo->id_archivo) }}', this)">
+                                            Eliminar
+                                        </button>
                                     </li>
                                 @endforeach
                             </ul>
                         </div>
                     @endif
+
 
                     {{-- Botones --}}
                     <div class="mt-6 flex justify-end space-x-2">
@@ -196,6 +225,76 @@
 
     {{-- Archivo de utilidades personalizado --}}
     <script src="{{ asset('js/select2Utils.js') }}"></script>
+    <script>
+        // Esta función evita el error de Alpine x-data="otForm()"
+        function otForm() {
+            return {
+                // Si más adelante necesitas estados, los agregas aquí
+                mensaje: '',
+                mostrarMensaje(texto) {
+                    this.mensaje = texto;
+                }
+            };
+        }
+    </script>
+
+    <script>
+        function mostrarArchivosSeleccionados() {
+            const input = document.getElementById('archivos');
+            const info = document.getElementById('archivosSeleccionados');
+            info.innerHTML = '';
+
+            const archivos = input.files;
+
+            if (archivos.length > 0) {
+                const resumen = document.createElement('div');
+                resumen.textContent = archivos.length === 1
+                    ? `Archivo seleccionado: ${archivos[0].name}`
+                    : `${archivos.length} archivos seleccionados`;
+                info.appendChild(resumen);
+
+                const lista = document.createElement('ul');
+                lista.classList.add('list-disc', 'pl-6');
+
+                Array.from(archivos).forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    lista.appendChild(li);
+                });
+
+                info.appendChild(lista);
+            }
+        }
+        function eliminarArchivo(url, boton) {
+            if (!confirm('¿Estás seguro de eliminar este archivo?')) return;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    _method: 'DELETE'
+                })
+            })
+            .then(res => {
+                if (res.ok) {
+                    // Eliminar visualmente el archivo
+                    const li = boton.closest('li');
+                    li.remove();
+                } else {
+                    console.error('Error al eliminar:', res);
+                    alert('Ocurrió un error al eliminar el archivo.');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                alert('Ocurrió un error en la comunicación con el servidor.');
+            });
+        }
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -225,13 +324,13 @@
                             onclick="$(this).parent().remove()">✕</button>
                     </div>`;
                 $('#productosContainer').append(html);
-                // Reaplicar Select2 y estilo
+
+                // Reaplicar Select2
                 $('#productosContainer .producto-item:last-child .select2').each(function () {
                     inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
                 });
             };
         });
     </script>
-@endpush
-
+    @endpush
 </x-app-layout>

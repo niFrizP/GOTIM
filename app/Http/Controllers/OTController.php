@@ -9,6 +9,8 @@ use App\Models\EstadoOt;
 use App\Models\Servicio;
 use App\Models\Producto;
 use App\Models\HistorialOT;
+use Illuminate\Support\Facades\Storage;
+use App\Models\ArchivoAdjuntoOT;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -462,6 +464,8 @@ class OTController extends Controller
             ]);
             // 7) Archivos adjuntos nuevos
             if (request()->hasFile('archivos')) {
+                $nombresNuevos = [];
+
                 foreach (request()->file('archivos') as $archivo) {
                     $path = $archivo->store('archivos_ot', 'public');
 
@@ -469,6 +473,19 @@ class OTController extends Controller
                         'ruta_archivo' => $path,
                         'tipo_archivo' => $archivo->getMimeType(),
                         'nombre_original' => $archivo->getClientOriginalName(),
+                    ]);
+
+                    $nombresNuevos[] = $archivo->getClientOriginalName();
+                }
+
+                if (!empty($nombresNuevos)) {
+                    HistorialOT::create([
+                        'id_ot' => $ot->id_ot,
+                        'id_responsable' => Auth::id(),
+                        'campo_modificado' => 'Archivos Adjuntos',
+                        'valor_anterior' => null,
+                        'valor_nuevo' => '<strong>Archivo(s) agregado(s)</strong>: <em>' . implode(', ', $nombresNuevos) . '</em>',
+                        'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
                     ]);
                 }
             }
@@ -689,7 +706,33 @@ class OTController extends Controller
         $fechaDescarga = now()->format('Y-m-d_H-i-s');
         return $pdf->download("OT_{$ordenTrabajo->id_ot}_{$fechaDescarga}.pdf");
     }
+    public function eliminarArchivo($id)
+    {
+        $archivo = ArchivoAdjuntoOT::findOrFail($id);
 
+        $nombre = $archivo->nombre_original;
+        $id_ot = $archivo->id_ot;
+
+        // Elimina el archivo físico si existe
+        if (Storage::exists($archivo->ruta_archivo)) {
+            Storage::delete($archivo->ruta_archivo);
+        }
+
+        // Elimina el registro de la base de datos
+        $archivo->delete();
+
+        // Registrar en historial
+        HistorialOT::create([
+            'id_ot' => $id_ot,
+            'id_responsable' => Auth::id(),
+            'campo_modificado' => 'Archivos Adjuntos',
+            'valor_anterior' => $nombre,
+            'valor_nuevo' => '<strong>Archivo eliminado</strong>: <em>' . $nombre . '</em>',
+            'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
+        ]);
+
+        return redirect()->back()->with('success', 'Archivo eliminado correctamente.');
+    }
 
     // Exporta el listado de OTs a PDF
     public function exportarListadoOT(Request $request)
