@@ -64,6 +64,8 @@ Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNo
 // Rutas de ciudades y regiones
 Route::get('/cxr/{regionId}', [CiudadController::class, 'getCiudadesPorRegion']);
 
+
+
 // Rutas de administración
 Route::middleware(['auth', 'admin'])->group(function () {
     //Rutas Usuarios
@@ -71,6 +73,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Ruta personalizada para reactivar usuarios
     Route::post('/users/{user}/reactivar', [UserController::class, 'reactivar'])->name('users.reactivar');
 });
+
+
 
 // Rutas de estado de categorías
 Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
@@ -89,6 +93,8 @@ Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, '
 Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
 Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
 
+
+
 // Rutas de inventario
 Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
 Route::resource('inventario', InventarioController::class);
@@ -98,12 +104,18 @@ Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name(
 Route::get('/inventario/{id}/edit', [InventarioController::class, 'edit'])->name('inventario.edit');
 Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
 
+// Ruta para validar el código de producto
+Route::get('/productos/create/validar-codigo', [ProductoController::class, 'validarCodigo'])->name('productos.validar.codigo');
 // Rutas de productos
 Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
-
+// Ruta personalizada para desactivar Producto
+// Ruta personalizada para desactivar Producto
 Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
+
+
+
 
 
 // Rutas de OT

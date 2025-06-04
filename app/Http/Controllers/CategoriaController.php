@@ -20,6 +20,7 @@ class CategoriaController extends Controller
     {
         return view('categorias.create');
     }
+    
     // Validar y guardar una nueva categoría
     public function validarNombre(Request $request)
     {
