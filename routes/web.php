@@ -65,6 +65,7 @@ Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNo
 Route::get('/cxr/{regionId}', [CiudadController::class, 'getCiudadesPorRegion']);
 
 
+
 // Rutas de administración
 Route::middleware(['auth', 'admin'])->group(function () {
     //Rutas Usuarios
@@ -72,6 +73,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Ruta personalizada para reactivar usuarios
     Route::post('/users/{user}/reactivar', [UserController::class, 'reactivar'])->name('users.reactivar');
 });
+
 
 
 // Rutas de estado de categorías
@@ -92,6 +94,7 @@ Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'act
 Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
 
 
+
 // Rutas de inventario
 Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
 Route::resource('inventario', InventarioController::class);
@@ -106,7 +109,10 @@ Route::resource('productos', ProductoController::class);
 // Ruta personalizada para reactivar Producto
 Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
 // Ruta personalizada para desactivar Producto
+// Ruta personalizada para desactivar Producto
 Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
+// Ruta para validar el código de producto
+Route::get('/productos/validar-codigo', [ProductoController::class, 'validarCodigo']);
 // Ruta para validar el código de producto
 Route::get('/productos/validar-codigo', [ProductoController::class, 'validarCodigo']);
 
