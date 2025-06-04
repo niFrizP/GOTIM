@@ -13,7 +13,9 @@
                 <i class="fa-solid fa-square-plus"></i> Nueva Empresa
             </a>
             @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
+                <div class="mb-4 rounded bg-green-100 p-4 text-green-800 dark:text-green-300 dark:bg-green-900/20">
+                    {{ session('success') }}
+                </div>
             @endif
 
 
@@ -41,15 +43,15 @@
                                     <a href="{{ route('empresas.edit', $empresa->id_empresa) }}"
                                         class="btn btn-warning">Editar</a>
                                     @if ($empresa->estado === 'activo')
-                                        <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}"
-                                            method="POST" class="inline">
+                                        <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}" method="POST"
+                                            class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger">Inhabilitar</button>
                                         </form>
                                     @else
-                                        <form action="{{ route('empresas.reactivar', $empresa->id_empresa) }}"
-                                            method="POST" class="inline">
+                                        <form action="{{ route('empresas.reactivar', $empresa->id_empresa) }}" method="POST"
+                                            class="inline">
                                             @csrf
                                             <button type="submit" class="btn btn-success">Reactivar</button>
                                         </form>

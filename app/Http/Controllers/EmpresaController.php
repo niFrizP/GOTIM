@@ -29,7 +29,6 @@ class EmpresaController extends Controller
             'telefono' => 'nullable|string|max:20',
             'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
-            'direccion' => 'nullable|string|max:255',
         ]);
 
         $validated['estado'] = 'activo'; // Por defecto, activa
