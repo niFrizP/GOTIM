@@ -124,8 +124,10 @@
                         @forelse($ordenes as $ot)
                             <tr>
                                 <td class="border-b p-2">{{ $ot->id_ot }}</td>
-                                <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}</td>
-                                <td class="border-b p-2">{{ $ot->responsable->nombre }}</td>
+                                <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}
+                                    {{ $ot->cliente->apellido_cliente }}</td>
+                                <td class="border-b p-2">{{ $ot->responsable->nombre }}
+                                    {{ $ot->responsable->apellido }}</td>
                                 <td class="border-b p-2">
                                     <span class="inline-block rounded px-2 py-1 text-xs font-semibold">
                                         {{ $ot->estadoOT->nombre_estado }}
