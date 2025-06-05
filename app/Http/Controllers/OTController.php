@@ -183,8 +183,16 @@ class OTController extends Controller
             'archivosAdjuntos'
         ])->findOrFail($id);
 
-        $clientes = Cliente::pluck('nombre_cliente', 'id_cliente');
-        $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
+        $clientes = Cliente::select('id_cliente', 'nombre_cliente', 'apellido_cliente', 'rut')
+            ->get()
+            ->mapWithKeys(function ($cliente) {
+                return [$cliente->id_cliente => $cliente->nombre_cliente . ' ' . $cliente->apellido_cliente . ' (' . $cliente->rut . ')'];
+            });
+        $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->nombre . ' ' . $user->apellido];
+            });
         $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
         $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
 
@@ -411,35 +419,35 @@ class OTController extends Controller
                 $descripcion = $cambiosReales->map(function ($chg) {
                     return match ($chg['campo']) {
                         'Productos Asociados' => (function () use ($chg) {
-                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
-                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+                            $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                            $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
 
-                                $agregados = array_diff($idsNuevo, $idsAntes);
-                                $eliminados = array_diff($idsAntes, $idsNuevo);
+                            $agregados = array_diff($idsNuevo, $idsAntes);
+                            $eliminados = array_diff($idsAntes, $idsNuevo);
 
-                                if (!empty($agregados) && empty($eliminados)) {
-                                    $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
+                            if (!empty($agregados) && empty($eliminados)) {
+                                $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                    return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
-                                }
+                                return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
+                            }
 
-                                if (!empty($eliminados) && empty($agregados)) {
-                                    $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
+                            if (!empty($eliminados) && empty($agregados)) {
+                                $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                    return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
-                                }
+                                return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
+                            }
 
-                                if (!empty($agregados) && !empty($eliminados)) {
-                                    $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                            if (!empty($agregados) && !empty($eliminados)) {
+                                $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                    $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                                $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
 
-                                    return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
-                                }
+                                return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                            }
 
-                                return null;
-                            })(),
+                            return null;
+                        })(),
                         default => "<strong>{$chg['campo']}</strong> de <em>{$chg['valor_anterior']}</em> a <em>{$chg['valor_nuevo']}</em>",
                     };
                 })->implode("\n");

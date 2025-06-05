@@ -14,139 +14,86 @@ use App\Http\Controllers\OTController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmpresaController;
 
-// Rutas de servicios
-Route::get('/servicios/validar-nombre', [ServicioController::class, 'validarNombre']);
-Route::resource('servicios', ServicioController::class);
-
 // Ruta para la página de inicio de sesión
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Ruta para la página de inicio
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Rutas públicas (si necesitás alguna, ponela acá)
 
-// Rutas de autenticación
-Route::middleware('auth')->group(function () {
+// Rutas protegidas con autenticación
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Clientes
+    Route::resource('clientes', ClienteController::class);
+    Route::get('/clientes/validar-rut', [ClienteController::class, 'validarRut'])->name('clientes.validar.rut');
+    Route::get('/clientes/validar-email', [ClienteController::class, 'validarEmail'])->name('clientes.validar.email');
+    Route::get('/clientes/{id}/validar-rut', [ClienteController::class, 'validarRutEditar'])->name('clientes.validar.rut.editar');
+    Route::get('/clientes/{id}/validar-email', [ClienteController::class, 'validarEmailEditar'])->name('clientes.validar.email.editar');
+    Route::post('/clientes/{id}/reactivar', [ClienteController::class, 'reactivar'])->name('clientes.reactivar');
+    Route::get('/cxr/{id_region}', [CiudadController::class, 'getCiudadesPorRegion']);
+
+    // Empresas
+    Route::resource('empresas', EmpresaController::class);
+    Route::get('/empresas/comprobar/{rut}', [EmpresaController::class, 'ComprobarPorRut']);
+    Route::post('/empresas/{id}/reactivar', [EmpresaController::class, 'reactivar'])->name('empresas.reactivar');
+    Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNombre'])->name('empresas.comprobar.nombre');
+
+    // Servicios
+    Route::get('/servicios/validar-nombre', [ServicioController::class, 'validarNombre']);
+    Route::resource('servicios', ServicioController::class);
+
+    // Categorías
+    Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
+    Route::delete('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
+    Route::get('/categorias/validar-nombre', [CategoriaController::class, 'validarNombre']);
+    Route::get('/categorias/inactivas', [CategoriaController::class, 'inactivas'])->name('categorias.inactivas');
+    Route::resource('categorias', CategoriaController::class)->except(['destroy']);
+
+    // Tipo Producto
+    Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, 'desactivar'])->name('tipo_productos.desactivar');
+    Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
+    Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
+
+    // Inventario
+    Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
+    Route::resource('inventario', InventarioController::class);
+    Route::get('/inventario/{id}/reactivar', [InventarioController::class, 'reactivar'])->name('inventario.reactivar');
+    Route::get('/inventario/{id}/desactivar', [InventarioController::class, 'desactivar'])->name('inventario.desactivar');
+    Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name('inventario.ver');
+    Route::get('/inventario/{id}/edit', [InventarioController::class, 'edit'])->name('inventario.edit');
+    Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
+
+    // Productos
+    Route::get('/productos/create/validar-codigo', [ProductoController::class, 'validarCodigo'])->name('productos.validar.codigo');
+    Route::resource('productos', ProductoController::class);
+    Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
+
+    // Órdenes de Trabajo (OT)
+    Route::get('ot/historial', [OTController::class, 'historialGeneral'])->name('ot.historial.global');
+    Route::resource('ot', OTController::class)->except(['destroy']);
+    Route::get('/ot/export/{id}', [OTController::class, 'exportOrdenes'])->name('ot.export');
+    Route::post('ot/{id_ot}/desactivar', [OTController::class, 'desactivar'])->name('ot.desactivar');
+    Route::post('ot/{id_ot}/reactivar', [OTController::class, 'reactivar'])->name('ot.reactivar');
+    Route::get('ot/{ot}/historial', [OTController::class, 'historial'])->name('ot.historial');
+    Route::delete('/archivos-ot/{id}', [OTController::class, 'eliminarArchivo'])->name('archivos_ot.eliminar');
+    Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
 });
-// Rutas de clientes
-Route::resource('clientes', ClienteController::class);
-Route::get('/ciudades-por-region/{id_region}', [CiudadController::class, 'getCiudadesPorRegion']);
 
-// Ruta personalizada para validar el RUT de un cliente
-Route::get('/clientes/validar-rut', [ClienteController::class, 'validarRut'])->name('clientes.validar.rut');
-// Ruta personalizada para validar el email de un cliente
-Route::get('/clientes/validar-email', [ClienteController::class, 'validarEmail'])->name('clientes.validar.email');
-// Ruta personalizada para validar el RUT de un cliente al editar
-Route::get('/clientes/{id}/validar-rut', [ClienteController::class, 'validarRutEditar'])->name('clientes.validar.rut.editar');
-// Ruta personalizada para validar el email de un cliente al editar
-Route::get('/clientes/{id}/validar-email', [ClienteController::class, 'validarEmailEditar'])->name('clientes.validar.email.editar');
-// Ruta personalizada para reactivar clientes
-Route::post('/clientes/{id}/reactivar', [ClienteController::class, 'reactivar'])->name('clientes.reactivar');
-
-
-// Rutas de empresas
-Route::resource('empresas', \App\Http\Controllers\EmpresaController::class);
-// Ruta personalizada para validar el RUT de una empresa
-Route::get('/empresas/comprobar/{rut}', [EmpresaController::class, 'ComprobarPorRut']);
-// Ruta Reactivar Empresa
-Route::post('/empresas/{id}/reactivar', [EmpresaController::class, 'reactivar'])->name('empresas.reactivar');
-// Ruta Validar Nombre Empresa
-Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNombre'])->name('empresas.comprobar.nombre');
-
-
-
-// Rutas de ciudades y regiones
-Route::get('/cxr/{regionId}', [CiudadController::class, 'getCiudadesPorRegion']);
-
-
-
-// Rutas de administración
+// Rutas que solo el admin puede acceder (dentro de auth)
 Route::middleware(['auth', 'admin'])->group(function () {
-    //Rutas Usuarios
+    // Usuarios
     Route::resource('users', UserController::class);
-    // Ruta personalizada para reactivar usuarios
     Route::post('/users/{user}/reactivar', [UserController::class, 'reactivar'])->name('users.reactivar');
 });
 
-
-
-// Rutas de estado de categorías
-Route::post('/categorias/{id}/reactivar', [CategoriaController::class, 'reactivar'])->name('categorias.reactivar');
-Route::delete('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
-
-// Ruta para validar el nombre de la categoría
-Route::get('/categorias/validar-nombre', [CategoriaController::class, 'validarNombre']);
-
-// Ruta para mostrar categorías inactivas
-Route::get('/categorias/inactivas', [CategoriaController::class, 'inactivas'])->name('categorias.inactivas');
-
-Route::resource('categorias', CategoriaController::class)->except(['destroy']);
-
-//Ruta tipo_producto
-Route::patch('tipo_productos/{id}/desactivar', [TipoProductoController::class, 'desactivar'])->name('tipo_productos.desactivar');
-Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
-Route::resource('tipo_productos', TipoProductoController::class)->except(['destroy']);
-
-
-
-// Rutas de inventario
-Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
-Route::resource('inventario', InventarioController::class);
-Route::get('/inventario/{id}/reactivar', [InventarioController::class, 'reactivar'])->name('inventario.reactivar');
-Route::get('/inventario/{id}/desactivar', [InventarioController::class, 'desactivar'])->name('inventario.desactivar');
-Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name('inventario.ver');
-Route::get('/inventario/{id}/edit', [InventarioController::class, 'edit'])->name('inventario.edit');
-Route::get('/inventario/{id}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
-
-// Ruta para validar el código de producto
-Route::get('/productos/create/validar-codigo', [ProductoController::class, 'validarCodigo'])->name('productos.validar.codigo');
-// Rutas de productos
-Route::resource('productos', ProductoController::class);
-// Ruta personalizada para reactivar Producto
-Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
-// Ruta personalizada para desactivar Producto
-// Ruta personalizada para desactivar Producto
-Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
-
-
-
-
-
-// Rutas de OT
-Route::middleware(['auth'])->group(function () {
-    Route::get('ot/historial', [OTController::class, 'historialGeneral'])
-        ->name('ot.historial.global');
-    // CRUD menos destroy
-    Route::resource('ot', OTController::class)->except(['destroy']);
-
-    // Ruta para exportar OT a PDF
-    Route::get('/ot/export/{id}', [OTController::class, 'exportOrdenes'])->name('ot.export');
-
-
-    // Desactivar (inhabilitar) OT
-    Route::post('ot/{id_ot}/desactivar', [OTController::class, 'desactivar'])
-        ->name('ot.desactivar');
-
-    // Reactivar OT
-    Route::post('ot/{id_ot}/reactivar', [OTController::class, 'reactivar'])
-        ->name('ot.reactivar');
-    Route::get('ot/{ot}/historial', [OTController::class, 'historial'])
-        ->name('ot.historial');
-
-    //Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    //archivos 
-    Route::delete('/archivos-ot/{id}', [OTController::class, 'eliminarArchivo'])->name('archivos_ot.eliminar');
-
-});
-
-
-
+// Autenticación (Login, Register, Password Reset)
 require __DIR__ . '/auth.php';

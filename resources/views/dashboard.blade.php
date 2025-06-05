@@ -58,7 +58,7 @@
                         ['id' => 'ordersChart', 'title' => 'Órdenes por Mes', 'icon' => 'calendar'],
                         ['id' => 'ordersByStatusChart', 'title' => 'Órdenes por Estado', 'icon' => 'bar-chart-3'],
                         ['id' => 'productsByCategoryChart', 'title' => 'Productos por Categoría', 'icon' => 'layers'],
-                        ['id' => 'ordersByResponsableChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
+                        ['id' => 'responsableOrdersChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
                     ];
                 @endphp
 
@@ -141,6 +141,155 @@
             "responsableOrders": @json($responsableOrders)
         }
     </script>
+        <script>
+            // Ejes Y con enteros y tooltips coherentes
+            const integerYAxisOptions = {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    callback: value => Number.isInteger(value) ? value : null
+                }
+            };
+
+            const integerTooltipOptions = {
+                callbacks: {
+                    label: context => {
+                        let label = context.dataset.label || '';
+                        if (label) label += ': ';
+                        label += Number.isInteger(context.parsed.y) ?
+                            context.parsed.y :
+                            Math.round(context.parsed.y);
+                        return label;
+                    }
+                }
+            };
+
+            // Traducción de meses al español
+            const monthLabels = {!! json_encode($ordersByMonth->keys()) !!}.map(month => ({
+                January: 'Enero',
+                February: 'Febrero',
+                March: 'Marzo',
+                April: 'Abril',
+                May: 'Mayo',
+                June: 'Junio',
+                July: 'Julio',
+                August: 'Agosto',
+                September: 'Septiembre',
+                October: 'Octubre',
+                November: 'Noviembre',
+                December: 'Diciembre'
+            } [month] || month));
+
+            // Tamaños para cada gráfico
+            document.getElementById('ordersChart').style.height = '250px';
+            document.getElementById('ordersByStatusChart').style.height = '250px';
+            document.getElementById('productsByCategoryChart').style.height = '250px';
+            document.getElementById('responsableOrdersChart').style.height = '250px';
+
+            // Gráfico: Órdenes por Mes
+            new Chart(document.getElementById('ordersChart'), {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Órdenes',
+                        data: {!! json_encode($ordersByMonth->values()) !!},
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: integerYAxisOptions
+                    },
+                    plugins: {
+                        tooltip: integerTooltipOptions
+                    }
+                }
+            });
+
+            // Gráfico: Órdenes por Estado
+            new Chart(document.getElementById('ordersByStatusChart'), {
+                type: 'pie',
+                data: {
+                    labels: {!! json_encode($ordersByStatus->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($ordersByStatus->values()) !!},
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#00A36C', '#C71585'
+                        ]
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            color: '#fff',
+                            font: {
+                                weight: 'bold'
+                            },
+                            formatter: (value, ctx) => {
+                                const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(1);
+                                return `${percent}% (${value})`;
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.label}: ${ctx.parsed}`
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+
+            // Gráfico: Productos por Categoría
+            new Chart(document.getElementById('productsByCategoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($productCategories->keys()) !!},
+                    datasets: [{
+                        label: 'Productos por Categoría',
+                        data: {!! json_encode($productCategories->values()) !!},
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: integerYAxisOptions
+                    },
+                    plugins: {
+                        tooltip: integerTooltipOptions
+                    }
+                }
+            });
+
+            // Gráfico: Órdenes por Responsable
+            new Chart(document.getElementById('responsableOrdersChart'), {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($responsableOrders->keys()) !!},
+                    datasets: [{
+                        label: 'Órdenes por Responsable',
+                        data: {!! json_encode($responsableOrders->values()) !!},
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: integerYAxisOptions
+                    },
+                    plugins: {
+                        tooltip: integerTooltipOptions
+                    }
+                }
+            });
+        </script>
     @endpush
 
 </x-app-layout>
