@@ -26,64 +26,111 @@
             </div>
 
             <!-- Tarjetas -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <?php
-                    $cards = [
-                        [
-                            'title' => 'Clientes',
-                            'value' => $totalCliente,
-                            'bg' => 'bg-gray-600',
-                            'icon' => 'users',
-                        ],
-                        [
-                            'title' => 'Órdenes Totales',
-                            'value' => $totalOrden,
-                            'bg' => 'bg-red-600',
-                            'icon' => 'clipboard-list',
-                        ],
-                        [
-                            'title' => 'Órdenes Completadas',
-                            'value' => $completedOrden,
-                            'bg' => 'bg-indigo-600',
-                            'icon' => 'check-circle',
-                        ],
-                    ];
-                ?>
+            <?php
+                $cards = [
+                    [
+                        'title' => 'Clientes',
+                        'value' => $totalCliente,
+                        'param' => 'clientes_filtro',
+                        'bg' => 'bg-gray-600',
+                        'icon' => 'users',
+                        'filtro' => $filtros['clientes'],
+                    ],
+                    [
+                        'title' => 'Órdenes Totales',
+                        'value' => $totalOrden,
+                        'param' => 'ordenes_filtro',
+                        'bg' => 'bg-red-600',
+                        'icon' => 'clipboard-list',
+                        'filtro' => $filtros['ordenes'],
+                    ],
+                    [
+                        'title' => 'Órdenes Completadas',
+                        'value' => $completedOrden,
+                        'param' => 'completadas_filtro',
+                        'bg' => 'bg-indigo-600',
+                        'icon' => 'check-circle',
+                        'filtro' => $filtros['completadas'],
+                    ],
+                ];
+            ?>
 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <?php $__currentLoopData = $cards; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $card): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div class="<?php echo e($card['bg']); ?> text-white p-6 rounded shadow flex items-center justify-between">
-                        <div>
-                            <div class="text-sm font-medium uppercase tracking-wide"><?php echo e($card['title']); ?></div>
-                            <div class="text-3xl font-bold"><?php echo e($card['value']); ?></div>
+                    <div class="<?php echo e($card['bg']); ?> text-white p-6 rounded shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium uppercase tracking-wide"><?php echo e($card['title']); ?></div>
+                                <div class="text-3xl font-bold"><?php echo e($card['value']); ?></div>
+                            </div>
+                            <i data-lucide="<?php echo e($card['icon']); ?>" class="w-10 h-10 opacity-80"></i>
                         </div>
-                        <i data-lucide="<?php echo e($card['icon']); ?>" class="w-10 h-10 opacity-80"></i>
+
+                        
+                        <form method="GET" class="mt-4 flex flex-wrap gap-2">
+                            <?php
+                                $opciones = ['semana', 'mes', 'año', 'total'];
+                            ?>
+
+                            <?php $__currentLoopData = $opciones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opcion): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <input type="hidden" name="<?php echo e($card['param']); ?>" value="<?php echo e($opcion); ?>">
+                                <button formaction="?<?php echo e($card['param']); ?>=<?php echo e($opcion); ?>"
+                                    class="text-xs px-2 py-1 rounded transition-all
+                        <?php echo e($card['filtro'] === $opcion ? 'bg-white text-black font-bold' : 'bg-black bg-opacity-30'); ?>">
+                                    <?php echo e(ucfirst($opcion)); ?>
+
+                                </button>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </form>
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
+
 
 
             <!-- Gráficos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <?php
-                    $charts = [
-                        ['id' => 'ordersChart', 'title' => 'Órdenes por Mes', 'icon' => 'calendar'],
-                        ['id' => 'ordersByStatusChart', 'title' => 'Órdenes por Estado', 'icon' => 'bar-chart-3'],
-                        ['id' => 'productsByCategoryChart', 'title' => 'Productos por Categoría', 'icon' => 'layers'],
-                        ['id' => 'responsableOrdersChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
-                    ];
-                ?>
+            <!--Filtro para gráficos-->
+            <form method="GET" action="<?php echo e(route('dashboard')); ?>" class="mb-6 flex gap-4 items-center">
+                <label for="filtro" class="p-6 text-gray-900 dark:text-gray-100">Filtrar por:</label>
+                <select name="filtro" id="filtro" onchange="this.form.submit()" class="p-2 border rounded">
+                    <option value="total" <?php echo e($filtro == 'total' ? 'selected' : ''); ?>>Total</option>
+                    <option value="semana" <?php echo e($filtro == 'semana' ? 'selected' : ''); ?>>Semana</option>
+                    <option value="mes" <?php echo e($filtro == 'mes' ? 'selected' : ''); ?>>Mes</option>
+                    <option value="año" <?php echo e($filtro == 'año' ? 'selected' : ''); ?>>Año</option>
+                </select>
+            </form>
 
-                <?php $__currentLoopData = $charts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chart): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-                        <div class="mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100 font-bold">
-                            <i data-lucide="<?php echo e($chart['icon']); ?>" class="w-5 h-5"></i>
-                            <?php echo e($chart['title']); ?>
+            <?php if($ordersByMonth->isEmpty()): ?>
+                <div class="text-center text-gray-500 p-4 border rounded bg-gray-100">
+                    No hay datos disponibles para generar el gráfico.
+                </div>
+            <?php else: ?>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <?php
+                        $charts = [
+                            ['id' => 'ordersChart', 'title' => 'Órdenes por Mes', 'icon' => 'calendar'],
+                            ['id' => 'ordersByStatusChart', 'title' => 'Órdenes por Estado', 'icon' => 'bar-chart-3'],
+                            [
+                                'id' => 'productsByCategoryChart',
+                                'title' => 'Productos por Categoría',
+                                'icon' => 'layers',
+                            ],
+                            ['id' => 'responsableOrdersChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
+                        ];
+                    ?>
 
+                    <?php $__currentLoopData = $charts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chart): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+                            <div class="mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100 font-bold">
+                                <i data-lucide="<?php echo e($chart['icon']); ?>" class="w-5 h-5"></i>
+                                <?php echo e($chart['title']); ?>
+
+                            </div>
+                            <canvas id="<?php echo e($chart['id']); ?>" class="h-64 w-full"></canvas>
                         </div>
-                        <canvas id="<?php echo e($chart['id']); ?>" class="h-64 w-full"></canvas>
-                    </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            <?php endif; ?>
 
             <!-- Productos con bajo stock -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
@@ -92,9 +139,9 @@
                     Productos con Stock Bajo
                 </div>
                 <p class="text-gray-700 dark:text-gray-300 mb-4">
-                    Los siguientes productos tienen un stock de 3 unidades o menos. Por favor, considere reabastecerlos.
+                    Los siguientes productos tienen un stock de 3 unidades o menos. Por favor, considere
+                    reabastecerlos.
                 </p>
-
 
                 <?php if($lowStockProducts->where('cantidad', '<=', 3)->isNotEmpty()): ?>
                     <div class="overflow-x-auto">
@@ -138,8 +185,8 @@
                 <?php else: ?>
                     <div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock
                         suficiente.</div>
-                <?php endif; ?>
             </div>
+            <?php endif; ?>
 
         </div>
     </div>
