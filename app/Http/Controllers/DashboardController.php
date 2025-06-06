@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $totalCliente = $this->filtrarClientes($filtros['clientes']);
         $totalOrden = $this->filtrarOT($filtros['ordenes']);
         $completedOrden = $this->filtrarOT($filtros['completadas'], 'Finalizada');
-        
+
 
         // Query base para aplicar en los gráficos
         $query = OT::query();
@@ -61,7 +61,7 @@ class DashboardController extends Controller
 
         $lowStockProducts = DB::table('inventario')
             ->join('productos', 'inventario.id_producto', '=', 'productos.id_producto')
-            ->where('inventario.cantidad', '<', 3)
+            ->where('inventario.cantidad', '<=', 3)
             ->select('productos.id_producto', 'productos.nombre_producto', 'inventario.cantidad')
             ->get();
 

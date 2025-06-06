@@ -249,7 +249,7 @@
             if (archivos.length > 0) {
                 const resumen = document.createElement('div');
                 resumen.textContent = archivos.length === 1
-                    ? `Archivo seleccionado: ${archivos[0].name}`
+                    ? `Archivo seleccionado:`
                     : `${archivos.length} archivos seleccionados`;
                 info.appendChild(resumen);
 

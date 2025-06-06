@@ -419,35 +419,35 @@ class OTController extends Controller
                 $descripcion = $cambiosReales->map(function ($chg) {
                     return match ($chg['campo']) {
                         'Productos Asociados' => (function () use ($chg) {
-                            $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
-                            $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
 
-                            $agregados = array_diff($idsNuevo, $idsAntes);
-                            $eliminados = array_diff($idsAntes, $idsNuevo);
+                                $agregados = array_diff($idsNuevo, $idsAntes);
+                                $eliminados = array_diff($idsAntes, $idsNuevo);
 
-                            if (!empty($agregados) && empty($eliminados)) {
-                                $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
+                                if (!empty($agregados) && empty($eliminados)) {
+                                    $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
-                            }
+                                    return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
+                                }
 
-                            if (!empty($eliminados) && empty($agregados)) {
-                                $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
+                                if (!empty($eliminados) && empty($agregados)) {
+                                    $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
-                            }
+                                    return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
+                                }
 
-                            if (!empty($agregados) && !empty($eliminados)) {
-                                $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                                if (!empty($agregados) && !empty($eliminados)) {
+                                    $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                                    $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
 
-                                return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
-                            }
+                                    return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                                }
 
-                            return null;
-                        })(),
+                                return null;
+                            })(),
                         default => "<strong>{$chg['campo']}</strong> de <em>{$chg['valor_anterior']}</em> a <em>{$chg['valor_nuevo']}</em>",
                     };
                 })->implode("\n");
@@ -532,6 +532,19 @@ class OTController extends Controller
         if ($request->filled('campo')) {
             $query->where('campo_modificado', 'like', "%{$request->campo}%");
         }
+        if ($request->filled('cliente')) {
+            $query->whereHas('ot.cliente', function ($q) use ($request) {
+                $q->where('nombre_cliente', 'like', '%' . $request->cliente . '%')
+                    ->orWhere('apellido_cliente', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        if ($request->filled('rut')) {
+            $query->whereHas('ot.cliente', function ($q) use ($request) {
+                $rut = preg_replace('/[^0-9kK]/', '', $request->rut);
+                $q->whereRaw("REPLACE(REPLACE(REPLACE(rut, '.', ''), '-', ''), ' ', '') LIKE ?", ["%{$rut}%"]);
+            });
+        }
         if ($request->filled('responsable')) {
             $query->whereHas('usuario', function ($q) use ($request) {
                 $q->where('nombre', 'like', "%{$request->responsable}%");
@@ -561,6 +574,8 @@ class OTController extends Controller
             return [
                 'id_historial' => $first->id_historial_ot,
                 'id_ot' => $first->id_ot,
+                'cliente' => optional($first->ot->cliente)->nombre_cliente . ' ' . optional($first->ot->cliente)->apellido_cliente,
+                'rut' => optional($first->ot->cliente)->rut,
                 'usuario' => $first->usuario->nombre ?? 'Sistema',
                 'campos' => $listaCampos,
                 'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
@@ -750,7 +765,7 @@ class OTController extends Controller
             'buscar' => 'nullable|string|max:255',
             'estado' => 'nullable|integer|exists:estado_ot,id_estado',
             'responsable' => 'nullable|integer|exists:users,id',
-            'fechaInicio' => 'nullable|date_format:Y-m-d',  // Solo fecha, sin hora
+            'fechaInicio' => 'nullable|date_format:Y-m-d',
         ]);
 
         // Si la validación falla, redirigir con errores
