@@ -88,8 +88,24 @@
                     {{-- Archivos Adjuntos --}}
                     <div class="mt-6">
                         <x-input-label for="archivos" value="Archivos Adjuntos" />
-                        <input id="archivos" name="archivos[]" type="file" multiple
-                            class="w-full text-sm text-gray-900 dark:text-gray-200" />
+                        <label for="archivos"
+                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow cursor-pointer transition duration-200 ease-in-out">
+                            <i class="fa-solid fa-upload mr-2"></i>
+                            Elegir Archivos
+                            <input id="archivos" name="archivos[]" type="file" multiple class="hidden"
+                                accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.xls,.xlsx"
+                                onchange="mostrarArchivosSeleccionados()" />
+                        </label>
+
+                        <div
+                            class="mt-3 border border-blue-300 dark:border-blue-700 rounded-md p-3 bg-blue-50 dark:bg-blue-900/10">
+                            <div class="font-semibold text-blue-800 dark:text-blue-300 mb-1">
+                                Archivos seleccionados para subir
+                            </div>
+                            <div id="archivosSeleccionados"
+                                class="text-sm text-gray-800 dark:text-gray-200 space-y-1 italic">
+                            </div>
+                        </div>
                         <x-input-error :messages="$errors->get('archivos')"
                             class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
@@ -187,6 +203,31 @@
             function crearServicioURL() {
                 return "{{ route('servicios.create') }}";
             }
+        });
+        function mostrarArchivosSeleccionados() {
+            const input = document.getElementById('archivos');
+            const info = document.getElementById('archivosSeleccionados');
+            info.innerHTML = '';
+            const archivos = input.files;
+            if (archivos.length > 0) {
+                const resumen = document.createElement('div');
+                resumen.textContent = archivos.length === 1 ? `Archivo seleccionado:` : `${archivos.length} archivos seleccionados`;
+                info.appendChild(resumen);
+                const lista = document.createElement('ul');
+                lista.classList.add('list-disc', 'pl-6');
+                Array.from(archivos).forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = file.name;
+                    lista.appendChild(li);
+                });
+                info.appendChild(lista);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            $('select.select2').each(function () {
+                inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
+            });
         });
     </script>
 

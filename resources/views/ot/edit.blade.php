@@ -164,6 +164,7 @@
                             <i class="fa-solid fa-upload mr-2"></i>
                             Elegir Archivos
                             <input id="archivos" name="archivos[]" type="file" multiple class="hidden"
+                                accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.xls,.xlsx"
                                 onchange="mostrarArchivosSeleccionados()" />
                         </label>
 
@@ -174,7 +175,18 @@
                             </div>
                             <div id="archivosSeleccionados"
                                 class="text-sm text-gray-800 dark:text-gray-200 space-y-1 italic">
-                                <!-- JS insertará aquí -->
+                                @if ($errors->has('archivos'))
+                                    @foreach ($errors->get('archivos') as $mensaje)
+                                        <div class="text-red-600 font-medium">{{ $mensaje }}</div>
+                                    @endforeach
+                                @endif
+                                @if ($errors->has('archivos.*'))
+                                    @foreach ($errors->get('archivos.*') as $erroresArchivo)
+                                        @foreach ($erroresArchivo as $mensaje)
+                                            <div class="text-red-600 font-medium">{{ $mensaje }}</div>
+                                        @endforeach
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
 
