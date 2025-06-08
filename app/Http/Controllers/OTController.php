@@ -75,8 +75,11 @@ class OTController extends Controller
             'descripcion' => 'nullable|string',
             'servicios' => 'array',
             'servicios.*' => 'exists:servicios,id_servicio',
-            'archivos.*' => 'file',
-        ]);
+            'archivos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,pdf,doc,docx,xls,xlsx|max:10240',
+        ], $messages = [
+                'archivos.*.mimes' => 'Solo se permiten archivos JPG, PNG, PDF, Word o Excel.',
+                'archivos.*.max' => 'El archivo no debe superar los 10MB.',
+            ]);
         // Asignar el estado inicial de la OT
         $data['id_estado'] = 1; // Estado "Recepcionada"
 
@@ -90,15 +93,40 @@ class OTController extends Controller
                 'fecha_entrega' => $data['fecha_entrega'] ?? null,
             ]);
 
-            // 2) Registro **solo** historial de creación
+            // 2) Registrar historial de creación y campos
+            $camposHistorial = [];
+
+            $cliente = Cliente::find($data['id_cliente']);
+            $responsable = User::find($data['id_responsable']);
+            $fechaEntrega = Carbon::parse($data['fecha_entrega'])->format('d/m/Y');
+
+            $camposHistorial[] = "<strong>Cliente</strong>: <em>{$cliente->nombre_cliente} {$cliente->apellido_cliente}</em>";
+            $camposHistorial[] = "<strong>Responsable</strong>: <em>{$responsable->nombre} {$responsable->apellido}</em>";
+            $camposHistorial[] = "<strong>Fecha de entrega</strong>: <em>{$fechaEntrega}</em>";
+
+            if (!empty($data['descripcion'])) {
+                $camposHistorial[] = "<strong>Descripción</strong>: <em>{$data['descripcion']}</em>";
+            }
+
+            if (!empty($data['servicios'])) {
+                $nombresServicios = Servicio::whereIn('id_servicio', $data['servicios'])->pluck('nombre_servicio')->implode(', ');
+                $camposHistorial[] = "<strong>Servicios</strong>: <em>{$nombresServicios}</em>";
+            }
+
+            if ($request->hasFile('archivos')) {
+                $nombresArchivos = collect($request->file('archivos'))->map(fn($f) => $f->getClientOriginalName())->implode(', ');
+                $camposHistorial[] = "<strong>Archivo(s) adjunto(s)</strong>: <em>{$nombresArchivos}</em>";
+            }
+
             HistorialOT::create([
                 'id_ot' => $ot->id_ot,
                 'id_responsable' => Auth::id(),
                 'campo_modificado' => 'Creación',
                 'valor_anterior' => null,
-                'valor_nuevo' => 'Orden creada',
+                'valor_nuevo' => implode('<br>', $camposHistorial),
                 'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
             ]);
+
 
             // 3) Ahora guardo el resto de datos sin más auditoría
             if (!empty($data['descripcion'])) {
@@ -161,7 +189,10 @@ class OTController extends Controller
                 'id_historial' => $group->min('id_historial_ot'),
                 'usuario' => $first->usuario->nombre ?? 'Sistema',
                 'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
-                'campos' => $listaCampos,
+                'campos' => collect($listaCampos)->map(function ($campo) {
+                    return $campo === 'nueva_descripcion' ? 'Descripción' : $campo;
+                })->all(),
+
                 'descripciones' => $group->map(fn($h) => $this->descripcion($h))->all(),
             ];
         })->sortByDesc('id_historial')->values();
@@ -229,8 +260,11 @@ class OTController extends Controller
             'productos' => 'array',
             'productos.*.id' => 'required|exists:productos,id_producto',
             'productos.*.cantidad' => 'required|integer|min:1',
-            'archivos.*' => 'file',
-        ]);
+            'archivos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,pdf,doc,docx,xls,xlsx|max:10240',
+        ], $messages = [
+                'archivos.*.mimes' => 'Solo se permiten archivos JPG, PNG, PDF, Word o Excel.',
+                'archivos.*.max' => 'El archivo no debe superar los 10MB.',
+            ]);
 
         DB::transaction(function () use ($ot, $data) {
             $labels = [
@@ -286,12 +320,15 @@ class OTController extends Controller
                 if ($descDesp) {
                     $ot->detalleOT()->create(['descripcion_actividad' => $descDesp]);
                 }
+
+                // Campo personalizado para mostrar "Nueva descripción" en historial
                 $cambios[] = [
-                    'campo' => $labels['descripcion'],
-                    'valor_anterior' => $descAntes ?: 'Sin descripción',
+                    'campo' => 'nueva_descripcion',
+                    'valor_anterior' => null,
                     'valor_nuevo' => $descDesp ?: 'Sin descripción',
                 ];
             }
+
 
             // 3) Servicios
             $oldServ = $ot->servicios()->pluck('servicios.id_servicio')->toArray();
@@ -419,35 +456,40 @@ class OTController extends Controller
                 $descripcion = $cambiosReales->map(function ($chg) {
                     return match ($chg['campo']) {
                         'Productos Asociados' => (function () use ($chg) {
-                            $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
-                            $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
 
-                            $agregados = array_diff($idsNuevo, $idsAntes);
-                            $eliminados = array_diff($idsAntes, $idsNuevo);
+                                $agregados = array_diff($idsNuevo, $idsAntes);
+                                $eliminados = array_diff($idsAntes, $idsNuevo);
 
-                            if (!empty($agregados) && empty($eliminados)) {
-                                $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
+                                if (!empty($agregados) && empty($eliminados)) {
+                                    $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
-                            }
+                                    return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
+                                }
 
-                            if (!empty($eliminados) && empty($agregados)) {
-                                $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
+                                if (!empty($eliminados) && empty($agregados)) {
+                                    $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
-                            }
+                                    return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
+                                }
 
-                            if (!empty($agregados) && !empty($eliminados)) {
-                                $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                                if (!empty($agregados) && !empty($eliminados)) {
+                                    $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                                    $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
 
-                                return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
-                            }
+                                    return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                                }
 
-                            return null;
-                        })(),
+                                return null;
+                            })(),
+
+                        // 🔧 Aquí está el cambio que tú pediste
+                        'nueva_descripcion' => "<strong>Nueva descripción</strong>: <em>{$chg['valor_nuevo']}</em>",
+
+                        // 🔁 Resto de campos (cliente, responsable, estado, etc.)
                         default => "<strong>{$chg['campo']}</strong> de <em>{$chg['valor_anterior']}</em> a <em>{$chg['valor_nuevo']}</em>",
                     };
                 })->implode("\n");
@@ -461,8 +503,6 @@ class OTController extends Controller
                     'fecha_modificacion' => Carbon::now()->timezone('America/Santiago'),
                 ]);
             }
-
-
             // 6) Actualizar OT
             $ot->update([
                 'id_cliente' => $data['id_cliente'],
@@ -532,6 +572,19 @@ class OTController extends Controller
         if ($request->filled('campo')) {
             $query->where('campo_modificado', 'like', "%{$request->campo}%");
         }
+        if ($request->filled('cliente')) {
+            $query->whereHas('ot.cliente', function ($q) use ($request) {
+                $q->where('nombre_cliente', 'like', '%' . $request->cliente . '%')
+                    ->orWhere('apellido_cliente', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        if ($request->filled('rut')) {
+            $query->whereHas('ot.cliente', function ($q) use ($request) {
+                $rut = preg_replace('/[^0-9kK]/', '', $request->rut);
+                $q->whereRaw("REPLACE(REPLACE(REPLACE(rut, '.', ''), '-', ''), ' ', '') LIKE ?", ["%{$rut}%"]);
+            });
+        }
         if ($request->filled('responsable')) {
             $query->whereHas('usuario', function ($q) use ($request) {
                 $q->where('nombre', 'like', "%{$request->responsable}%");
@@ -561,8 +614,13 @@ class OTController extends Controller
             return [
                 'id_historial' => $first->id_historial_ot,
                 'id_ot' => $first->id_ot,
+                'cliente' => optional($first->ot->cliente)->nombre_cliente . ' ' . optional($first->ot->cliente)->apellido_cliente,
+                'rut' => optional($first->ot->cliente)->rut,
                 'usuario' => $first->usuario->nombre ?? 'Sistema',
-                'campos' => $listaCampos,
+                'campos' => collect($listaCampos)->map(function ($campo) {
+                    return $campo === 'nueva_descripcion' ? 'Descripción' : $campo;
+                })->all(),
+
                 'fecha_modificacion' => $first->fecha_modificacion->format('Y-m-d H:i:s'),
                 'descripciones' => $group->map(fn($h) => $this->descripcion($h))->all(),
             ];
@@ -590,8 +648,19 @@ class OTController extends Controller
     protected function descripcion(HistorialOT $h): string
     {
         if ($h->campo_modificado === 'Creación') {
-            return '<li><strong>Se ha creado la Orden de Trabajo.</strong></li>';
+            $lineas = preg_split('/\r\n|\r|\n|<br\s*\/?>/i', $h->valor_nuevo);
+            $lineas = array_filter(array_map('trim', $lineas));
+
+            $html = '<li><strong>Se ha creado la Orden de Trabajo con los siguientes datos:</strong></li>';
+            foreach ($lineas as $linea) {
+                if (!empty($linea)) {
+                    $html .= "<li>{$linea}</li>";
+                }
+            }
+
+            return $html;
         }
+
 
         if (is_string($h->valor_nuevo) && str_contains($h->valor_nuevo, '<strong>')) {
             // Si es un bloque consolidado con HTML, divídelo en líneas
@@ -750,7 +819,7 @@ class OTController extends Controller
             'buscar' => 'nullable|string|max:255',
             'estado' => 'nullable|integer|exists:estado_ot,id_estado',
             'responsable' => 'nullable|integer|exists:users,id',
-            'fechaInicio' => 'nullable|date_format:Y-m-d',  // Solo fecha, sin hora
+            'fechaInicio' => 'nullable|date_format:Y-m-d',
         ]);
 
         // Si la validación falla, redirigir con errores
