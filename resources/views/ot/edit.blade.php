@@ -89,6 +89,8 @@
                         <div>
                             <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega" />
                             <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full"
+                                min="{{ $ot->fecha_creacion->format('Y-m-d') }}"
+                                max="{{ \Carbon\Carbon::now()->addYears(5)->format('Y-m-d') }}"
                                 :value="old('fecha_entrega', optional($ot->fecha_entrega)->format('Y-m-d'))" />
                             <x-input-error :messages="$errors->get('fecha_entrega')" class="mt-1" />
                         </div>

@@ -59,7 +59,7 @@ class OTController extends Controller
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])
             ->get()
             ->mapWithKeys(function ($user) {
-                return [$user->id => $user->nombre . ' ' . $user->apellido];
+                return [$user->id => $user->nombre . ' ' . $user->apellido . ' (' . $user->rol . ')'];
             });
         $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
 
@@ -82,7 +82,19 @@ class OTController extends Controller
             ]);
         // Asignar el estado inicial de la OT
         $data['id_estado'] = 1; // Estado "Recepcionada"
+        // Validación adicional: la fecha_entrega no puede ser mayor a 5 años desde hoy
+        if (!empty($data['fecha_entrega'])) {
+            $fechaEntrega = Carbon::parse($data['fecha_entrega']);
+            $limiteSuperior = now()->addYears(5);
 
+            if ($fechaEntrega->gt($limiteSuperior)) {
+                return redirect()->back()
+                    ->withErrors([
+                        'fecha_entrega' => 'La fecha de entrega no puede superar los 5 años desde hoy (' . $limiteSuperior->format('d/m/Y') . ').'
+                    ])
+                    ->withInput();
+            }
+        }
 
         DB::transaction(function () use ($data, $request) {
             // 1) Creo la OT
@@ -222,7 +234,7 @@ class OTController extends Controller
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])
             ->get()
             ->mapWithKeys(function ($user) {
-                return [$user->id => $user->nombre . ' ' . $user->apellido];
+                return [$user->id => $user->nombre . ' ' . $user->apellido . ' (' . $user->rol . ')'];
             });
         $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
         $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
@@ -249,6 +261,8 @@ class OTController extends Controller
     public function update(Request $request, $id)
     {
         $ot = OT::findOrFail($id);
+
+        // ✅ Paso 1: Validación con Laravel
         $data = $request->validate([
             'id_cliente' => 'required|exists:clientes,id_cliente',
             'id_responsable' => 'required|exists:users,id',
@@ -261,11 +275,33 @@ class OTController extends Controller
             'productos.*.id' => 'required|exists:productos,id_producto',
             'productos.*.cantidad' => 'required|integer|min:1',
             'archivos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,pdf,doc,docx,xls,xlsx|max:10240',
-        ], $messages = [
-                'archivos.*.mimes' => 'Solo se permiten archivos JPG, PNG, PDF, Word o Excel.',
-                'archivos.*.max' => 'El archivo no debe superar los 10MB.',
-            ]);
+        ], [
+            'archivos.*.mimes' => 'Solo se permiten archivos JPG, PNG, PDF, Word o Excel.',
+            'archivos.*.max' => 'El archivo no debe superar los 10MB.',
+        ]);
 
+        // ✅ Paso 2: Validación personalizada de fecha_entrega
+        if (!empty($data['fecha_entrega'])) {
+            $fechaEntrega = Carbon::parse($data['fecha_entrega']);
+            $fechaCreacion = Carbon::parse($ot->fecha_creacion);
+            $limiteSuperior = now()->addYears(5);
+
+            if ($fechaEntrega->lt($fechaCreacion)) {
+                return redirect()->back()
+                    ->withErrors([
+                        'fecha_entrega' => 'La fecha de entrega no puede ser anterior a la fecha de creación de la orden (' . $fechaCreacion->format('d/m/Y') . ').'
+                    ])
+                    ->withInput();
+            }
+
+            if ($fechaEntrega->gt($limiteSuperior)) {
+                return redirect()->back()
+                    ->withErrors([
+                        'fecha_entrega' => 'La fecha de entrega no puede superar los 5 años desde hoy (' . $limiteSuperior->format('d/m/Y') . ').'
+                    ])
+                    ->withInput();
+            }
+        }
         DB::transaction(function () use ($ot, $data) {
             $labels = [
                 'id_cliente' => 'Cliente',

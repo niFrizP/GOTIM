@@ -56,7 +56,7 @@
                         <div>
                             <x-input-label for="fecha_entrega" value="Fecha Estimada de Entrega*" />
                             <x-text-input id="fecha_entrega" name="fecha_entrega" type="date" class="w-full"
-                                min="{{ now()->format('Y-m-d') }}" />
+                                min="{{ now()->format('Y-m-d') }}" max="{{ now()->addYears(5)->format('Y-m-d') }}" />
                             <x-input-error :messages="$errors->get('fecha_entrega')"
                                 class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
@@ -169,7 +169,17 @@
                 if (invalido) {
                     errorContainer.textContent = mensaje;
                     campo.classList.add('border-red-500');
-                } else {
+
+                }
+                if (campo.type === 'date') {
+                    const hoy = new Date().toISOString().split('T')[0];
+                    const max = new Date();
+                    max.setFullYear(max.getFullYear() + 5);
+                    const limite = max.toISOString().split('T')[0];
+
+                    invalido = !campo.value || campo.value < hoy || campo.value > limite;
+                }
+                else {
                     errorContainer.textContent = '';
                     campo.classList.remove('border-red-500');
                 }
@@ -180,6 +190,9 @@
             if (fechaEntrega) {
                 const hoy = new Date().toISOString().split('T')[0];
                 fechaEntrega.min = hoy;
+                const cincoAnios = new Date();
+                cincoAnios.setFullYear(cincoAnios.getFullYear() + 5);
+                fechaEntrega.max = cincoAnios.toISOString().split('T')[0];
             }
 
             // Servicios con búsqueda personalizada
