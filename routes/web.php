@@ -50,8 +50,8 @@ Route::middleware(['auth', \App\Http\Middleware\AllUserMiddleware::class])->grou
     Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNombre'])->name('empresas.comprobar.nombre');
 
     // OT
-    Route::resource('ot', OTController::class)->except(['destroy']);
     Route::get('ot/historial', [OTController::class, 'historialGeneral'])->name('ot.historial.global');
+    Route::resource('ot', OTController::class)->except(['destroy']);
     Route::get('/ot/export/{id}', [OTController::class, 'exportOrdenes'])->name('ot.export');
     Route::post('ot/{id_ot}/desactivar', [OTController::class, 'desactivar'])->name('ot.desactivar');
     Route::post('ot/{id_ot}/reactivar', [OTController::class, 'reactivar'])->name('ot.reactivar');
@@ -80,8 +80,8 @@ Route::middleware(['auth', \App\Http\Middleware\AdminOrSupervisorMiddleware::cla
     Route::patch('tipo_productos/{id}/activar', [TipoProductoController::class, 'activar'])->name('tipo_productos.activar');
 
     // Inventario
-    Route::resource('inventario', InventarioController::class);
     Route::get('/inventario/historial', [InventarioController::class, 'historial'])->name('inventario.historial');
+    Route::resource('inventario', InventarioController::class);
     Route::get('/inventario/{id}/reactivar', [InventarioController::class, 'reactivar'])->name('inventario.reactivar');
     Route::get('/inventario/{id}/desactivar', [InventarioController::class, 'desactivar'])->name('inventario.desactivar');
     Route::get('/inventario/{id}/ver', [InventarioController::class, 'show'])->name('inventario.ver');

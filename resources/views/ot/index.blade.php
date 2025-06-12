@@ -116,7 +116,6 @@
                             <th class="border-b p-2">Cliente</th>
                             <th class="border-b p-2">Responsable</th>
                             <th class="border-b p-2">Estado</th>
-                            <th class="border-b p-2">Fase</th>
                             <th class="border-b p-2">Creación</th>
                             <th class="border-b p-2">Acciones</th>
                         </tr>
@@ -126,22 +125,18 @@
                             <tr>
                                 <td class="border-b p-2">{{ $ot->id_ot }}</td>
                                 <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}
-                                    {{ $ot->cliente->apellido_cliente }}
+                                    {{ $ot->cliente->apellido_cliente }} ({{ $ot->cliente->tipo_cliente }})
                                 </td>
-                                <td class="border-b p-2">{{ $ot->responsable->nombre }}
-                                    {{ $ot->responsable->apellido }}
+                                <td class="border-b p-2">
+                                    {{ $ot->responsable->nombre }} {{ $ot->responsable->apellido }}
+                                    ({{ $ot->responsable->rol }})
                                 </td>
+
                                 <td class="border-b p-2">
                                     <span class="inline-block rounded px-2 py-1 text-xs font-semibold">
                                         {{ $ot->estadoOT->nombre_estado }}
                                     </span>
                                 </td>
-                                <td class="border-b p-2">
-                                    <span
-                                        class="inline-block rounded px-2 py-1 text-xs font-semibold
-                                            @if ($ot->fase === 'Habilitado') bg-green-100 text-green-800 @else bg-red-100 text-red-800 @endif">
-                                        {{ $ot->fase }}
-                                    </span>
                                 <td class="border-b p-2">
                                     {{ \Carbon\Carbon::parse($ot->fecha_creacion)->format('d/m/Y') }}
                                 </td>
