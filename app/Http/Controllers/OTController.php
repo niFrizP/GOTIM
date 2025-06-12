@@ -582,7 +582,7 @@ class OTController extends Controller
     public function desactivar($id_ot)
     {
         $ot = OT::findOrFail($id_ot);
-        $ot->id_estado = 2;
+        $ot->fase = 'Inhabiltiado';
         $ot->save();
 
         return back()->with('success', 'Orden de trabajo inhabilitada.');
@@ -591,7 +591,7 @@ class OTController extends Controller
     public function reactivar($id_ot)
     {
         $ot = OT::findOrFail($id_ot);
-        $ot->id_estado = 1;
+        $ot->fase = 'Habilitado';
         $ot->save();
 
         return back()->with('success', 'Orden de trabajo reactivada.');

@@ -116,6 +116,7 @@
                             <th class="border-b p-2">Cliente</th>
                             <th class="border-b p-2">Responsable</th>
                             <th class="border-b p-2">Estado</th>
+                            <th class="border-b p-2">Fase</th>
                             <th class="border-b p-2">Creación</th>
                             <th class="border-b p-2">Acciones</th>
                         </tr>
@@ -125,14 +126,22 @@
                             <tr>
                                 <td class="border-b p-2">{{ $ot->id_ot }}</td>
                                 <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}
-                                    {{ $ot->cliente->apellido_cliente }}</td>
+                                    {{ $ot->cliente->apellido_cliente }}
+                                </td>
                                 <td class="border-b p-2">{{ $ot->responsable->nombre }}
-                                    {{ $ot->responsable->apellido }}</td>
+                                    {{ $ot->responsable->apellido }}
+                                </td>
                                 <td class="border-b p-2">
                                     <span class="inline-block rounded px-2 py-1 text-xs font-semibold">
                                         {{ $ot->estadoOT->nombre_estado }}
                                     </span>
                                 </td>
+                                <td class="border-b p-2">
+                                    <span
+                                        class="inline-block rounded px-2 py-1 text-xs font-semibold
+                                            @if ($ot->fase === 'Habilitado') bg-green-100 text-green-800 @else bg-red-100 text-red-800 @endif">
+                                        {{ $ot->fase }}
+                                    </span>
                                 <td class="border-b p-2">
                                     {{ \Carbon\Carbon::parse($ot->fecha_creacion)->format('d/m/Y') }}
                                 </td>
@@ -154,23 +163,24 @@
                                         Exportar PDF
                                     </a>
                                     {{-- Inhabilitar si no está finalizada --}}
-                                    @if ($ot->estadoOT->nombre_estado !== 'Finalizada')
-                                        <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST"
-                                            class="inline">
+                                    @if ($ot->fase === 'Habilitado')
+                                        <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST" class="inline">
                                             @csrf
-                                            <button type="submit" class="text-red-500 hover:underline">
+                                            <button type="submit" class="text-red-500 hover:underline"
+                                                onclick="return confirm('¿Inhabilitar esta OT?')">
                                                 Inhabilitar
                                             </button>
                                         </form>
                                     @else
-                                        <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST"
-                                            class="inline">
+                                        <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST" class="inline">
                                             @csrf
-                                            <button type="submit" class="text-green-500 hover:underline">
+                                            <button type="submit" class="text-green-500 hover:underline"
+                                                onclick="return confirm('¿Reactivar esta OT?')">
                                                 Reactivar
                                             </button>
                                         </form>
                                     @endif
+
 
                                 </td>
 
