@@ -62,6 +62,7 @@
                                         class="text-gray-600 dark:text-gray-300 hover:underline">Ver</a>
                                     <a href="{{ route('productos.edit', $producto->id_producto) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
+                                    @if (Auth::user()->rol === 'administrador')
                                     @if ($producto->estado)
                                         <button
                                             onclick="mostrarModal('{{ $producto->id_producto }}', '{{ $producto->nombre_producto }}')"
@@ -76,6 +77,7 @@
                                                 Reactivar
                                             </button>
                                         </form>
+                                    @endif
                                     @endif
                                 </td>
                             </tr>

@@ -101,23 +101,25 @@
                         class="inline-block rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600 ml-2">
                         Editar Producto
                     </a>
-
-                    @if ($producto->estado)
-                        <!-- Botón para inhabilitar -->
-                        <button onclick="mostrarModal()"
-                            class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 ml-2">
-                            Inhabilitar Producto
-                        </button>
-                    @else
-                        <!-- Botón de reactivar -->
-                        <form action="{{ route('productos.reactivar', $producto->id_producto) }}" method="POST"
-                            class="inline-block">
-                            @csrf
-                            <button type="submit"
-                                class="inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 ml-2">
-                                Reactivar Producto
+                    @if (Auth::user()->rol === 'administrador')
+                        {{-- Botón para desactivar/activar producto --}}
+                        @if ($producto->estado)
+                            <!-- Botón para inhabilitar -->
+                            <button onclick="mostrarModal()"
+                                class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 ml-2">
+                                Inhabilitar Producto
                             </button>
-                        </form>
+                        @else
+                            <!-- Botón de reactivar -->
+                            <form action="{{ route('productos.reactivar', $producto->id_producto) }}" method="POST"
+                                class="inline-block">
+                                @csrf
+                                <button type="submit"
+                                    class="inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 ml-2">
+                                    Reactivar Producto
+                                </button>
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>
