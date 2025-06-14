@@ -50,73 +50,59 @@
                     <div class="mt-4">
                         <x-input-label value="Tipo de Cliente *" />
                         <div class="flex items-center gap-6">
-                            <x-input-label><input type="radio" name="tipo_cliente" value="natural"
-                                    {{ old('tipo_cliente') == 'natural' ? 'checked' : '' }}> Persona
-                                Natural</x-input-label>
-                            <x-input-label><input type="radio" name="tipo_cliente" value="empresa"
-                                    {{ old('tipo_cliente') == 'empresa' ? 'checked' : '' }}>
-                                Empresa</x-input-label>
+                            <x-input-label>
+                                <input type="radio" name="tipo_cliente" value="natural"
+                                    {{ old('tipo_cliente') == 'natural' ? 'checked' : '' }}> Persona Natural
+                            </x-input-label>
+                            <x-input-label>
+                                <input type="radio" name="tipo_cliente" value="empresa"
+                                    {{ old('tipo_cliente') == 'empresa' ? 'checked' : '' }}> Empresa
+                            </x-input-label>
                         </div>
                     </div>
                     <br>
-                    <!-- Nombre de la Empresa (Solo Empresa) -->
-                    <div id="nombre_empresa_field" style="display: none;">
-                        <x-input-label for="nombre_empresa_field" value="Nombre empresa" />
-                        <span id="nombre_empresa_label"
-                            class="inline-block mt-1 rounded px-3 py-1 text-sm font-semibold
-               bg-blue-200 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                        </span>
-                    </div>
-                    <input type="hidden" name="id_empresa" id="id_empresa" value="{{ old('id_empresa') }}">
 
-                    <!-- Giro (Solo Empresa) -->
+                    <!-- Campos Empresa -->
+                    <div id="rut_empresa_field" style="display: none;">
+                        <x-input-label for="rut_empresa" value="RUT Empresa *" />
+                        <p id="rut_empresa_feedback" class="mt-1 text-sm"></p>
+                        <x-text-input id="rut_empresa" name="rut_empresa" type="text" class="w-full"
+                            value="{{ old('rut_empresa') }}" maxlength="12" placeholder="Ej: 99.999.999-9" />
+                        <div id="empresa_no_encontrada" class="mt-2 text-red-600" style="display: none;">
+                            Empresa no registrada.
+                            <button type="button" id="btn_crear_empresa"
+                                class="ml-2 underline text-blue-500 hover:text-blue-700">
+                                Crear nueva empresa
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields para guardar id y nombre de empresa seleccionada -->
+                    <input type="hidden" id="id_empresa" name="id_empresa" value="{{ old('id_empresa') }}">
+                    <input type="hidden" id="nombre_empresa_label" name="nombre_empresa_label" value="">
+
+                    <div id="razon_social_field" style="display: none;">
+                        <x-input-label for="razon_social" value="Razón Social" />
+                        <x-text-input id="razon_social" name="razon_social" type="text" class="w-full"
+                            value="{{ old('razon_social') }}" />
+                        <x-input-error :messages="$errors->get('razon_social')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                    </div>
+
                     <div id="giro_field" style="display: none;">
                         <x-input-label for="giro" value="Giro" />
                         <x-text-input id="giro" name="giro" type="text" class="w-full"
                             value="{{ old('giro') }}" />
                         <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                     </div>
-                    <br>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <!-- Razón Social (solo empresa) -->
-                        <div id="razon_social_field" style="display: none;">
-                            <x-input-label for="razon_social" value="Razón Social" />
-                            <x-text-input id="razon_social" name="razon_social" type="text" class="w-full"
-                                value="{{ old('razon_social') }}" />
-                            <x-input-error :messages="$errors->get('razon_social')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-                        </div>
 
-                        <!-- Tipo de Cliente -->
-                        <!-- RUT Persona Natural -->
-                        <div id="rut_field" style="display: none;">
-                            <x-input-label for="rut_natural" value="RUT *" />
-                            <x-text-input id="rut_natural" name="rut_natural" type="text" class="w-full"
-                                value="{{ old('rut_natural') }}" maxlength="12" placeholder="Ej: 9.999.999-9" />
-                        </div>
-                        <x-input-error :messages="$errors->get('rut_natural')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-
-                        <!-- RUT Empresa -->
-                        <div id="rut_empresa_field" style="display: none;">
-                            <x-input-label for="rut_empresa" value="RUT Empresa *" />
-                            <x-text-input id="rut_empresa" name="rut_empresa" type="text" class="w-full"
-                                value="{{ old('rut_empresa') }}" maxlength="12" placeholder="Ej: 99.999.999-9" />
-                            <x-input-error :messages="$errors->get('rut')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-
-                            <!-- Mostrar razón social si existe -->
-                            <div id="razon_social_empresa" class="mt-2 text-green-600 font-semibold"
-                                style="display: none;">
-                            </div>
-
-                            <!-- Si no existe, mostrar botón para crear -->
-                            <div id="empresa_no_encontrada" class="mt-2 text-red-600" style="display: none;">
-                                Empresa no registrada.
-                                <button type="button" id="btn_crear_empresa"
-                                    class="ml-2 underline text-blue-500 hover:text-blue-700">
-                                    Crear nueva empresa
-                                </button>
-                            </div>
-                        </div>
+                    <!-- RUT Persona Natural -->
+                    <div id="rut_field" style="display: none;">
+                        <x-input-label for="rut_natural" value="RUT *" />
+                        <x-text-input id="rut_natural" name="rut_natural" type="text" class="w-full"
+                            value="{{ old('rut_natural') }}" maxlength="12" placeholder="Ej: 9.999.999-9" />
+                        <p id="rut_natural_feedback" class="mt-1 text-sm"></p>
                     </div>
+
                     <!-- Dirección -->
                     <div>
                         <x-input-label for="direccion" value="Dirección *" />
@@ -156,7 +142,6 @@
                             <x-input-error :messages="$errors->get('id_ciudad')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
                         <x-input-label value="Los campos marcados con * son obligatorios." />
-
                     </div>
                     @if ($errors->any())
                         <div class="mb-4 text-red-600">
@@ -174,207 +159,252 @@
 
                     <div class="mt-4">
                         <x-secondary-button>
-                            <a href="{{ route('clientes.index') }}" class="text-blue-500 hover:text-blue-700">Volver
-                                a la
-                                lista de clientes</a>
+                            <a href="{{ route('clientes.index') }}" class="text-blue-500 hover:text-blue-700">
+                                Volver a la lista de clientes</a>
                         </x-secondary-button>
                     </div>
-
                 </form>
             </div>
         </div>
     </div>
 
-    @push('scripts')
-        {{-- Select2 CSS --}}
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- MODAL PARA CREAR EMPRESA -->
+    <div id="modalCrearEmpresa"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl relative">
+            <button id="cerrarModalEmpresa"
+                class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl">&times;</button>
+            <div id="contenidoModalEmpresa" class="p-6">
+                <div class="text-center text-gray-600 dark:text-gray-300">Cargando...</div>
+            </div>
+        </div>
+    </div>
 
-        {{-- jQuery y Select2 JS --}}
+    @push('scripts')
+        <!-- Dependencias externas -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-        {{-- Archivo utilitario personalizado --}}
+        <!-- Utilidades propias -->
         <script src="{{ asset('js/select2Utils.js') }}"></script>
+        <script src="{{ asset('js/rutUtils.js') }}"></script>
 
         <script>
-            $(document).ready(function() {
+            $(function() {
+                // <--- Selectores comunes --->
                 const $region = $('#id_region');
                 const $ciudad = $('#id_ciudad');
+                const $rutEmpresa = $('#rut_empresa');
+                const $nombreEmpresaLabel = $('#nombre_empresa_label');
+                const $idEmpresa = $('#id_empresa');
+                const $razonSocial = $('#razon_social');
+                const $giro = $('#giro');
 
-                // Mostrar/Ocultar campos según tipo de cliente
-                function toggleFields() {
+                // <--- Función para formatear RUT con guion y dígito verificador --->
+                function formatRut(rut) {
+                    rut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+                    if (rut.length < 2) return rut;
+                    let cuerpo = rut.slice(0, -1);
+                    let dv = rut.slice(-1);
+                    return cuerpo + '-' + dv;
+                }
+
+                // <--- Mostrar/ocultar campos según tipo cliente --->
+                function toggleTipoCliente() {
                     const tipo = $('input[name="tipo_cliente"]:checked').val();
                     $('#rut_field').toggle(tipo === 'natural');
                     $('#rut_empresa_field, #razon_social_field, #giro_field, #nombre_empresa_field').toggle(tipo ===
                         'empresa');
-                    limpiarIdEmpresaSiNatural();
-                }
-
-                // Limpiar campos de empresa si se selecciona persona natural
-                function limpiarIdEmpresaSiNatural() {
-                    const tipo = $('input[name="tipo_cliente"]:checked').val();
                     if (tipo === 'natural') {
-                        $('#id_empresa').val('');
-                        $('#razon_social').val('').prop('readonly', false).removeClass('bg-gray-100');
-                        $('#giro').val('').prop('readonly', false).removeClass('bg-gray-100');
-                        $('#nombre_empresa_label').hide();
-                        $('#empresa_no_encontrada').hide();
+                        $idEmpresa.val('');
+                        $razonSocial.add($giro).val('').prop('readonly', false).removeClass('bg-gray-100');
+                        $nombreEmpresaLabel.add('#empresa_no_encontrada').hide();
                     }
                 }
+                $('input[name="tipo_cliente"]').on('change', toggleTipoCliente);
+                toggleTipoCliente();
 
-                // Evento para cambio de tipo de cliente
-                $('input[name="tipo_cliente"]').on('change', toggleFields);
-                toggleFields();
-
-                // Formatear RUT chileno
-                function formatRut(input) {
-                    let value = input.value.toUpperCase().replace(/[^0-9K]/g, '');
-                    if (value.length === 9) {
-                        value = value.replace(/^(\d{2})(\d{3})(\d{3})([\dkK])$/, '$1.$2.$3-$4');
-                    } else if (value.length === 8) {
-                        value = value.replace(/^(\d{1})(\d{3})(\d{3})([\dkK])$/, '$1.$2.$3-$4');
-                    }
-                    input.value = value;
-                }
-                $('#rut_natural, #rut_empresa').on('input', function() {
-                    formatRut(this);
-                });
-
-                // Buscar empresa por RUT (async/await con control de errores)
-                $('#rut_empresa').on('input', async function() {
-                    formatRut(this);
-                    const rut = $(this).val().toUpperCase();
-                    const rutRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
-
-                    if (!rutRegex.test(rut)) {
-                        limpiarEmpresaNoEncontrada();
-                        return;
-                    }
-
-                    try {
-                        const response = await fetch(`/empresas/comprobar/${rut}`);
-                        if (!response.ok) throw new Error('Error en la respuesta del servidor');
-                        const data = await response.json();
-
-                        if (data.existe) {
-                            $('#razon_social').val(data.razon_social).prop('readonly', true).addClass(
-                                'bg-gray-100');
-                            $('#giro').val(data.giro).prop('readonly', false).removeClass('bg-gray-100');
-                            $('#id_empresa').val(data.id_empresa);
-                            $('#nombre_empresa_label').text(data.nom_emp).show();
-                            $('#empresa_no_encontrada').hide();
-                        } else {
-                            limpiarEmpresaNoEncontrada();
+                // <--- Componentes de RUT --->
+                // Rut Natural
+                rutUtils.rutComponent({
+                    idRut: 'rut_natural',
+                    idFeedback: 'rut_natural_feedback',
+                    comprobarRutRemoto: async rut => {
+                        try {
+                            const res = await fetch(`/clientes/comprobar-rut/${rut}`);
+                            return res.ok ? await res.json() : {
+                                existe: false
+                            };
+                        } catch {
+                            return {
+                                existe: false
+                            };
                         }
-                    } catch (error) {
-                        console.error('Error al buscar empresa:', error);
-                        limpiarEmpresaNoEncontrada();
-                    }
+                    },
+                    caso: 'natural'
                 });
 
-                // Limpiar campos cuando empresa no existe o RUT inválido
-                function limpiarEmpresaNoEncontrada() {
-                    $('#razon_social').val('').prop('readonly', false).removeClass('bg-gray-100');
-                    $('#giro').val('').prop('readonly', false).removeClass('bg-gray-100');
-                    $('#nombre_empresa_label').hide();
-                    $('#empresa_no_encontrada').show();
-                    $('#id_empresa').val('');
+                // Rut Empresa
+                rutUtils.rutComponent({
+                    idRut: 'rut_empresa',
+                    idFeedback: 'rut_empresa_feedback',
+                    comprobarRutRemoto: async rut => {
+                        try {
+                            const res = await fetch(`/empresas/comprobar-rut/${rut}`);
+                            return res.ok ? await res.json() : {
+                                existe: false
+                            };
+                        } catch {
+                            return {
+                                existe: false
+                            };
+                        }
+                    },
+                    caso: 'empresa'
+                });
+
+                // --- Autocompletar datos de empresa por RUT ---
+                $rutEmpresa.on('input', function() {
+                    let rut = $(this).val();
+                    rut = formatRut(rut);
+                    if (rut.length < 3) return limpiarCamposEmpresa();
+
+                    fetch(`/empresas/comprobar/${rut}`)
+                        .then(res => res.ok ? res.json() : Promise.reject())
+                        .then(data => {
+                            if (data.existe) {
+                                $nombreEmpresaLabel.text(data.nom_emp).show();
+                                $idEmpresa.val(data.id_empresa);
+                                $razonSocial.val(data.razon_social).prop('readonly', true).addClass(
+                                    'bg-gray-100');
+                                $giro.val(data.giro).prop('readonly', false).removeClass('bg-gray-100');
+                            } else {
+                                limpiarCamposEmpresa();
+                            }
+                        })
+                        .catch(limpiarCamposEmpresa);
+                });
+
+                function limpiarCamposEmpresa() {
+                    $nombreEmpresaLabel.text('').hide();
+                    $idEmpresa.val('');
+                    $razonSocial.add($giro).val('').prop('readonly', false).removeClass('bg-gray-100');
                 }
 
-                // Botón para abrir nueva empresa en pestaña aparte
-                $('#btn_crear_empresa').on('click', () => {
-                    window.open('{{ route('empresas.create') }}', '_blank');
+                // --- Teléfonos ---
+                rutUtils.telefonoComponent('nro_contacto');
+                rutUtils.telefonoComponent('telefono');
+
+                // --- Modal de empresa ---
+                $(document).on('click', '#btn_crear_empresa', function() {
+                    $('#modalCrearEmpresa').removeClass('hidden');
+                    $('#contenidoModalEmpresa').html(
+                        '<div class="text-center text-gray-600 dark:text-gray-300">Cargando...</div>');
+                    $.get('{{ route('empresas.create') }}?popup=1', function(data) {
+                        $('#contenidoModalEmpresa').html(data);
+                        initRutEmpresaValidation();
+                    });
+                });
+                $(document).on('click', '#cerrarModalEmpresa, .btnCerrarEmpresaModal', cerrarModalEmpresa);
+                $('#modalCrearEmpresa').on('click', function(e) {
+                    if (e.target === this) cerrarModalEmpresa();
                 });
 
-                // Inicializar Select2 para todos los selects con clase select2
+                function cerrarModalEmpresa() {
+                    $('#modalCrearEmpresa').addClass('hidden');
+                    $('#contenidoModalEmpresa').empty();
+                }
+
+                $(document).on('submit', '#formCrearEmpresa', function(e) {
+                    e.preventDefault();
+                    const $form = $(this);
+                    $.post($form.attr('action'), $form.serialize(), function(resp) {
+                        if (resp.success) {
+                            $('#empresa-success-msg').removeClass('hidden').text(
+                                'Empresa creada correctamente');
+                            $form.find('input,button,select,textarea').prop('disabled', true);
+                            $idEmpresa.val(resp.empresa.id);
+                            $razonSocial.val(resp.empresa.razon_social).prop('readonly', true).addClass(
+                                'bg-gray-100');
+                            $giro.val(resp.empresa.giro).prop('readonly', false).removeClass(
+                                'bg-gray-100');
+                            $nombreEmpresaLabel.text(resp.empresa.nombre).show();
+                            $('#empresa_no_encontrada').hide();
+                            setTimeout(cerrarModalEmpresa, 1500);
+                        }
+                    }).fail(function(xhr) {
+                        if (xhr.status === 422) $('#contenidoModalEmpresa').html(xhr.responseText);
+                    });
+                });
+
+                // --- Select2: inicialización y dependencias región/ciudad ---
                 $('select.select2').each(function() {
                     if (typeof inicializarSelect2 === 'function') {
-                        inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
+                        inicializarSelect2(this, $(this).data('placeholder') || 'Seleccione una opción');
                     }
                 });
-
-                // Configurar Select2 para región y ciudad
                 $region.select2({
                     placeholder: "Seleccione una región",
                     allowClear: true,
                     width: 'resolve'
                 });
-
                 $ciudad.select2({
                     placeholder: "Seleccione una ciudad",
                     allowClear: true,
                     width: 'resolve'
                 }).prop('disabled', true);
 
-                // Evento cambio de región para cargar ciudades dinámicamente
-                $region.on('change', function() {
-                    (async () => {
-                        const regionId = $(this).val();
-                        $ciudad.select2('destroy').empty().append(
-                            '<option value="">Cargando ciudades...</option>');
-
-                        if (!regionId) {
-                            $ciudad.empty().append('<option value="">Seleccione una ciudad</option>')
-                                .prop('disabled', true);
-                            $ciudad.select2({
-                                placeholder: "Seleccione una ciudad",
-                                allowClear: true,
-                                width: 'resolve'
-                            });
-                            return;
-                        }
-
-                        try {
-                            const response = await fetch(`/cxr/${regionId}`);
-                            if (!response.ok) throw new Error('No se pudo cargar las ciudades');
-                            const ciudades = await response.json();
-
-                            $ciudad.empty().append('<option value="">Seleccione una ciudad</option>');
-                            ciudades.forEach(c => {
-                                $ciudad.append(
-                                    `<option value="${c.id_ciudad}">${c.nombre_ciudad}</option>`
-                                );
-                            });
-                            $ciudad.prop('disabled', false);
-                        } catch (error) {
-                            console.error('Error cargando ciudades:', error);
-                            $ciudad.empty().append('<option value="">Error al cargar</option>').prop(
-                                'disabled', true);
-                        }
-
-                        $ciudad.select2({
-                            placeholder: "Seleccione una ciudad",
-                            allowClear: true,
-                            width: 'resolve'
-                        });
-                        if (typeof estilizarSelect2 === 'function') estilizarSelect2();
-                    })();
+                $region.on('change', async function() {
+                    const regionId = $(this).val();
+                    $ciudad.select2('destroy').empty().append(
+                        '<option value="">Cargando ciudades...</option>');
+                    if (!regionId) {
+                        $ciudad.empty().append('<option value="">Seleccione una ciudad</option>').prop(
+                            'disabled', true);
+                        return reinicializarCiudad();
+                    }
+                    try {
+                        const res = await fetch(`/cxr/${regionId}`);
+                        if (!res.ok) throw new Error();
+                        const ciudades = await res.json();
+                        $ciudad.empty().append('<option value="">Seleccione una ciudad</option>');
+                        ciudades.forEach(c => $ciudad.append(
+                            `<option value="${c.id_ciudad}">${c.nombre_ciudad}</option>`));
+                        $ciudad.prop('disabled', false);
+                    } catch {
+                        $ciudad.empty().append('<option value="">Error al cargar</option>').prop('disabled',
+                            true);
+                    }
+                    reinicializarCiudad();
                 });
 
-                // Validar solo números en teléfono cliente
-                $('#nro_contacto').on('input', function() {
-                    this.value = this.value.replace(/[^0-9]/g, '');
-                });
+                function reinicializarCiudad() {
+                    $ciudad.select2({
+                        placeholder: "Seleccione una ciudad",
+                        allowClear: true,
+                        width: 'resolve'
+                    });
+                    if (typeof estilizarSelect2 === 'function') estilizarSelect2();
+                }
 
-                // Función para estilizar Select2 (opcional)
                 function estilizarSelect2() {
                     setTimeout(() => {
                         $('.select2-container--default .select2-selection--single').css({
-                            'background-color': '#fff',
-                            'border': '1px solid #d1d5db',
-                            'border-radius': '0.5rem',
-                            'height': '42px',
-                            'padding': '0.5rem 0.75rem',
-                            'font-size': '0.875rem',
-                            'color': '#000'
+                            backgroundColor: '#fff',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '0.5rem',
+                            height: '42px',
+                            padding: '0.5rem 0.75rem',
+                            fontSize: '0.875rem',
+                            color: '#000'
                         });
                         $('.select2-selection__rendered').css({
-                            'color': '#000',
-                            'line-height': '1.5rem',
+                            color: '#000',
+                            lineHeight: '1.5rem'
                         });
                         $('.select2-selection__arrow').css({
-                            'top': '8px',
-                            'right': '0.75rem'
+                            top: '8px',
+                            right: '0.75rem'
                         });
                     }, 10);
                 }
@@ -382,6 +412,3 @@
         </script>
     @endpush
 </x-app-layout>
-
-
-<!-- Well begun is half done. - Aristotle -->

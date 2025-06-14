@@ -15,8 +15,13 @@ class EmpresaController extends Controller
     }
 
     // Mostrar formulario de creación
-    public function create()
+    public function create(Request $request)
     {
+        // Si se solicita vía popup, devolver solo el partial
+        if ($request->has('popup')) {
+            return view('empresas._form');
+        }
+        // Vista normal
         return view('empresas.create');
     }
 
@@ -24,16 +29,29 @@ class EmpresaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nom_emp' => 'required|string|max:255|unique:empresas,nom_emp',
-            'rut_empresa' => 'required|string|max:20|unique:empresas,rut_empresa',
-            'telefono' => 'nullable|string|max:20',
+            'nom_emp'      => 'required|string|max:255|unique:empresas,nom_emp',
+            'rut_empresa'  => 'required|string|max:20|unique:empresas,rut_empresa',
+            'telefono'     => 'nullable|string|max:20',
             'razon_social' => 'nullable|string|max:255',
-            'giro' => 'nullable|string|max:255',
+            'giro'         => 'nullable|string|max:255',
         ]);
-
         $validated['estado'] = 'activo'; // Por defecto, activa
 
-        Empresa::create($validated);
+        $empresa = Empresa::create($validated);
+
+        // Si petición AJAX (modal), responder JSON con los datos básicos
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'empresa' => [
+                    'id'            => $empresa->id_empresa,
+                    'nombre'        => $empresa->nom_emp,
+                    'razon_social'  => $empresa->razon_social,
+                    'giro'          => $empresa->giro,
+                    'rut_empresa'   => $empresa->rut_empresa,
+                ]
+            ]);
+        }
 
         return redirect()->route('empresas.index')->with('success', 'Empresa creada exitosamente.');
     }
@@ -58,12 +76,12 @@ class EmpresaController extends Controller
         $empresa = Empresa::findOrFail($id);
 
         $validated = $request->validate([
-            'nom_emp' => 'required|string|max:255|unique:empresas,nom_emp,' . $empresa->id_empresa . ',id_empresa',
-            'rut_empresa' => 'required|string|max:20|unique:empresas,rut_empresa,' . $empresa->id_empresa . ',id_empresa',
-            'telefono' => 'nullable|string|max:20',
+            'nom_emp'      => 'required|string|max:255|unique:empresas,nom_emp,' . $empresa->id_empresa . ',id_empresa',
+            'rut_empresa'  => 'required|string|max:20|unique:empresas,rut_empresa,' . $empresa->id_empresa . ',id_empresa',
+            'telefono'     => 'nullable|string|max:20',
             'razon_social' => 'nullable|string|max:255',
-            'giro' => 'nullable|string|max:255',
-            'direccion' => 'nullable|string|max:255',
+            'giro'         => 'nullable|string|max:255',
+            'direccion'    => 'nullable|string|max:255',
         ]);
 
         $empresa->update($validated);
@@ -114,17 +132,16 @@ class EmpresaController extends Controller
 
         if ($empresa) {
             return response()->json([
-                'existe' => true,
-                'id_empresa' => $empresa->id_empresa,
-                'razon_social' => $empresa->razon_social,
-                'giro' => $empresa->giro,
-                'nom_emp' => $empresa->nom_emp
+                'existe'        => true,
+                'id_empresa'    => $empresa->id_empresa,
+                'razon_social'  => $empresa->razon_social,
+                'giro'          => $empresa->giro,
+                'nom_emp'       => $empresa->nom_emp
             ]);
         } else {
             return response()->json(['existe' => false]);
         }
     }
-
 
     // Validar nombre de empresa
     public function comprobarNombre(Request $request)
