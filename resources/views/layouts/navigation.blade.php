@@ -56,11 +56,13 @@
                         </div>
 
                         @auth
-                            @if (Auth::user()->rol === 'administrador')
+                                @if (Auth::user()->rol === 'administrador')
                                 <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                                     <i class="fa-solid fa-users"></i>
                                     <span class="ml-3">{{ __('Usuarios') }}</span>
                                 </x-nav-link>
+                                @endif
+                                @if (in_array(Auth::user()->rol, ['administrador', 'supervisor']))
                                 <!-- Dropdown de Recursos -->
                                 <div class="hidden sm:flex sm:items-center sm:ms-6">
                                     <x-dropdown align="right" width="48">

@@ -39,40 +39,41 @@
                     </thead>
                     <tbody>
                         @foreach ($categorias as $categoria)
-                            <tr>
-                                <td class="border-b p-2">{{ $categoria->nombre_categoria }}</td>
-                                <td class="border-b p-2">{{ $categoria->descripcion }}</td>
-                                <td class="border-b p-2">
-                                    <span
-                                        class="inline-block rounded px-2 py-1 text-sm font-semibold
-                                    {{ $categoria->estado === 'Inactiva'
-                                        ? 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                                        : 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' }}">
-                                        {{ $categoria->estado }}
-                                    </span>
-                                </td>
-                                <td class="border-b p-2">
-                                    <div class="flex items-center gap-4">
-                                        {{-- Ver --}}
-                                        <a href="{{ route('categorias.show', $categoria->id_categoria) }}"
-                                            class="text-blue-600 hover:underline dark:text-blue-400">Ver</a>
+                                            <tr>
+                                                <td class="border-b p-2">{{ $categoria->nombre_categoria }}</td>
+                                                <td class="border-b p-2">{{ $categoria->descripcion }}</td>
+                                                <td class="border-b p-2">
+                                                    <span class="inline-block rounded px-2 py-1 text-sm font-semibold
+                                                        {{ $categoria->estado === 'Inactiva'
+                            ? 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                            : 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' }}">
+                                                        {{ $categoria->estado }}
+                                                    </span>
+                                                </td>
+                                                <td class="border-b p-2">
+                                                    <div class="flex items-center gap-4">
+                                                        {{-- Ver --}}
+                                                        <a href="{{ route('categorias.show', $categoria->id_categoria) }}"
+                                                            class="text-blue-600 hover:underline dark:text-blue-400">Ver</a>
 
-                                        {{-- Editar --}}
-                                        <a href="{{ route('categorias.edit', $categoria->id_categoria) }}"
-                                            class="text-yellow-500 hover:underline dark:text-yellow-400">Editar</a>
+                                                        {{-- Editar --}}
+                                                        <a href="{{ route('categorias.edit', $categoria->id_categoria) }}"
+                                                            class="text-yellow-500 hover:underline dark:text-yellow-400">Editar</a>
 
-                                        {{-- Botón de desactivación lógica con confirmación --}}
-                                        {{-- Este usa el modal --}}
-                                        @if ($categoria->estado === 'Activa')
-                                            <button
-                                                onclick="mostrarModal(event, '{{ route('categorias.desactivar', $categoria->id_categoria) }}', '{{ $categoria->nombre_categoria }}')"
-                                                class="text-red-500 hover:underline">
-                                                Desactivar
-                                            </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
+                                                        {{-- Botón de desactivación lógica con confirmación --}}
+                                                        {{-- Este usa el modal --}}
+                                                        @if (Auth::user()->rol === 'administrador')
+                                                            @if ($categoria->estado === 'Activa')
+                                                                <button
+                                                                    onclick="mostrarModal(event, '{{ route('categorias.desactivar', $categoria->id_categoria) }}', '{{ $categoria->nombre_categoria }}')"
+                                                                    class="text-red-500 hover:underline">
+                                                                    Desactivar
+                                                                </button>
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
                         @endforeach
                     </tbody>
                 </table>

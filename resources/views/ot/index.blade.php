@@ -125,9 +125,13 @@
                             <tr>
                                 <td class="border-b p-2">{{ $ot->id_ot }}</td>
                                 <td class="border-b p-2">{{ $ot->cliente->nombre_cliente }}
-                                    {{ $ot->cliente->apellido_cliente }}</td>
-                                <td class="border-b p-2">{{ $ot->responsable->nombre }}
-                                    {{ $ot->responsable->apellido }}</td>
+                                    {{ $ot->cliente->apellido_cliente }} ({{ $ot->cliente->tipo_cliente }})
+                                </td>
+                                <td class="border-b p-2">
+                                    {{ $ot->responsable->nombre }} {{ $ot->responsable->apellido }}
+                                    ({{ $ot->responsable->rol }})
+                                </td>
+
                                 <td class="border-b p-2">
                                     <span class="inline-block rounded px-2 py-1 text-xs font-semibold">
                                         {{ $ot->estadoOT->nombre_estado }}
@@ -153,25 +157,26 @@
                                         class="text-green-600 hover:underline">
                                         Exportar PDF
                                     </a>
-                                    {{-- Inhabilitar si no está finalizada --}}
-                                    @if ($ot->estadoOT->nombre_estado !== 'Finalizada')
-                                        <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-red-500 hover:underline">
-                                                Inhabilitar
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-green-500 hover:underline">
-                                                Reactivar
-                                            </button>
-                                        </form>
+                                    @if (Auth::user()->rol === 'administrador')
+                                        {{-- Inhabilitar si no está finalizada --}}
+                                        @if ($ot->fase === 'Habilitado')
+                                            <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-red-500 hover:underline"
+                                                    onclick="return confirm('¿Inhabilitar esta OT?')">
+                                                    Inhabilitar
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-green-500 hover:underline"
+                                                    onclick="return confirm('¿Reactivar esta OT?')">
+                                                    Reactivar
+                                                </button>
+                                            </form>
+                                        @endif
                                     @endif
-
                                 </td>
 
                             </tr>

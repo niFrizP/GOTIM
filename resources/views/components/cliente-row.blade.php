@@ -36,19 +36,22 @@
         <a href="{{ route('clientes.show', $cliente->id_cliente) }}"
             class="text-gray-600 dark:text-gray-300 hover:underline">Ver</a>
         <a href="{{ route('clientes.edit', $cliente->id_cliente) }}" class="text-blue-500 hover:underline">Editar</a>
-        @if ($cliente->estado === 'activo')
-            <button
-                onclick="mostrarModal('{{ $cliente->id_cliente }}', '{{ $cliente->nombre_cliente }} {{ $cliente->apellido_cliente }}')"
-                class="text-red-500 hover:underline">
-                Inhabilitar
-            </button>
-        @else
-            <form action="{{ route('clientes.reactivar', $cliente->id_cliente) }}" method="POST" class="inline-block">
-                @csrf
-                <button type="submit" class="text-green-500 hover:underline">
-                    Reactivar
+        @if (Auth::user()->rol === 'administrador')
+            @if ($cliente->estado === 'activo')
+                <button
+                    onclick="mostrarModal('{{ $cliente->id_cliente }}', '{{ $cliente->nombre_cliente }} {{ $cliente->apellido_cliente }}')"
+                    class="text-red-500 hover:underline">
+                    Inhabilitar
                 </button>
-            </form>
+            @else
+                <form action="{{ route('clientes.reactivar', $cliente->id_cliente) }}" method="POST" class="inline-block">
+                    @csrf
+                    <button type="submit" class="text-green-500 hover:underline">
+                        Reactivar
+                    </button>
+                </form>
+            @endif
         @endif
+
     </td>
 </tr>
