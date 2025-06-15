@@ -13,11 +13,9 @@
 
         <!-- RUT Empresa-->
         <div>
-            <x-input-label for="rut_empresa" value="RUT Empresa *" class="dark:text-gray-300" />
-            <x-text-input id="rut_empresa" name="rut_empresa" type="text" class="w-full"
-                value="{{ old('rut_empresa') }}" maxlength="12" placeholder="Ej: 99.999.999-9" required />
-            <p id="rut_empresa_feedback" class="mt-1 text-sm"></p>
-            <x-input-error :messages="$errors->get('rut_empresa')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            <x-input-label for="rut" value="RUT *" />
+            <x-text-input id="rut" name="rut" type="text" class="w-full" data-rut maxlength="12" placeholder="Ej: 12.345.678-9" value="{{ old('rut') }}"/>
+            <p id="rut_feedback" class="mt-1 text-sm"></p>
         </div>
 
         <!-- Teléfono -->
@@ -57,99 +55,113 @@
 
 @push('scripts')
     <script>
-        // Llama a esta función después de insertar el popup en el DOM
-        function initRutEmpresaValidation() {
-            const $rut = document.getElementById('rut_empresa');
-            const $feedback = document.getElementById('rut_empresa_feedback');
-            const $btnGuardar = document.getElementById('btnGuardar');
-            if (!$rut) return;
-
-            function cleanRut(rut) {
-                return rut.replace(/[^0-9kK]/g, '').toUpperCase();
-            }
-
-            function formatRut(rut) {
-                rut = cleanRut(rut);
+        // Utilidad para manejar RUTs
+        const RUTUtils = {
+            clean: rut => (rut || '').replace(/[^0-9kK]/g, '').toUpperCase(),
+            format: rut => {
+                rut = RUTUtils.clean(rut);
                 if (rut.length < 2) return rut;
-                let cuerpo = rut.slice(0, -1);
-                let dv = rut.slice(-1);
-                cuerpo = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                return cuerpo + '-' + dv;
-            }
-
-            function dvRut(cuerpo) {
-                let suma = 0,
-                    multiplo = 2;
+                const cuerpo = rut.slice(0, -1);
+                const dv = rut.slice(-1);
+                return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + '-' + dv;
+            },
+            calculateDV: cuerpo => {
+                let suma = 0, multiplo = 2;
                 for (let i = cuerpo.length - 1; i >= 0; i--) {
                     suma += parseInt(cuerpo.charAt(i)) * multiplo;
                     multiplo = multiplo < 7 ? multiplo + 1 : 2;
                 }
-                let dv = 11 - (suma % 11);
-                if (dv == 11) return '0';
-                if (dv == 10) return 'K';
+                const dv = 11 - (suma % 11);
+                if (dv === 11) return '0';
+                if (dv === 10) return 'K';
                 return dv.toString();
-            }
-
-            function validarRut(rut) {
-                rut = cleanRut(rut);
+            },
+            validate: rut => {
+                rut = RUTUtils.clean(rut);
                 if (rut.length < 2) return false;
-                let cuerpo = rut.slice(0, -1);
-                let dv = rut.slice(-1).toUpperCase();
-                if (!/^\d+$/.test(cuerpo)) return false;
-                return dvRut(cuerpo) === dv;
+                const cuerpo = rut.slice(0, -1);
+                const dv = rut.slice(-1).toUpperCase();
+                return /^\d+$/.test(cuerpo) && RUTUtils.calculateDV(cuerpo) === dv;
             }
+        };
 
-            function mostrarFeedback(mensaje, ok = false) {
-                if ($feedback) {
-                    $feedback.textContent = mensaje;
-                    $feedback.style.color = ok ? 'green' : 'red';
-                }
-                if ($btnGuardar) $btnGuardar.disabled = !ok;
+        class EmpresaForm {
+            constructor() {
+                this.form = document.getElementById('formCrearEmpresa');
+                this.rutInput = document.getElementById('rut');
+                this.rutFeedback = document.getElementById('rut_feedback');
+                this.telefonoInput = document.getElementById('telefono');
+                this.btnGuardar = document.getElementById('btnGuardar');
+                this.rutValido = false;
+                this.init();
             }
-
-            $rut.addEventListener('input', function() {
-                let valor = cleanRut($rut.value);
+            init() {
+                if (this.rutInput) this.initRutValidation();
+                if (this.telefonoInput) this.initTelefonoValidation();
+                if (this.form) this.initFormValidation();
+            }
+            initRutValidation() {
+                this.rutInput.addEventListener('input', () => this.handleRutInput());
+                this.rutInput.addEventListener('blur', () => this.handleRutBlur());
+            }
+            initTelefonoValidation() {
+                this.telefonoInput.addEventListener('input', e => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                });
+            }
+            handleRutInput() {
+                const valor = RUTUtils.clean(this.rutInput.value);
                 if (!valor) {
-                    mostrarFeedback('');
-                    if ($btnGuardar) $btnGuardar.disabled = true;
+                    this.updateFeedback('', null);
+                    this.rutValido = false;
+                    this.toggleBtnGuardar();
                     return;
                 }
                 if (valor.length < 2) {
-                    mostrarFeedback('Ingresa al menos 2 dígitos');
-                    if ($btnGuardar) $btnGuardar.disabled = true;
+                    this.updateFeedback('Ingresa al menos 2 dígitos', false);
+                    this.rutValido = false;
+                    this.toggleBtnGuardar();
                     return;
                 }
-                if (!validarRut(valor)) {
-                    mostrarFeedback('RUT inválido');
-                    $rut.value = formatRut(valor);
-                    return;
+                if (!RUTUtils.validate(valor)) {
+                    this.updateFeedback('RUT inválido', false);
+                    this.rutValido = false;
+                } else {
+                    this.updateFeedback('RUT válido', true);
+                    this.rutValido = true;
                 }
-                mostrarFeedback('RUT válido', true);
-                $rut.value = formatRut(valor);
-            });
-
-            $rut.addEventListener('blur', function() {
-                let valor = cleanRut($rut.value);
-                $rut.value = formatRut(valor);
-            });
-
-            // Solo números para teléfono empresa
-            let telefono = document.getElementById('telefono');
-            if (telefono) {
-                telefono.addEventListener('input', function() {
-                    this.value = this.value.replace(/[^0-9]/g, '');
+                this.toggleBtnGuardar();
+                this.rutInput.value = RUTUtils.format(valor);
+            }
+            handleRutBlur() {
+                const valor = RUTUtils.clean(this.rutInput.value);
+                this.rutInput.value = RUTUtils.format(valor);
+            }
+            updateFeedback(mensaje, isValid) {
+                if (this.rutFeedback) {
+                    this.rutFeedback.textContent = mensaje;
+                    if (isValid === null) {
+                        this.rutFeedback.className = 'mt-1 text-sm';
+                    } else {
+                        this.rutFeedback.className = `mt-1 text-sm ${isValid ? 'text-green-600' : 'text-red-600'}`;
+                    }
+                }
+            }
+            toggleBtnGuardar() {
+                if (this.btnGuardar) {
+                    this.btnGuardar.disabled = !this.rutValido;
+                }
+            }
+            initFormValidation() {
+                this.form.addEventListener('submit', e => {
+                    if (!this.rutValido) {
+                        e.preventDefault();
+                        this.updateFeedback('Debe ingresar un RUT válido', false);
+                        this.rutInput.focus();
+                    }
                 });
             }
         }
-
-        // Si cargas el popup dinámicamente, llama a esta función después de insertar el HTML.
-        // Por ejemplo:
-        // $('#contenidoModalEmpresa').html(data);
-        // initRutEmpresaValidation();
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Si el popup ya está en el DOM al cargar, inicializa directo
-            initRutEmpresaValidation();
-        });
+        document.addEventListener('DOMContentLoaded', () => new EmpresaForm());
     </script>
 @endpush
