@@ -26,8 +26,7 @@
                             <x-input-label for="nom_emp" value="Nombre de la empresa *" class="dark:text-gray-300" />
                             <x-text-input id="nom_emp" name="nom_emp" type="text" class="w-full"
                                 value="{{ old('nom_emp') }}" required />
-                            <x-input-error :messages="$errors->get('nom_emp')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('nom_emp')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         <!-- RUT Empresa-->
@@ -38,8 +37,7 @@
                                 required />
                             {{-- Aquí mostraremos el mensaje de validación de RUT --}}
                             <p id="rut_empresa_feedback" class="mt-1 text-sm"></p>
-                            <x-input-error :messages="$errors->get('rut_empresa')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('rut_empresa')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         <!-- Teléfono -->
@@ -48,8 +46,7 @@
                             <x-text-input id="telefono" name="telefono" type="tel" class="w-full" maxlength="9"
                                 minlength="9" value="{{ old('telefono') }}" required />
                             <small class="text-gray-500 dark:text-gray-400">Ingrese el número sin el prefijo +56</small>
-                            <x-input-error :messages="$errors->get('telefono')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('telefono')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         <!-- Razón Social -->
@@ -57,17 +54,15 @@
                             <x-input-label for="razon_social" value="Razón Social *" class="dark:text-gray-300" />
                             <x-text-input id="razon_social" name="razon_social" type="text" class="w-full"
                                 value="{{ old('razon_social') }}" required />
-                            <x-input-error :messages="$errors->get('razon_social')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-input-error :messages="$errors->get('razon_social')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
 
                         <!-- Giro de la empresa -->
                         <div>
                             <x-input-label for="giro" value="Giro de la empresa *" class="dark:text-gray-300" />
-                            <x-text-input id="giro" name="giro" type="text" class="w-full" value="{{ old('giro') }}"
-                                required />
-                            <x-input-error :messages="$errors->get('giro')"
-                                class="mt-1 text-sm text-red-600 dark:text-red-400" />
+                            <x-text-input id="giro" name="giro" type="text" class="w-full"
+                                value="{{ old('giro') }}" required />
+                            <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
                         </div>
                     </div>
 
@@ -121,11 +116,13 @@
                         return data; // { existe: true/false, empresa: {...} }
                     } catch (err) {
                         console.error('Error al comprobar RUT:', err);
-                        return { existe: false };
+                        return {
+                            existe: false
+                        };
                     }
                 }
 
-                inputRut.addEventListener('input', async function () {
+                inputRut.addEventListener('input', async function() {
                     formatRut(this);
                     const rut = this.value;
                     feedback.textContent = '';
@@ -140,7 +137,8 @@
                         const result = await comprobarRut(rut);
                         if (result.existe) {
                             // Si ya existe: mostramos mensaje y deshabilitamos botón
-                            feedback.textContent = '❌ Este RUT ya está registrado (' + result.empresa.nom_emp + ')';
+                            feedback.textContent = '❌ Este RUT ya está registrado (' + result.empresa
+                                .nom_emp + ')';
                             feedback.classList.remove('text-gray-500');
                             feedback.classList.add('text-red-600');
                             btnGuardar.disabled = true;
@@ -161,7 +159,7 @@
                 });
 
                 // Validar solo números/K en RUT mientras escribe
-                inputRut.addEventListener('keypress', function (e) {
+                inputRut.addEventListener('keypress', function(e) {
                     const char = String.fromCharCode(e.which);
                     if (!/[0-9Kk]/.test(char)) {
                         e.preventDefault();
@@ -171,7 +169,7 @@
                 // Validar solo números en teléfono
                 const telefonoEmpresa = document.getElementById('telefono');
                 if (telefonoEmpresa) {
-                    telefonoEmpresa.addEventListener('input', function () {
+                    telefonoEmpresa.addEventListener('input', function() {
                         this.value = this.value.replace(/[^0-9]/g, '');
                     });
                 }

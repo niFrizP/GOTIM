@@ -47,6 +47,7 @@ Route::middleware(['auth', \App\Http\Middleware\AllUserMiddleware::class])->grou
     Route::resource('empresas', EmpresaController::class);
     Route::post('/empresas/{id}/reactivar', [EmpresaController::class, 'reactivar'])->name('empresas.reactivar');
     Route::get('/empresas/comprobar/{rut}', [EmpresaController::class, 'ComprobarPorRut']);
+    Route::get('/empresas/comprobar-rut/{rut}', [EmpresaController::class, 'ComprobarPorRut']);
     Route::get('/empresas/comprobar-nombre', [EmpresaController::class, 'comprobarNombre'])->name('empresas.comprobar.nombre');
 
     // OT
