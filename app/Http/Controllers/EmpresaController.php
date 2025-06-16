@@ -17,13 +17,13 @@ class EmpresaController extends Controller
     // Mostrar formulario de creación
     public function create(Request $request)
     {
-        // Si se solicita vía popup, devolver solo el partial
-        if ($request->has('popup')) {
-            return view('empresas._form');
+        if ($request->query('popup') == 1) {
+            return view('empresas._form'); // Este es un form parcial, sin layout
         }
-        // Vista normal
+
         return view('empresas.create');
     }
+
 
     // Guardar nueva empresa
     public function store(Request $request)
