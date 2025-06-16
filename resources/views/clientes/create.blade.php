@@ -70,10 +70,10 @@
                             value="{{ old('rut_empresa') }}" maxlength="12" placeholder="Ej: 99.999.999-9" />
                         <div id="empresa_no_encontrada" class="mt-2 text-red-600" style="display: none;">
                             Empresa no registrada.
-                            <button type="button" id="btn_crear_empresa"
-                                class="ml-2 underline text-blue-500 hover:text-blue-700">
+                            <a href="javascript:void(0);" id="btn_crear_empresa"
+                               class="ml-2 underline text-blue-500 hover:text-blue-700">
                                 Crear nueva empresa
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -170,15 +170,19 @@
 
     <!-- MODAL PARA CREAR EMPRESA -->
     <div id="modalCrearEmpresa"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
+         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 hidden">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl relative">
             <button id="cerrarModalEmpresa"
-                class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl">&times;</button>
+                    class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl">&times;</button>
             <div id="contenidoModalEmpresa" class="p-6">
+                <!-- Este contenido se carga dinámicamente con el formulario de empresa -->
                 <div class="text-center text-gray-600 dark:text-gray-300">Cargando...</div>
             </div>
         </div>
     </div>
+    <script>
+        window.initRutValidation();
+    </script>
 
     @push('scripts')
         <!-- Dependencias externas -->
