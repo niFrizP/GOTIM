@@ -22,32 +22,34 @@
 
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200">Estado</h3>
-                    <span
-                        class="inline-block rounded px-2 py-1 text-sm font-semibold
+                    <span class="inline-block rounded px-2 py-1 text-sm font-semibold
                         {{ $categoria->estado === 'Inactiva'
-                            ? 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-                            : 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' }}">
+    ? 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+    : 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' }}">
                         {{ $categoria->estado }}
                     </span>
                 </div>
 
                 <div class="mt-6 flex flex-wrap items-center gap-4">
                     <a href="{{ route('categorias.index') }}"
-                        class="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline dark:text-blue-400">
-                        <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+                        class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+                        ← Volver a la lista
                     </a>
-                    @if ($categoria->estado === 'Inactiva')
-                        <button
-                            onclick="mostrarModalReactivar('{{ route('categorias.reactivar', $categoria->id_categoria) }}', '{{ $categoria->nombre_categoria }}')"
-                            class="inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">
-                            Reactivar Categoría
-                        </button>
-                    @else
-                        <button
-                            onclick="mostrarModalDesactivar('{{ route('categorias.desactivar', $categoria->id_categoria) }}', '{{ $categoria->nombre_categoria }}')"
-                            class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-                            Desactivar Categoría
-                        </button>
+                    @if (Auth::user()->rol === 'administrador')
+                        {{-- Editar --}}
+                        @if ($categoria->estado === 'Inactiva')
+                            <button
+                                onclick="mostrarModalReactivar('{{ route('categorias.reactivar', $categoria->id_categoria) }}', '{{ $categoria->nombre_categoria }}')"
+                                class="inline-block rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+                                Reactivar Categoría
+                            </button>
+                        @else
+                            <button
+                                onclick="mostrarModalDesactivar('{{ route('categorias.desactivar', $categoria->id_categoria) }}', '{{ $categoria->nombre_categoria }}')"
+                                class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                                Desactivar Categoría
+                            </button>
+                        @endif
                     @endif
                 </div>
             </div>

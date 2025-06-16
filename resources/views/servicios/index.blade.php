@@ -37,11 +37,13 @@
                                         class="text-gray-600 hover:underline dark:text-gray-300">Ver</a>
                                     <a href="{{ route('servicios.edit', $servicio->id_servicio) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
-                                    <button
-                                        onclick="mostrarModal('{{ $servicio->id_servicio }}', '{{ $servicio->nombre_servicio }}')"
-                                        class="text-red-500 hover:underline">
-                                        Eliminar
-                                    </button>
+                                    @if (Auth::user()->rol === 'administrador')
+                                        <button
+                                            onclick="mostrarModal('{{ $servicio->id_servicio }}', '{{ $servicio->nombre_servicio }}')"
+                                            class="text-red-500 hover:underline">
+                                            Eliminar
+                                        </button>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
