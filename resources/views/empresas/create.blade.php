@@ -69,10 +69,7 @@
                     <br>
                     <div class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                         <x-primary-button type="submit" id="btnGuardar">Crear Empresa</x-primary-button>
-                        <x-secondary-button href="{{ route('categorias.index') }}"
-                            class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
-                            Cancelar
-                        </x-secondary-button>
+                        <a href="{{ route('empresas.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded">Cancelar</a>
                     </div>
                 </form>
             </div>

@@ -21,13 +21,18 @@ class ClienteController extends Controller
     }
 
     // Muestra el formulario de creación de un nuevo cliente
-    public function create()
+    public function create(Request $request)
     {
         $regiones = Region::all();
         $ciudades = Ciudad::all();
-        $empresas = Empresa::where('estado', 'activo')->get(); // Solo activas
-        return view('clientes.create', compact('regiones', 'ciudades', 'empresas'));
+
+        if ($request->query('popup') == 1) {
+            return view('clientes._form', compact('regiones', 'ciudades'));
+        }
+
+        return view('clientes.create', compact('regiones', 'ciudades'));
     }
+
 
     // Almacena un nuevo cliente
 
@@ -62,12 +67,16 @@ class ClienteController extends Controller
         $cliente->direccion = $request->direccion;
         $cliente->estado = 'activo';
 
-        // Validación del RUT 
         if ($request->tipo_cliente === 'empresa') {
             $rutEmpresa = $request->rut_empresa;
 
             $empresa = Empresa::where('rut_empresa', $rutEmpresa)->first();
             if (!$empresa) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'errors' => ['rut_empresa' => 'La empresa con ese RUT no está registrada.']
+                    ], 422);
+                }
                 return back()->withErrors(['rut_empresa' => 'La empresa con ese RUT no está registrada.'])->withInput();
             }
 
@@ -78,8 +87,12 @@ class ClienteController extends Controller
         } else {
             $rutNatural = $request->rut_natural;
 
-            // ⚠️ Validar que no esté en tabla empresas
             if (Empresa::where('rut_empresa', $rutNatural)->exists()) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'errors' => ['rut_natural' => 'Este RUT ya está registrado como empresa.']
+                    ], 422);
+                }
                 return back()->withErrors(['rut_natural' => 'Este RUT ya está registrado como empresa.'])->withInput();
             }
 
@@ -91,8 +104,21 @@ class ClienteController extends Controller
 
         $cliente->save();
 
+        // ✅ Si es AJAX desde el modal, devolver JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'cliente' => [
+                    'id' => $cliente->id_cliente,
+                    'nombre' => $cliente->nombre_cliente . ' ' . $cliente->apellido_cliente,
+                    'rut' => $cliente->rut, // <-- Agrega el rut
+                ]
+            ]);
+        }
+
         return redirect()->route('clientes.index')->with('success', 'Cliente registrado exitosamente.');
     }
+
 
 
     // Muestra los detalles de un cliente específico

@@ -167,3 +167,112 @@ window.rutUtils = {
     formatTelefono,
     telefonoComponent
 };
+/**
+ * Inicializa la validación de RUTs y teléfonos en formularios estándar.
+ */
+window.initRutValidation = function () {
+    // Validación de RUT persona natural
+    rutUtils.rutComponent({
+        idRut: 'rut_natural',
+        idFeedback: 'rut_natural_feedback',
+        comprobarRutRemoto: async rut => {
+            try {
+                const res = await fetch(`/clientes/comprobar-rut/${rut}`);
+                return res.ok ? await res.json() : { existe: false };
+            } catch {
+                return { existe: false };
+            }
+        },
+        caso: 'natural'
+    });
+
+    // Validación de RUT empresa
+    rutUtils.rutComponent({
+        idRut: 'rut_empresa',
+        idFeedback: 'rut_empresa_feedback',
+        comprobarRutRemoto: async rut => {
+            try {
+                const res = await fetch(`/empresas/comprobar-rut/${rut}`);
+                return res.ok ? await res.json() : { existe: false };
+            } catch {
+                return { existe: false };
+            }
+        },
+        caso: 'empresa'
+    });
+
+    // Validación de teléfono
+    rutUtils.telefonoComponent('nro_contacto');
+};
+window.initClienteModalScripts = function () {
+    // Región/Ciudad select2
+    const $region = $('#id_region');
+    const $ciudad = $('#id_ciudad');
+    $region.select2({
+        dropdownParent: $('#modalCrearCliente'),
+        placeholder: "Seleccione una región",
+        allowClear: true,
+        width: 'resolve'
+    });
+    $ciudad.select2({
+        dropdownParent: $('#modalCrearCliente'),
+        placeholder: "Seleccione una ciudad",
+        allowClear: true,
+        width: 'resolve'
+    });
+
+    // Reaplicar estilos
+    if (typeof estilizarSelect2 === 'function') estilizarSelect2();
+
+    // Región cambia ciudades
+    $region.off('change').on('change', async function () {
+        const regionId = $(this).val();
+        $ciudad.select2('destroy').empty().append('<option value="">Cargando ciudades...</option>');
+        if (!regionId) {
+            $ciudad.empty().append('<option value="">Seleccione una ciudad</option>').prop('disabled', true);
+            reinicializarCiudad();
+            return;
+        }
+        try {
+            const res = await fetch(`/cxr/${regionId}`);
+            const ciudades = await res.json();
+            $ciudad.empty().append('<option value="">Seleccione una ciudad</option>');
+            ciudades.forEach(c => $ciudad.append(`<option value="${c.id_ciudad}">${c.nombre_ciudad}</option>`));
+            $ciudad.prop('disabled', false);
+        } catch {
+            $ciudad.empty().append('<option value="">Error al cargar</option>').prop('disabled', true);
+        }
+        reinicializarCiudad();
+    });
+
+    function reinicializarCiudad() {
+        $ciudad.select2({
+            dropdownParent: $('#modalCrearCliente'),
+            placeholder: "Seleccione una ciudad",
+            allowClear: true,
+            width: 'resolve'
+        });
+        if (typeof estilizarSelect2 === 'function') estilizarSelect2();
+    }
+
+    // Lógica tipo_cliente: muestra/oculta campos
+    function toggleTipoCliente() {
+        const tipo = $('input[name="tipo_cliente"]:checked').val();
+        $('#rut_natural_field').toggle(tipo === 'natural');
+        $('#rut_empresa_field, #razon_social_field, #giro_field').toggle(tipo === 'empresa');
+    }
+    $('input[name="tipo_cliente"]').off('change').on('change', toggleTipoCliente);
+    toggleTipoCliente(); // Ejecutar al abrir el modal
+
+    // Teléfono: solo números, máximo 9
+    $('#nro_contacto').off('input').on('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 9);
+    });
+
+    // RUT validación
+    if (typeof window.initRutValidation === 'function') {
+        window.initRutValidation();
+    }
+};
+
+
