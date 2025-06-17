@@ -16,7 +16,10 @@ class ClienteController extends Controller
     // Muestra la lista de clientes
     public function index()
     {
-        $clientes = Cliente::with(['empresa', 'region', 'ciudad'])->get();
+        $clientes = Cliente::with(['empresa', 'region', 'ciudad'])
+            ->orderBy('id_cliente', 'desc')
+            ->paginate(10);
+
         return view('clientes.index', compact('clientes'));
     }
 
