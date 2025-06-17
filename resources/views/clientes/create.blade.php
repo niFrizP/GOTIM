@@ -156,13 +156,7 @@
                     <br>
                     <div class="mt-6">
                         <x-primary-button>Crear Cliente</x-primary-button>
-                    </div>
-
-                    <div class="mt-4">
-                        <x-secondary-button>
-                            <a href="{{ route('clientes.index') }}" class="text-blue-500 hover:text-blue-700">
-                                Volver a la lista de clientes</a>
-                        </x-secondary-button>
+                        <a href="{{ route('clientes.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -325,22 +319,37 @@
                     const $form = $(this);
                     $.post($form.attr('action'), $form.serialize(), function(resp) {
                         if (resp.success) {
-                            $('#empresa-success-msg').removeClass('hidden').text(
-                                'Empresa creada correctamente');
+                            // Suponiendo que resp.empresa.rut_empresa trae el rut (sin puntos/guión)
+                            // o trae el rut formateado; ajústalo si es necesario.
+                            let rutFormateado = resp.empresa.rut_empresa;
+                            if (typeof formatearRut === "function") {
+                                rutFormateado = formatearRut(resp.empresa.rut_empresa);
+                            }
+                            // 1. Rellenar campo RUT Empresa en el formulario principal
+                            $('#rut_empresa').val(rutFormateado).trigger('input').trigger('blur');
+
+                            // 2. Rellenar id_empresa, nombre y razón social si quieres (opcional)
+                            $('#id_empresa').val(resp.empresa.id);
+                            $('#nombre_empresa_label').val(resp.empresa.nombre);
+                            $('#razon_social').val(resp.empresa.razon_social).prop('readonly', true).addClass('bg-gray-100');
+                            $('#giro').val(resp.empresa.giro).prop('readonly', false).removeClass('bg-gray-100');
+
+                            // 3. Ocultar el modal
+                            $('#empresa-success-msg').removeClass('hidden').text('Empresa creada correctamente');
                             $form.find('input,button,select,textarea').prop('disabled', true);
-                            $idEmpresa.val(resp.empresa.id);
-                            $razonSocial.val(resp.empresa.razon_social).prop('readonly', true).addClass(
-                                'bg-gray-100');
-                            $giro.val(resp.empresa.giro).prop('readonly', false).removeClass(
-                                'bg-gray-100');
-                            $nombreEmpresaLabel.text(resp.empresa.nombre).show();
+                            setTimeout(() => {
+                                $('#modalCrearEmpresa').addClass('hidden');
+                                $('#contenidoModalEmpresa').empty();
+                            }, 1200);
+
+                            // 4. Opcional: ocultar el aviso de "empresa no encontrada"
                             $('#empresa_no_encontrada').hide();
-                            setTimeout(cerrarModalEmpresa, 1500);
                         }
                     }).fail(function(xhr) {
                         if (xhr.status === 422) $('#contenidoModalEmpresa').html(xhr.responseText);
                     });
                 });
+
 
                 // --- Select2: inicialización y dependencias región/ciudad ---
                 $('select.select2').each(function() {

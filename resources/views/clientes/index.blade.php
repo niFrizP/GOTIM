@@ -38,49 +38,52 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                {{-- Paginación --}}
+                <div class="mt-4">
+                    {{ $clientes->onEachSide(1)->links() }}
+                </div>
             </div>
-        </div>
-    </div>
 
-    @include('partials.confirm-modal')
+            @include('partials.confirm-modal')
 
-    <script>
-        function mostrarModal(id, nombreCompleto) {
-            const modal = document.getElementById('confirmModal');
-            const form = document.getElementById('deleteForm');
-            const message = document.getElementById('confirmMessage');
+            <script>
+                function mostrarModal(id, nombreCompleto) {
+                    const modal = document.getElementById('confirmModal');
+                    const form = document.getElementById('deleteForm');
+                    const message = document.getElementById('confirmMessage');
 
-            if (!form || !modal || !message) {
-                console.error('❌ No se encontró el modal o el formulario');
-                return;
-            }
+                    if (!form || !modal || !message) {
+                        console.error('❌ No se encontró el modal o el formulario');
+                        return;
+                    }
 
-            form.action = `/clientes/${id}`; // Cambiá si es para otra entidad
-            message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`;
+                    form.action = `/clientes/${id}`; // Cambiá si es para otra entidad
+                    message.innerHTML = `¿Estás seguro de que deseas inhabilitar a <strong>${nombreCompleto}</strong>?`;
 
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.add('opacity-100');
-                modal.querySelector('div').classList.add('scale-100');
-                modal.querySelector('div').classList.remove('scale-95');
-            }, 10);
-        }
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                        modal.querySelector('div').classList.remove('scale-95');
+                    }, 10);
+                }
 
-        function cerrarModal() {
-            const modal = document.getElementById('confirmModal');
-            const message = document.getElementById('confirmMessage');
+                function cerrarModal() {
+                    const modal = document.getElementById('confirmModal');
+                    const message = document.getElementById('confirmMessage');
 
-            if (!modal || !message) return;
+                    if (!modal || !message) return;
 
-            modal.classList.remove('opacity-100');
-            modal.querySelector('div').classList.remove('scale-100');
-            modal.querySelector('div').classList.add('scale-95');
+                    modal.classList.remove('opacity-100');
+                    modal.querySelector('div').classList.remove('scale-100');
+                    modal.querySelector('div').classList.add('scale-95');
 
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                message.innerHTML = `¿Estás seguro de que deseas inhabilitar este elemento?`;
-            }, 300);
-        }
-    </script>
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        message.innerHTML = `¿Estás seguro de que deseas inhabilitar este elemento?`;
+                    }, 300);
+                }
+            </script>
 
 </x-app-layout>

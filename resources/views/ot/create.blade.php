@@ -9,6 +9,19 @@
     <div class="py-6">
         <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 p-6 rounded shadow" x-data="otForm()">
+                {{-- Alerta global para éxito (cliente u orden) --}}
+                @if (session('success'))
+                    <div id="global-success-alert"
+                        class="mb-4 p-3 rounded font-semibold bg-green-100 text-green-700 flex items-center gap-2 shadow">
+                        <i class="fa-solid fa-circle-check text-green-500"></i>
+                        {{ session('success') }}
+                    </div>
+                @else
+                    <div id="global-success-alert"
+                        class="mb-4 p-3 rounded font-semibold bg-green-100 text-green-700 flex items-center gap-2 shadow hidden">
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('ot.store') }}" enctype="multipart/form-data">
                     @csrf
 
@@ -120,19 +133,220 @@
             </div>
         </div>
     </div>
+    <!-- MODAL PARA CREAR CLIENTE -->
+    <div id="modalCrearCliente" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden"
+        aria-modal="true" role="dialog">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative modal-content">
+            <div
+                class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Crear Nuevo Cliente</h3>
+                <button id="cerrarModalCliente"
+                    class="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    aria-label="Cerrar modal">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="contenidoModalCliente" class="p-6"></div>
+        </div>
+    </div>
+
+    <!-- Modal contenedor (una sola vez en la vista principal) -->
+    <div id="modalCrearEmpresa" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden"
+        aria-modal="true" role="dialog">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative modal-content">
+            <div
+                class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Crear Nueva Empresa</h3>
+                <button id="cerrarModalCliente"
+                    class="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    aria-label="Cerrar modal">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="contenidoModalEmpresa" class="p-6"></div>
+        </div>
+    </div>
 
     {{-- CDN Select2 --}}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('js/select2Utils.js') }}"></script>
-
+    <script src="{{ asset('js/rutUtils.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Inicializar Select2
-            $('select.select2').each(function () {
+            // Inicializa select2 para todos los que no sean #id_cliente
+            $('select.select2').not('#id_cliente').each(function () {
                 inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
+
+            // Inicializa #id_cliente con botón de "Crear nuevo cliente"
+            $('#id_cliente').select2({
+                placeholder: 'Seleccione un cliente',
+                width: '100%',
+                language: {
+                    noResults: function () {
+                        return `
+            <div class="text-center">
+                <p class="text-gray-700 dark:text-gray-300">No se encontró el cliente</p>
+                <a href="javascript:void(0);" id="btn_crear_cliente_from_select"
+                    class="mt-2 inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">
+                    + Crear nuevo cliente
+                </a>
+            </div>`;
+                    }
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                }
+            });
+
+            // --- Modal de cliente ---
+            document.addEventListener('DOMContentLoaded', function () {
+                // Cierre de modal con botón
+                document.querySelectorAll('[id^="cerrarModal"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const modalType = btn.id.replace('cerrarModal', '').toLowerCase();
+                        ModalHandlers.closeModal(modalType);
+                    });
+                });
+
+                // Cierre de modal haciendo clic en overlay
+                document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', function (e) {
+                        if (e.target === this) {
+                            const modalType = this.id.replace('modal', '').toLowerCase();
+                            ModalHandlers.closeModal(modalType);
+                        }
+                    });
+                });
+
+                // Botón para crear nuevo cliente
+                $(document).on('click', '#btn_crear_cliente_from_select', function () {
+                    $('#id_cliente').select2('close');
+                    ModalHandlers.openModal('cliente');
+                });
+
+                // Botón para crear nueva empresa desde cliente
+                // 1. Cuando hacen clic en "Crear nueva empresa" desde el modal de cliente:
+                $(document).on('click', '#btn_crear_empresa', function () {
+                    // Abre el modal de empresa
+                    $('#modalCrearEmpresa').removeClass('hidden');
+                    $('#contenidoModalEmpresa').html('<div class="text-center text-gray-600 dark:text-gray-300">Cargando...</div>');
+                    $.get('{{ route('empresas.create') }}?popup=1', function (data) {
+                        $('#contenidoModalEmpresa').html(data);
+
+                        // Inicializar validación/funciones del formulario de empresa
+                        if (typeof initRutEmpresaValidation === 'function') {
+                            initRutEmpresaValidation();
+                        }
+                    });
+                });
+
+                // 2. Cerrar modal de empresa
+                $(document).on('click', '#cerrarModalEmpresa, .btnCerrarEmpresaModal', function () {
+                    $('#modalCrearEmpresa').addClass('hidden');
+                    $('#contenidoModalEmpresa').empty();
+                });
+                $('#modalCrearEmpresa').on('click', function (e) {
+                    if (e.target === this) {
+                        $('#modalCrearEmpresa').addClass('hidden');
+                        $('#contenidoModalEmpresa').empty();
+                    }
+                });
+
+                // 3. Guardar empresa desde el modal
+                $(document).on('submit', '#formCrearEmpresa', function (e) {
+                    e.preventDefault();
+                    const $form = $(this);
+
+                    $.post($form.attr('action'), $form.serialize(), function (resp) {
+                        if (resp.success) {
+                            // Mensaje en el modal empresa
+                            $('#empresa-alert-msg').removeClass('hidden').text('Empresa creada correctamente');
+                            $form.find('input, button, select, textarea').prop('disabled', true);
+
+                            // PASO CRUCIAL: Cargar los datos de empresa en el modal de cliente
+                            setTimeout(() => {
+                                // Cierra modal empresa
+                                $('#modalCrearEmpresa').addClass('hidden');
+                                $('#contenidoModalEmpresa').empty();
+
+                                // Actualiza campos en el formulario de cliente (en el DOM padre)
+                                $('#id_empresa').val(resp.empresa.id); // input hidden
+                                $('#nombre_empresa_label').val(resp.empresa.nombre);
+                                $('#razon_social').val(resp.empresa.razon_social).prop('readonly', true).addClass('bg-gray-100');
+                                $('#giro').val(resp.empresa.giro).prop('readonly', true).addClass('bg-gray-100');
+                                $('#empresa_no_encontrada').hide();
+
+                                // Mensaje visual en el modal cliente (puedes personalizarlo)
+                                $('#cliente-alert-msg')
+                                    .removeClass('hidden')
+                                    .removeClass('bg-red-100 text-red-700')
+                                    .addClass('bg-green-100 text-green-700')
+                                    .html('<i class="fa-solid fa-circle-check text-green-500"></i> Empresa creada correctamente.');
+
+                                setTimeout(() => {
+                                    $('#cliente-alert-msg').addClass('hidden');
+                                }, 2000);
+                            }, 1200); // tiempo de confirmación visual
+                        }
+                    }).fail(function (xhr) {
+                        if (xhr.status === 422) {
+                            $('#contenidoModalEmpresa').html(xhr.responseText);
+                        }
+                    });
+                });
+
+            });
+
+            $(document).on('click', '#cerrarModalCliente, .btnCerrarClienteModal', cerrarModalCliente);
+            $('#modalCrearCliente').on('click', function (e) {
+                if (e.target === this) cerrarModalCliente();
+            });
+
+            function cerrarModalCliente() {
+                $('#modalCrearCliente').addClass('hidden');
+                $('#contenidoModalCliente').empty();
+            }
+
+            $(document).on('submit', '#formCrearCliente', function (e) {
+                e.preventDefault();
+                const $form = $(this);
+
+                $.post($form.attr('action'), $form.serialize(), function (resp) {
+                    if (resp.success) {
+                        // ESTE ES EL CAMBIO:
+                        $('#global-success-alert')
+                            .removeClass('hidden')
+                            .html('<i class="fa-solid fa-circle-check text-green-500"></i> Cliente creado correctamente.');
+
+                        $form.find('input,button,select,textarea').prop('disabled', true);
+
+                        const texto = resp.cliente.nombre + ' (' + resp.cliente.rut + ')';
+                        const nuevoOption = new Option(texto, resp.cliente.id, true, true);
+                        $('#id_cliente').append(nuevoOption).val(resp.cliente.id).trigger('change');
+                        $('#id_cliente option[value=""]').remove();
+
+                        setTimeout(() => {
+                            cerrarModalCliente();
+                            setTimeout(() => $('#global-success-alert').addClass('hidden'), 3000);
+                        }, 1500);
+                    }
+                }).fail(function (xhr) {
+                    if (xhr.status === 422) {
+                        $('#contenidoModalCliente').html(xhr.responseText);
+                        window.initRutValidation(); // para reactivar validaciones
+                    }
+                });
+            });
+
 
             // Validación sincrónica en tiempo real
             const campos = {
@@ -150,6 +364,21 @@
                 input.addEventListener('change', () => validarCampo(id, mensaje));
                 input.addEventListener('input', () => validarCampo(id, mensaje));
             });
+            // Botón "Crear nuevo cliente" desde el select2
+            $(document).on('click', '#btn_crear_cliente_from_select', function () {
+                $('#id_cliente').select2('close');
+                $('#modalCrearCliente').removeClass('hidden');
+                $('#contenidoModalCliente').html('<div class="text-center text-gray-600 dark:text-gray-300">Cargando...</div>');
+                $.get('{{ route('clientes.create') }}?popup=1', function (data) {
+                    $('#contenidoModalCliente').html(data);
+
+                    // Ahora sí: inicializar scripts para los campos cargados por AJAX
+                    if (typeof window.initClienteModalScripts === 'function') {
+                        window.initClienteModalScripts();
+                    }
+                });
+            });
+
 
             function validarCampo(id, mensaje) {
                 const campo = document.getElementById(id);
@@ -238,10 +467,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            $('select.select2').each(function () {
+            $('select.select2').not('#id_cliente').each(function () {
                 inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
+
         });
     </script>
-
 </x-app-layout>
