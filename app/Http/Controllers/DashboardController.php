@@ -13,8 +13,8 @@ class DashboardController extends Controller
     {
         // Filtros individuales para las tarjetas
         $filtros = [
-            'ordenes' => $request->get('ordenes_filtro', 'año'),
-            'completadas' => $request->get('completadas_filtro', 'año'),
+            'ordenes' => $request->get('ordenes_filtro', 'total'),
+            'completadas' => $request->get('completadas_filtro', 'total'),
             'clientes' => $request->get('clientes_filtro', 'total'),
         ];
 

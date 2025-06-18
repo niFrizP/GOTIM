@@ -56,20 +56,34 @@
                         </div>
 
                         {{-- Filtros horizontales --}}
-                        <form method="GET" class="mt-4 flex flex-wrap gap-2">
+                        <div class="mt-4 flex flex-wrap gap-2">
                             @php
                                 $opciones = ['semana', 'mes', 'año', 'total'];
                             @endphp
 
                             @foreach ($opciones as $opcion)
-                                <input type="hidden" name="{{ $card['param'] }}" value="{{ $opcion }}">
-                                <button formaction="?{{ $card['param'] }}={{ $opcion }}"
-                                    class="text-xs px-2 py-1 rounded transition-all
-                        {{ $card['filtro'] === $opcion ? 'bg-white text-black font-bold' : 'bg-black bg-opacity-30' }}">
-                                    {{ ucfirst($opcion) }}
-                                </button>
+                                <form method="GET" class="inline">
+                                    {{-- Mantener los otros filtros activos --}}
+                                    @foreach ($cards as $otherCard)
+                                        @if ($otherCard['param'] !== $card['param'] && request($otherCard['param']))
+                                            <input type="hidden" name="{{ $otherCard['param'] }}" value="{{ request($otherCard['param']) }}">
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Si existe un filtro general para los gráficos, mantenlo --}}
+                                    @if (request('filtro'))
+                                        <input type="hidden" name="filtro" value="{{ request('filtro') }}">
+                                    @endif
+
+                                    <input type="hidden" name="{{ $card['param'] }}" value="{{ $opcion }}">
+                                    <button type="submit"
+                                        class="text-xs px-2 py-1 rounded transition-all
+                                        {{ $card['filtro'] === $opcion ? 'bg-white text-black font-bold' : 'bg-black bg-opacity-30' }}">
+                                        {{ ucfirst($opcion) }}
+                                    </button>
+                                </form>
                             @endforeach
-                        </form>
+                        </div>
                     </div>
                 @endforeach
             </div>
