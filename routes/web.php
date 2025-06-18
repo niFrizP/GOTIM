@@ -29,6 +29,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
+
 
 });
 
@@ -58,7 +60,6 @@ Route::middleware(['auth', \App\Http\Middleware\AllUserMiddleware::class])->grou
     Route::post('ot/{id_ot}/reactivar', [OTController::class, 'reactivar'])->name('ot.reactivar');
     Route::get('ot/{ot}/historial', [OTController::class, 'historial'])->name('ot.historial');
     Route::delete('/archivos-ot/{id}', [OTController::class, 'eliminarArchivo'])->name('archivos_ot.eliminar');
-    Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
 
 });
 // Rutas para administrador o supervisor

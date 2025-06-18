@@ -75,9 +75,14 @@
         @endisset
         <h1>Orden de Trabajo #@yield('ot_id')</h1>
         <p><strong>Cliente:</strong> @yield('cliente')</p>
+            <p><strong>Rut Cliente: </strong>@yield('rut_cliente')</p>
+            <p><strong>Tipo Cliente: </strong>@yield('tipo_cliente')</p>
+            <p><strong>Nombre empresa: </strong>@yield('empresa')</p>
+            <p><strong>Razón social: </strong>@yield('razon_social')</p>
+        <p><strong>Giro: </strong>@yield('giro')</p>
         <p><strong>Responsable:</strong> @yield('responsable')</p>
-        <p><strong>Estado:</strong> @yield('estado')</p>
-        <p><strong>Creación:</strong> @yield('fecha_creacion')</p>
+        <p><strong>Estado Orden:</strong> @yield('estado')</p>
+        <p><strong>Creación Orden:</strong> @yield('fecha_creacion')</p>
         <p><strong>Entrega Estimada:</strong> @yield('fecha_entrega')</p>
     </div>
 
