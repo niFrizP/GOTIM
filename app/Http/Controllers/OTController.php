@@ -177,7 +177,8 @@ class OTController extends Controller
             'servicios',
             'detalleOT',
             'detalleProductos.producto',
-            'archivosAdjuntos'
+            'archivosAdjuntos',
+            'empresa'
         ])->findOrFail($id);
 
         // --- Nuevo: cargo en su totalidad el historial de esta OT, ordenado de mayor a menor por ID ---

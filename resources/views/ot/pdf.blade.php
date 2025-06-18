@@ -3,8 +3,18 @@
 @section('title', "Orden de Trabajo #{$ordenTrabajo->id_ot}")
 
 @section('ot_id', $ordenTrabajo->id_ot)
-@section('cliente', $ordenTrabajo->cliente->nombre_cliente)
-@section('responsable', $ordenTrabajo->responsable->nombre)
+@section('cliente', $ordenTrabajo->cliente->nombre_cliente . ' ' . $ordenTrabajo->cliente->apellido_cliente ?? 'Cliente no especificado')
+@section('rut_cliente', $ordenTrabajo->cliente->rut)
+@section('tipo_cliente', $ordenTrabajo->cliente->tipo_cliente ?? '—')
+@section('empresa', $ordenTrabajo->cliente->empresa->nom_emp ?? 'Empresa no especificada')
+@section('razon_social', $ordenTrabajo->cliente->empresa->razon_social ?? 'Razón social no especificada')
+@section('giro', $ordenTrabajo->cliente->empresa->giro ?? 'Giro no especificado')
+@section('responsable',
+    ($ordenTrabajo->responsable->nombre ?? '') . ' ' .
+    ($ordenTrabajo->responsable->apellido ?? '') .
+    (isset($ordenTrabajo->responsable->rol) ? ' (' . $ordenTrabajo->responsable->rol . ')' : '') ??
+    'Responsable no especificado'
+)
 @section('estado', $ordenTrabajo->estadoOT->nombre_estado)
 @section('fecha_creacion', \Carbon\Carbon::parse($ordenTrabajo->fecha_creacion)->format('d/m/Y'))
 @section('fecha_entrega', $ordenTrabajo->fecha_entrega ? $ordenTrabajo->fecha_entrega->format('d/m/Y') : '—')
