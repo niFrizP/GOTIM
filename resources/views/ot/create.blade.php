@@ -136,6 +136,9 @@
     <!-- MODAL PARA CREAR CLIENTE -->
     <div id="modalCrearCliente" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden"
         aria-modal="true" role="dialog">
+        <!-- Overlay de fondo oscuro -->
+        <div class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"></div>
+        <!-- Contenido del modal -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative modal-content">
             <div
                 class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -156,6 +159,7 @@
     <!-- Modal contenedor (una sola vez en la vista principal) -->
     <div id="modalCrearEmpresa" class="fixed inset-0 z-50 flex items-center justify-center modal-overlay hidden"
         aria-modal="true" role="dialog">
+        <div class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"></div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl relative modal-content">
             <div
                 class="sticky top-0 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -471,6 +475,21 @@
                 inicializarSelect2(this, $(this).attr('data-placeholder') || 'Seleccione una opción');
             });
 
+        });
+        // CIERRA EL MODAL AL HACER CLICK EN EL OVERLAY
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', function (e) {
+                const modalOverlay = this.closest('.modal-overlay');
+                if (modalOverlay) {
+                    modalOverlay.classList.add('hidden');
+                    if (modalOverlay.id === 'modalCrearCliente') {
+                        document.getElementById('contenidoModalCliente').innerHTML = '';
+                    }
+                    if (modalOverlay.id === 'modalCrearEmpresa') {
+                        document.getElementById('contenidoModalEmpresa').innerHTML = '';
+                    }
+                }
+            });
         });
     </script>
 </x-app-layout>

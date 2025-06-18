@@ -1,140 +1,149 @@
 <div id="cliente-alert-msg" class="hidden mb-4 p-3 rounded font-semibold"></div>
+<div class="modal-body-scroll max-h-[70vh] overflow-y-auto px-4 py-2">
+    <form id="formCrearCliente" method="POST" action="{{ route('clientes.store') }}" novalidate>
+        @csrf
+        <input type="hidden" name="popup" value="0">
+        <input type="hidden" id="id_empresa" name="id_empresa" value="">
+        <input type="hidden" id="nombre_empresa_label" name="nombre_empresa_label" value="">
 
-<form id="formCrearCliente" method="POST" action="{{ route('clientes.store') }}" novalidate>
-    @csrf
-    <input type="hidden" name="popup" value="0">
-    <input type="hidden" id="id_empresa" name="id_empresa" value="">
-    <input type="hidden" id="nombre_empresa_label" name="nombre_empresa_label" value="">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <!-- Nombre -->
+            <div>
+                <x-input-label for="nombre_cliente" value="Nombre *" />
+                <x-text-input id="nombre_cliente" name="nombre_cliente" type="text" class="w-full" required
+                    maxlength="255" />
+                <x-input-error :messages="$errors->get('nombre_cliente')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
 
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <!-- Nombre -->
-        <div>
-            <x-input-label for="nombre_cliente" value="Nombre *" />
-            <x-text-input id="nombre_cliente" name="nombre_cliente" type="text" class="w-full" required
-                maxlength="255" />
-            <x-input-error :messages="$errors->get('nombre_cliente')"
+            <!-- Apellido -->
+            <div>
+                <x-input-label for="apellido_cliente" value="Apellido *" />
+                <x-text-input id="apellido_cliente" name="apellido_cliente" type="text" class="w-full" required
+                    maxlength="255" />
+                <x-input-error :messages="$errors->get('apellido_cliente')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+
+            <!-- Correo -->
+            <div>
+                <x-input-label for="email" value="Correo Electrónico *" />
+                <x-text-input id="email" name="email" type="email" class="w-full" required maxlength="255" />
+                <x-input-error :messages="$errors->get('email')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+                <x-input-label for="nro_contacto" value="Teléfono *" />
+                <x-text-input id="nro_contacto" name="nro_contacto" type="tel" class="w-full" maxlength="9"
+                    minlength="9" required placeholder="Ej: 912345678" />
+                <small class="text-gray-500">Ingrese el número sin el prefijo +56</small>
+                <x-input-error :messages="$errors->get('nro_contacto')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+        </div>
+
+        <!-- Tipo de Cliente -->
+        <div class="mt-4">
+            <x-input-label value="Tipo de Cliente *" />
+            <div class="flex items-center gap-6">
+                <x-input-label>
+                    <input type="radio" name="tipo_cliente" value="natural" checked> Persona Natural
+                </x-input-label>
+                <x-input-label>
+                    <input type="radio" name="tipo_cliente" value="empresa"> Empresa
+                </x-input-label>
+            </div>
+        </div>
+
+        <!-- RUT Natural -->
+        <div id="rut_natural_field" class="mt-4">
+            <x-input-label for="rut_natural" value="RUT *" />
+            <x-text-input id="rut_natural" name="rut_natural" type="text" class="w-full pr-10" maxlength="12"
+                placeholder="Ej: 12.345.678-9" />
+            <div id="rut_natural_icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            </div>
+            <p id="rut_natural_feedback" class="mt-1 text-sm"></p>
+            <x-input-error :messages="$errors->get('rut_natural')"
                 class="mt-1 text-sm text-red-600 dark:text-red-400" />
         </div>
 
-        <!-- Apellido -->
-        <div>
-            <x-input-label for="apellido_cliente" value="Apellido *" />
-            <x-text-input id="apellido_cliente" name="apellido_cliente" type="text" class="w-full" required
-                maxlength="255" />
-            <x-input-error :messages="$errors->get('apellido_cliente')"
+        <!-- RUT Empresa -->
+        <div id="rut_empresa_field" class="hidden mt-4 relative">
+            <x-input-label for="rut_empresa" value="RUT Empresa *" />
+            <x-text-input id="rut_empresa" name="rut_empresa" type="text" class="w-full pr-10" maxlength="12"
+                placeholder="Ej: 99.999.999-9" />
+            <div id="rut_empresa_icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            </div>
+            <p id="rut_empresa_feedback" class="mt-1 text-sm"></p>
+            <x-input-error :messages="$errors->get('rut_empresa')"
                 class="mt-1 text-sm text-red-600 dark:text-red-400" />
         </div>
-
-        <!-- Correo -->
-        <div>
-            <x-input-label for="email" value="Correo Electrónico *" />
-            <x-text-input id="email" name="email" type="email" class="w-full" required maxlength="255" />
-            <x-input-error :messages="$errors->get('email')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+        <!-- Empresa no encontrada -->
+        <div id="empresa_no_encontrada" class="hidden mt-2 text-red-600 dark:text-red-400">
+            Empresa no registrada.
+            <a href="javascript:void(0);" id="btn_crear_empresa"
+                class="ml-2 underline text-blue-600 hover:text-blue-800">
+                Crear nueva empresa
+            </a>
         </div>
-
-        <!-- Teléfono -->
-        <div>
-            <x-input-label for="nro_contacto" value="Teléfono *" />
-            <x-text-input id="nro_contacto" name="nro_contacto" type="tel" class="w-full" maxlength="9" minlength="9"
-                required placeholder="Ej: 912345678" />
-            <small class="text-gray-500">Ingrese el número sin el prefijo +56</small>
-            <x-input-error :messages="$errors->get('nro_contacto')"
+        <!-- Razón Social y Giro -->
+        <div id="razon_social_field" class="hidden mt-4">
+            <x-input-label for="razon_social" value="Razón Social" />
+            <x-text-input id="razon_social" name="razon_social" type="text" class="w-full" maxlength="255" />
+            <x-input-error :messages="$errors->get('razon_social')"
                 class="mt-1 text-sm text-red-600 dark:text-red-400" />
         </div>
-    </div>
-
-    <!-- Tipo de Cliente -->
-    <div class="mt-4">
-        <x-input-label value="Tipo de Cliente *" />
-        <div class="flex items-center gap-6">
-            <x-input-label>
-                <input type="radio" name="tipo_cliente" value="natural" checked> Persona Natural
-            </x-input-label>
-            <x-input-label>
-                <input type="radio" name="tipo_cliente" value="empresa"> Empresa
-            </x-input-label>
+        <div id="giro_field" class="hidden mt-4">
+            <x-input-label for="giro" value="Giro" />
+            <x-text-input id="giro" name="giro" type="text" class="w-full" maxlength="255" />
+            <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
         </div>
-    </div>
 
-    <!-- RUT Natural -->
-    <div id="rut_natural_field" class="mt-4">
-        <x-input-label for="rut_natural" value="RUT *" />
-        <x-text-input id="rut_natural" name="rut_natural" type="text" class="w-full pr-10" maxlength="12"
-            placeholder="Ej: 12.345.678-9" />
-        <div id="rut_natural_icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"></div>
-        <p id="rut_natural_feedback" class="mt-1 text-sm"></p>
-        <x-input-error :messages="$errors->get('rut_natural')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-    </div>
-
-    <!-- RUT Empresa -->
-    <div id="rut_empresa_field" class="hidden mt-4 relative">
-        <x-input-label for="rut_empresa" value="RUT Empresa *" />
-        <x-text-input id="rut_empresa" name="rut_empresa" type="text" class="w-full pr-10" maxlength="12"
-            placeholder="Ej: 99.999.999-9" />
-        <div id="rut_empresa_icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"></div>
-        <p id="rut_empresa_feedback" class="mt-1 text-sm"></p>
-        <x-input-error :messages="$errors->get('rut_empresa')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-    </div>
-    <!-- Empresa no encontrada -->
-    <div id="empresa_no_encontrada" class="hidden mt-2 text-red-600 dark:text-red-400">
-        Empresa no registrada.
-        <a href="javascript:void(0);" id="btn_crear_empresa" class="ml-2 underline text-blue-600 hover:text-blue-800">
-            Crear nueva empresa
-        </a>
-    </div>
-    <!-- Razón Social y Giro -->
-    <div id="razon_social_field" class="hidden mt-4">
-        <x-input-label for="razon_social" value="Razón Social" />
-        <x-text-input id="razon_social" name="razon_social" type="text" class="w-full" maxlength="255" />
-        <x-input-error :messages="$errors->get('razon_social')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-    </div>
-    <div id="giro_field" class="hidden mt-4">
-        <x-input-label for="giro" value="Giro" />
-        <x-text-input id="giro" name="giro" type="text" class="w-full" maxlength="255" />
-        <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-    </div>
-
-    <!-- Dirección -->
-    <div class="mt-4">
-        <x-input-label for="direccion" value="Dirección *" />
-        <x-text-input id="direccion" name="direccion" type="text" class="w-full" maxlength="255" required />
-        <x-input-error :messages="$errors->get('direccion')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-    </div>
-
-    <!-- Región y Ciudad -->
-    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-            <x-input-label for="id_region" value="Región *" />
-            <select id="id_region" name="id_region"
-                class="select2 w-full border-gray-300 dark:bg-gray-700 dark:text-white rounded" required>
-                <option value="">Seleccione una región</option>
-                @foreach ($regiones as $region)
-                    <option value="{{ $region->id_region }}">{{ $region->nombre_region }}</option>
-                @endforeach
-            </select>
-            <x-input-error :messages="$errors->get('id_region')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+        <!-- Dirección -->
+        <div class="mt-4">
+            <x-input-label for="direccion" value="Dirección *" />
+            <x-text-input id="direccion" name="direccion" type="text" class="w-full" maxlength="255" required />
+            <x-input-error :messages="$errors->get('direccion')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
         </div>
-        <!-- Ciudad -->
-        <div>
-            <x-input-label for="id_ciudad" value="Ciudad *" />
-            <select id="id_ciudad" name="id_ciudad" class="w-full select2" required>
-                <option value="">Seleccione una ciudad</option>
-                @foreach ($ciudades as $ciudad)
-                    <option value="{{ $ciudad->id_ciudad }}" {{ old('id_ciudad') == $ciudad->id_ciudad ? 'selected' : '' }}>
-                        {{ $ciudad->nombre_ciudad }}
-                    </option>
-                @endforeach
-            </select>
-            <x-input-error :messages="$errors->get('id_ciudad')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-        </div>
-    </div>
 
-    <!-- Botones -->
-    <div class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-        <x-primary-button type="submit" id="btnGuardarCliente">Crear Cliente</x-primary-button>
-        <x-secondary-button type="button" id="cerrarModalCliente">Cancelar</x-secondary-button>
-    </div>
-</form>
+        <!-- Región y Ciudad -->
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <x-input-label for="id_region" value="Región *" />
+                <select id="id_region" name="id_region"
+                    class="select2 w-full border-gray-300 dark:bg-gray-700 dark:text-white rounded" required>
+                    <option value="">Seleccione una región</option>
+                    @foreach ($regiones as $region)
+                        <option value="{{ $region->id_region }}">{{ $region->nombre_region }}</option>
+                    @endforeach
+                </select>
+                <x-input-error :messages="$errors->get('id_region')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+            <!-- Ciudad -->
+            <div>
+                <x-input-label for="id_ciudad" value="Ciudad *" />
+                <select id="id_ciudad" name="id_ciudad" class="w-full select2" required>
+                    <option value="">Seleccione una ciudad</option>
+                    @foreach ($ciudades as $ciudad)
+                        <option value="{{ $ciudad->id_ciudad }}" {{ old('id_ciudad') == $ciudad->id_ciudad ? 'selected' : '' }}>
+                            {{ $ciudad->nombre_ciudad }}
+                        </option>
+                    @endforeach
+                </select>
+                <x-input-error :messages="$errors->get('id_ciudad')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <x-primary-button type="submit" id="btnGuardarCliente">Crear Cliente</x-primary-button>
+            <x-secondary-button type="button" id="cerrarModalCliente">Cancelar</x-secondary-button>
+        </div>
+    </form>
+</div>
 <script>
     $(document).on('click', '#btn_crear_empresa', function () {
         // Mostrar modal

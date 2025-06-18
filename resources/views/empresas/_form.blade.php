@@ -1,60 +1,62 @@
 <div id="empresa-alert-msg" class="hidden mb-4 p-3 rounded font-semibold"></div>
+<div class="modal-body-scroll max-h-[70vh] overflow-y-auto px-4 py-2">
+    <form id="formCrearEmpresa" method="POST" action="{{ route('empresas.store') }}" novalidate>
+        @csrf
 
-<form id="formCrearEmpresa" method="POST" action="{{ route('empresas.store') }}" novalidate>
-    @csrf
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <!-- Nombre de la empresa -->
+            <div>
+                <x-input-label for="nom_emp" value="Nombre de la empresa *" class="dark:text-gray-300" />
+                <x-text-input id="nom_emp" name="nom_emp" type="text" class="w-full" value="{{ old('nom_emp') }}"
+                    required maxlength="255" placeholder="Ej: Mi Empresa Ltda." />
+                <x-input-error :messages="$errors->get('nom_emp')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
 
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <!-- Nombre de la empresa -->
-        <div>
-            <x-input-label for="nom_emp" value="Nombre de la empresa *" class="dark:text-gray-300" />
-            <x-text-input id="nom_emp" name="nom_emp" type="text" class="w-full" value="{{ old('nom_emp') }}" required
-                maxlength="255" placeholder="Ej: Mi Empresa Ltda." />
-            <x-input-error :messages="$errors->get('nom_emp')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            <!-- RUT Empresa -->
+            <div class="relative">
+                <x-input-label for="rut" value="RUT *" />
+                <x-text-input id="rut" name="rut_empresa" type="text" class="w-full pr-10" maxlength="12"
+                    placeholder="Ej: 12.345.678-9" value="{{ old('rut') }}" />
+                <div id="rut_icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"></div>
+                <p id="rut_feedback" class="mt-1 text-sm"></p>
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+                <x-input-label for="telefono" value="Teléfono" class="dark:text-gray-300" />
+                <x-text-input id="telefono" name="telefono" type="tel" class="w-full" maxlength="9" minlength="9"
+                    value="{{ old('telefono') }}" placeholder="Ej: 912345678" />
+                <small class="text-gray-500 dark:text-gray-400">Ingrese el número sin el prefijo +56</small>
+                <x-input-error :messages="$errors->get('telefono')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+
+            <!-- Razón Social -->
+            <div>
+                <x-input-label for="razon_social" value="Razón Social" class="dark:text-gray-300" />
+                <x-text-input id="razon_social" name="razon_social" type="text" class="w-full"
+                    value="{{ old('razon_social') }}" maxlength="255" placeholder="Ej: Mi Empresa Sociedad Limitada" />
+                <x-input-error :messages="$errors->get('razon_social')"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
+
+            <!-- Giro -->
+            <div>
+                <x-input-label for="giro" value="Giro de la empresa" class="dark:text-gray-300" />
+                <x-text-input id="giro" name="giro" type="text" class="w-full" value="{{ old('giro') }}" maxlength="255"
+                    placeholder="Ej: Servicios de tecnología" />
+                <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
+            </div>
         </div>
 
-        <!-- RUT Empresa -->
-        <div class="relative">
-            <x-input-label for="rut" value="RUT *" />
-            <x-text-input id="rut" name="rut_empresa" type="text" class="w-full pr-10" maxlength="12"
-                placeholder="Ej: 12.345.678-9" value="{{ old('rut') }}" />
-            <div id="rut_icon" class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"></div>
-            <p id="rut_feedback" class="mt-1 text-sm"></p>
+        <!-- Botones -->
+        <div class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <x-primary-button type="submit" id="btnGuardar">Crear Empresa</x-primary-button>
+            <x-secondary-button type="button" id="cerrarModalEmpresa">Cancelar</x-secondary-button>
         </div>
-
-        <!-- Teléfono -->
-        <div>
-            <x-input-label for="telefono" value="Teléfono" class="dark:text-gray-300" />
-            <x-text-input id="telefono" name="telefono" type="tel" class="w-full" maxlength="9" minlength="9"
-                value="{{ old('telefono') }}" placeholder="Ej: 912345678" />
-            <small class="text-gray-500 dark:text-gray-400">Ingrese el número sin el prefijo +56</small>
-            <x-input-error :messages="$errors->get('telefono')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-        </div>
-
-        <!-- Razón Social -->
-        <div>
-            <x-input-label for="razon_social" value="Razón Social" class="dark:text-gray-300" />
-            <x-text-input id="razon_social" name="razon_social" type="text" class="w-full"
-                value="{{ old('razon_social') }}" maxlength="255" placeholder="Ej: Mi Empresa Sociedad Limitada" />
-            <x-input-error :messages="$errors->get('razon_social')"
-                class="mt-1 text-sm text-red-600 dark:text-red-400" />
-        </div>
-
-        <!-- Giro -->
-        <div>
-            <x-input-label for="giro" value="Giro de la empresa" class="dark:text-gray-300" />
-            <x-text-input id="giro" name="giro" type="text" class="w-full" value="{{ old('giro') }}" maxlength="255"
-                placeholder="Ej: Servicios de tecnología" />
-            <x-input-error :messages="$errors->get('giro')" class="mt-1 text-sm text-red-600 dark:text-red-400" />
-        </div>
-    </div>
-
-    <!-- Botones -->
-    <div class="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-        <x-primary-button type="submit" id="btnGuardar">Crear Empresa</x-primary-button>
-        <x-secondary-button type="button" id="cerrarModalEmpresa">Cancelar</x-secondary-button>
-    </div>
-</form>
-
+    </form>
+</div>
 <script>
     function limpiarRut(rut) {
         return rut.replace(/[^0-9kK]/g, '').toUpperCase();
