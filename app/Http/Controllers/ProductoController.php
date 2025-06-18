@@ -90,7 +90,7 @@ class ProductoController extends Controller
     }
 
 
-    
+
 
     /**
      * Update the specified resource in storage.
@@ -129,7 +129,7 @@ class ProductoController extends Controller
      */
 
 
-    // Método para buscar Producto por nombre 
+    // Función para buscar Producto por nombre
     public function buscarPorNombre(Request $request)
     {
         $nombre = $request->input('nombre');
