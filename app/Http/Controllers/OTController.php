@@ -180,7 +180,7 @@ class OTController extends Controller
             'archivosAdjuntos'
         ])->findOrFail($id);
 
-        // --- Nuevo: cargo todo el historial de esta OT, ordenado de mayor a menor por ID ---
+        // --- Nuevo: cargo en su totalidad el historial de esta OT, ordenado de mayor a menor por ID ---
         $todos = HistorialOT::with('usuario')
             ->where('id_ot', $id)
             ->orderByDesc('id_historial_ot')
@@ -209,7 +209,7 @@ class OTController extends Controller
             ];
         })->sortByDesc('id_historial')->values();
 
-        // Paso todo a la vista
+        // Paso en su totalidad a la vista
         return view('ot.show', compact('ot', 'historial'));
     }
 
@@ -723,7 +723,7 @@ class OTController extends Controller
             'archivosAdjuntos',
         ])->findOrFail($id);
 
-        // Obtener y agrupar el historial como en el método 'show'
+        // Obtener y agrupar el historial como en la función 'show'
         $todos = HistorialOT::with('usuario')
             ->where('id_ot', $id)
             ->orderByDesc('id_historial_ot')
