@@ -175,10 +175,6 @@
             </div>
         </div>
     </div>
-    <script>
-        window.initRutValidation();
-    </script>
-
     @push('scripts')
         <!-- Dependencias externas -->
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -190,6 +186,11 @@
 
         <script>
             $(function() {
+
+                // --- Inicialización global de RUT ---
+                if (typeof window.initRutValidation === 'function') {
+                    window.initRutValidation();
+                }
                 // <--- Selectores comunes --->
                 const $region = $('#id_region');
                 const $ciudad = $('#id_ciudad');
@@ -242,7 +243,7 @@
                     },
                     caso: 'natural'
                 });
-
+                
                 // Rut Empresa
                 rutUtils.rutComponent({
                     idRut: 'rut_empresa',

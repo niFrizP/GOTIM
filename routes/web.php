@@ -44,6 +44,8 @@ Route::middleware(['auth', \App\Http\Middleware\AllUserMiddleware::class])->grou
     Route::get('/clientes/{id}/validar-rut', [ClienteController::class, 'validarRutEditar'])->name('clientes.validar.rut.editar');
     Route::get('/clientes/{id}/validar-email', [ClienteController::class, 'validarEmailEditar'])->name('clientes.validar.email.editar');
     Route::get('/cxr/{id_region}', [CiudadController::class, 'getCiudadesPorRegion']);
+    Route::get('/clientes/comprobar-rut/{rut}', [ClienteController::class, 'comprobarRut']);
+
 
     // Empresas
     Route::resource('empresas', EmpresaController::class);
