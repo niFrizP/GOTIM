@@ -321,6 +321,46 @@
         if (typeof window.initRutValidation === 'function') {
             window.initRutValidation();
         }
+        // --- Autocompletar datos de empresa por RUT en el modal ---
+        const $rutEmpresa = $('#rut_empresa');
+        const $nombreEmpresaLabel = $('#nombre_empresa_label');
+        const $idEmpresa = $('#id_empresa');
+        const $razonSocial = $('#razon_social');
+        const $giro = $('#giro');
+
+        function formatRut(rut) {
+            rut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+            if (rut.length < 2) return rut;
+            let cuerpo = rut.slice(0, -1);
+            let dv = rut.slice(-1);
+            return cuerpo + '-' + dv;
+        }
+
+        function limpiarCamposEmpresa() {
+            $nombreEmpresaLabel.text('').hide();
+            $idEmpresa.val('');
+            $razonSocial.add($giro).val('').prop('readonly', false).removeClass('bg-gray-100');
+        }
+
+        $rutEmpresa.on('input', function () {
+            let rut = $(this).val();
+            rut = formatRut(rut);
+            if (rut.length < 3) return limpiarCamposEmpresa();
+
+            fetch(`/empresas/comprobar/${rut}`)
+                .then(res => res.ok ? res.json() : Promise.reject())
+                .then(data => {
+                    if (data.existe) {
+                        $nombreEmpresaLabel.text(data.nom_emp).show();
+                        $idEmpresa.val(data.id_empresa);
+                        $razonSocial.val(data.razon_social).prop('readonly', true).addClass('bg-gray-100');
+                        $giro.val(data.giro).prop('readonly', false).removeClass('bg-gray-100');
+                    } else {
+                        limpiarCamposEmpresa();
+                    }
+                })
+                .catch(limpiarCamposEmpresa);
+        });
 
     }
 </script>

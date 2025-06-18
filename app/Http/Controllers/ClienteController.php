@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use App\Models\Ciudad;
 use App\Models\Region;
 use App\Models\Empresa;
+use App\Rules\RutValido;
 
 /**
  * Controlador para manejar las operaciones relacionadas con los clientes.
@@ -52,8 +53,26 @@ class ClienteController extends Controller
             'direccion' => 'required|string|max:255',
             'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
-            'rut_natural' => 'nullable|required_if:tipo_cliente,natural|string|max:20',
-            'rut_empresa' => 'nullable|required_if:tipo_cliente,empresa|string|max:20',
+            'rut_natural' => [
+                'nullable',
+                'required_if:tipo_cliente,natural',
+                'string',
+                'max:20',
+                new RutValido, // <--- AGREGADO
+                // Tu closure para evitar duplicados
+                function ($attribute, $value, $fail) {
+                    if (request('tipo_cliente') === 'natural' && \App\Models\Cliente::where('rut', $value)->exists()) {
+                        $fail('El RUT ya está registrado para otro cliente.');
+                    }
+                },
+            ],
+            'rut_empresa' => [
+                'nullable',
+                'required_if:tipo_cliente,empresa',
+                'string',
+                'max:20',
+                new RutValido, // <--- AGREGADO
+            ],
         ], [
             'rut_natural.required_if' => 'Debes ingresar el RUT si es persona natural.',
             'rut_empresa.required_if' => 'Debes ingresar el RUT si es empresa.',
@@ -157,8 +176,51 @@ class ClienteController extends Controller
             'direccion' => 'required|string|max:255',
             'razon_social' => 'nullable|string|max:255',
             'giro' => 'nullable|string|max:255',
-            'rut' => 'required|string|max:20',
-            'id_empresa' => 'nullable|exists:empresas,id_empresa',
+            // Validación para tipo NATURAL
+            'rut_natural' => [
+                'nullable',
+                'required_if:tipo_cliente,natural',
+                'string',
+                'max:20',
+                new RutValido, // <--- AGREGADO
+                function ($attribute, $value, $fail) use ($cliente) {
+                    if (
+                        request('tipo_cliente') === 'natural' &&
+                        \App\Models\Cliente::where('rut', $value)
+                            ->where('id_cliente', '!=', $cliente->id_cliente)
+                            ->exists()
+                    ) {
+                        $fail('El RUT ya está registrado para otro cliente.');
+                    }
+                    // Valida que el rut_natural NO exista como rut_empresa en tabla empresas
+                    if (
+                        request('tipo_cliente') === 'natural' &&
+                        \App\Models\Empresa::where('rut_empresa', $value)->exists()
+                    ) {
+                        $fail('Este RUT ya está registrado como empresa.');
+                    }
+                }
+            ],
+            // Validación para tipo EMPRESA
+            'rut_empresa' => [
+                'nullable',
+                'required_if:tipo_cliente,empresa',
+                'string',
+                'max:20',
+                new RutValido, // <--- AGREGADO
+                // Opcional: Valida que la empresa exista en la tabla empresas
+                function ($attribute, $value, $fail) {
+                    if (
+                        request('tipo_cliente') === 'empresa' &&
+                        !\App\Models\Empresa::where('rut_empresa', $value)->exists()
+                    ) {
+                        $fail('La empresa con ese RUT no está registrada.');
+                    }
+                }
+            ],
+        ], [
+            'rut_natural.required_if' => 'Debes ingresar el RUT si es persona natural.',
+            'rut_empresa.required_if' => 'Debes ingresar el RUT si es empresa.',
         ]);
 
         // Campos comunes
@@ -172,27 +234,14 @@ class ClienteController extends Controller
         $cliente->direccion = $request->direccion;
         $cliente->giro = $request->giro;
 
-        // Validación del RUT 
         if ($request->tipo_cliente === 'empresa') {
             $rutEmpresa = $request->rut_empresa;
-
-            $empresa = Empresa::where('rut_empresa', $rutEmpresa)->first();
-            if (!$empresa) {
-                return back()->withErrors(['rut_empresa' => 'La empresa con ese RUT no está registrada.'])->withInput();
-            }
-
+            $empresa = \App\Models\Empresa::where('rut_empresa', $rutEmpresa)->first();
             $cliente->id_empresa = $empresa->id_empresa;
             $cliente->razon_social = $empresa->razon_social;
-            $cliente->giro = $request->giro;
             $cliente->rut = $empresa->rut_empresa;
         } else {
             $rutNatural = $request->rut_natural;
-
-            // ⚠️ Validar que no esté en tabla empresas
-            if (Empresa::where('rut_empresa', $rutNatural)->exists()) {
-                return back()->withErrors(['rut_natural' => 'Este RUT ya está registrado como empresa.'])->withInput();
-            }
-
             $cliente->rut = $rutNatural;
             $cliente->id_empresa = null;
             $cliente->razon_social = null;
@@ -271,4 +320,11 @@ class ClienteController extends Controller
 
         return response()->json($ciudades);
     }
+    // API para verificar si el rut_natural existe en clientes
+    public function comprobarRut($rut)
+    {
+        $existe = Cliente::where('rut', $rut)->exists();
+        return response()->json(['existe' => $existe]);
+    }
+
 }

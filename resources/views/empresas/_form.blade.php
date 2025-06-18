@@ -153,14 +153,52 @@
             }
         });
     }
+    function initTelefonoEmpresaValidation() {
+        const telefonoInput = document.getElementById('telefono');
+        const form = document.getElementById('formCrearEmpresa');
+        const alert = document.getElementById('empresa-alert-msg');
 
-    window.initRutValidation = function () {
+        // Solo permite números en tiempo real
+        telefonoInput.addEventListener('input', function (e) {
+            // Quitar todo lo que no sea dígito
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Previene pegar letras
+        telefonoInput.addEventListener('paste', function (e) {
+            let paste = (e.clipboardData || window.clipboardData).getData('text');
+            if (/[^0-9]/.test(paste)) {
+                e.preventDefault();
+            }
+        });
+
+        // Validación al enviar formulario
+        form.addEventListener('submit', function (e) {
+            alert.classList.add('hidden');
+            const telefono = telefonoInput.value.trim();
+
+            if (telefono && (!/^\d{9}$/.test(telefono))) {
+                e.preventDefault();
+                alert.textContent = "❌ Error: El teléfono debe contener exactamente 9 dígitos numéricos (sin +56).";
+                alert.className = "mb-4 p-3 rounded font-semibold bg-red-100 text-red-700";
+                alert.classList.remove('hidden');
+                telefonoInput.focus();
+            }
+        });
+    }
+
+    // Ejecutar ambas validaciones al cargar el modal
+    function initRutValidation() {
         initRutEmpresaValidation();
-    };
+        initTelefonoEmpresaValidation();
+    }
 
-    document.addEventListener('DOMContentLoaded', initRutEmpresaValidation);
+    // Al abrir el modal o cargar el DOM, siempre ejecuta ambas validaciones
+    window.initRutValidation = initRutValidation;
+
+    document.addEventListener('DOMContentLoaded', initRutValidation);
 
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(initRutEmpresaValidation, 1);
+        setTimeout(initRutValidation, 1);
     }
 </script>
