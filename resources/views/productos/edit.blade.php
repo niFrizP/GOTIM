@@ -1,4 +1,4 @@
-<x-app-layout> 
+<x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">
             Editar Producto
@@ -8,7 +8,8 @@
     <div class="py-6">
         <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
             <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md">
-                <form method="POST" action="{{ route('productos.update', $producto->id_producto) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('productos.update', $producto->id_producto) }}"
+                    enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -72,16 +73,15 @@
                         <!-- Descripción -->
                         <div>
                             <x-input-label for="descripcion" value="Descripción" />
-                            <textarea id="descripcion" name="descripcion" rows="3"
-                                class="w-full rounded dark:bg-gray-700">{{ old('descripcion', $producto->descripcion) }}</textarea>
+                            <textarea id="descripcion" name="descripcion" rows="3" class="w-full rounded dark:bg-gray-700">{{ old('descripcion', $producto->descripcion) }}</textarea>
                             <x-input-error :messages="$errors->get('descripcion')" class="mt-1 text-sm text-red-600" />
                         </div>
 
                         <!-- Código -->
                         <div>
-                            <x-input-label for="codigo" value="Código" />
-                            <x-text-input id="codigo" name="codigo" type="text" class="w-full"
-                                value="{{ old('codigo', $producto->codigo) }}" required />
+                            <x-input-label for="codigo" value="Código / Código de Barra" />
+                            <x-text-input id="codigo" name="codigo" type="number" class="w-full" max="13" min="8"
+                                 value="{{ old('codigo', $producto->codigo) }}" required />
                             <x-input-error :messages="$errors->get('codigo')" class="mt-1 text-sm text-red-600" />
                         </div>
 
@@ -94,7 +94,8 @@
                             @if ($producto->imagen)
                                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
                                     Imagen actual: <br>
-                                    <img src="{{ asset('storage/' . $producto->imagen) }}" alt="Imagen actual" class="h-32 mt-2 rounded border">
+                                    <img src="{{ asset('storage/' . $producto->imagen) }}" alt="Imagen actual"
+                                        class="h-32 mt-2 rounded border">
                                 </p>
                             @endif
                         </div>

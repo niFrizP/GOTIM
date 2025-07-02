@@ -108,7 +108,7 @@ class ProductoController extends Controller
             'descripcion' => 'nullable|string',
             'codigo' => [
                 'required',
-                'regex:/^(\d{8}|\d{13})$/',
+                'digits_between:8,13',
                 'unique:productos,codigo,' . $producto->id_producto . ',id_producto',
             ],
             'imagen' => 'nullable|image|max:2048',
@@ -171,6 +171,4 @@ class ProductoController extends Controller
 
         return redirect()->route('productos.index')->with('success', 'Producto inhabilitado correctamente.');
     }
-
-
 }
