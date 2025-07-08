@@ -59,19 +59,21 @@
                                         class="text-blue-500 hover:underline">
                                         Editar
                                     </a>
-                                    @if (Auth::user()->rol === 'administrador')
+                                    @if (Auth::user()->rol === 'Administrador')
                                         @if ($empresa->estado === 'activo')
-                                            <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}" method="POST"
-                                                class="inline">
+                                            <form action="{{ route('empresas.destroy', $empresa->id_empresa) }}"
+                                                method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-500 hover:underline">Inhabilitar</button>
+                                                <button type="submit"
+                                                    class="text-red-500 hover:underline">Inhabilitar</button>
                                             </form>
                                         @else
-                                            <form action="{{ route('empresas.reactivar', $empresa->id_empresa) }}" method="POST"
-                                                class="inline">
+                                            <form action="{{ route('empresas.reactivar', $empresa->id_empresa) }}"
+                                                method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="text-green-500 hover:underline">Reactivar</button>
+                                                <button type="submit"
+                                                    class="text-green-500 hover:underline">Reactivar</button>
                                             </form>
                                         @endif
                                     @endif

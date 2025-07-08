@@ -39,7 +39,7 @@
                         class="inline-block rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600">
                         Editar
                     </a>
-                    @if (Auth::user()->rol === 'administrador')
+                    @if (Auth::user()->rol === 'Administrador')
                         {{-- Botón para desactivar/activar tipo de producto --}}
                         @if ($tipo->estado)
                             <button onclick="mostrarModal()"
@@ -50,7 +50,8 @@
                             <form action="{{ route('tipo_productos.activar', $tipo->tipo_producto_id) }}" method="POST"
                                 class="inline-block">
                                 @csrf
-                                <button type="submit" class="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+                                <button type="submit"
+                                    class="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">
                                     Activar
                                 </button>
                             </form>

@@ -18,7 +18,7 @@
             @php
                 $cards = [
                     [
-                        'title' => 'Clientes',
+                        'title' => 'Clientes Almacenados',
                         'value' => $totalCliente,
                         'param' => 'clientes_filtro',
                         'bg' => 'bg-gray-600',
@@ -26,7 +26,7 @@
                         'filtro' => $filtros['clientes'],
                     ],
                     [
-                        'title' => 'Órdenes Totales',
+                        'title' => 'Órdenes Almacenadas',
                         'value' => $totalOrden,
                         'param' => 'ordenes_filtro',
                         'bg' => 'bg-red-600',
@@ -34,7 +34,7 @@
                         'filtro' => $filtros['ordenes'],
                     ],
                     [
-                        'title' => 'Órdenes Completadas',
+                        'title' => 'Órdenes Finalizadas',
                         'value' => $completedOrden,
                         'param' => 'completadas_filtro',
                         'bg' => 'bg-indigo-600',
@@ -66,7 +66,8 @@
                                     {{-- Mantener los otros filtros activos --}}
                                     @foreach ($cards as $otherCard)
                                         @if ($otherCard['param'] !== $card['param'] && request($otherCard['param']))
-                                            <input type="hidden" name="{{ $otherCard['param'] }}" value="{{ request($otherCard['param']) }}">
+                                            <input type="hidden" name="{{ $otherCard['param'] }}"
+                                                value="{{ request($otherCard['param']) }}">
                                         @endif
                                     @endforeach
 
@@ -110,8 +111,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @php
                         $charts = [
-                            ['id' => 'ordersChart', 'title' => 'Órdenes por Mes', 'icon' => 'calendar'],
-                            ['id' => 'ordersByStatusChart', 'title' => 'Órdenes por Estado', 'icon' => 'bar-chart-3'],
+                            ['id' => 'ordersChart', 'title' => 'Órdenes creadas por mes', 'icon' => 'calendar'],
+                            ['id' => 'ordersByStatusChart', 'title' => 'Estado de Órdenes', 'icon' => 'bar-chart-3'],
                             [
                                 'id' => 'productsByCategoryChart',
                                 'title' => 'Productos por Categoría',

@@ -30,11 +30,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/ot/exportar-ots', [OTController::class, 'exportarListadoOT'])->name('ots.exportar.pdf');
-
-
 });
 
-// Rutas para administrador, supervisor o técnico
+// Rutas para Administrador, supervisor o técnico
 Route::middleware(['auth', \App\Http\Middleware\AllUserMiddleware::class])->group(function () {
     // Clientes
     Route::resource('clientes', ClienteController::class);
@@ -62,9 +60,8 @@ Route::middleware(['auth', \App\Http\Middleware\AllUserMiddleware::class])->grou
     Route::post('ot/{id_ot}/reactivar', [OTController::class, 'reactivar'])->name('ot.reactivar');
     Route::get('ot/{ot}/historial', [OTController::class, 'historial'])->name('ot.historial');
     Route::delete('/archivos-ot/{id}', [OTController::class, 'eliminarArchivo'])->name('archivos_ot.eliminar');
-
 });
-// Rutas para administrador o supervisor
+// Rutas para Administrador o supervisor
 Route::middleware(['auth', \App\Http\Middleware\AdminOrSupervisorMiddleware::class])->group(function () {
 
     // Servicios
@@ -96,10 +93,9 @@ Route::middleware(['auth', \App\Http\Middleware\AdminOrSupervisorMiddleware::cla
     Route::resource('productos', ProductoController::class);
     Route::post('/productos/{id}/reactivar', [ProductoController::class, 'reactivar'])->name('productos.reactivar');
     Route::get('/productos/create/validar-codigo', [ProductoController::class, 'validarCodigo'])->name('productos.validar.codigo');
-
 });
 
-// Solo administradores
+// Solo Administradores
 Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
     Route::resource('users', UserController::class);
     Route::post('/users/{user}/reactivar', [UserController::class, 'reactivar'])->name('users.reactivar');

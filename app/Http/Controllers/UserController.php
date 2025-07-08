@@ -16,7 +16,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $roles = ['administrador', 'supervisor', 'tecnico'];
+        $roles = ['Administrador', 'Supervisor', 'Técnico'];
         return view('users.create', compact('roles'));
     }
 
@@ -27,7 +27,7 @@ class UserController extends Controller
             'apellido' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
-            'rol' => 'required|in:administrador,supervisor,tecnico',
+            'rol' => 'required|in:Administrador,Supervisor,Técnico',
             'estado' => 'required|boolean',
         ]);
 
@@ -46,7 +46,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::findOrFail($id);
-        $roles = ['administrador', 'supervisor', 'tecnico'];
+        $roles = ['Administrador', 'Supervisor', 'Técnico'];
         return view('users.edit', compact('user', 'roles'));
     }
 
@@ -58,7 +58,7 @@ class UserController extends Controller
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'rol' => 'required|in:administrador,supervisor,tecnico',
+            'rol' => 'required|in:Administrador,Supervisor,Técnico',
             'estado' => 'required|boolean',
         ]);
 

@@ -9,7 +9,7 @@ class AllUserMiddleware
 {
     public function handle($request, Closure $next)
     {
-        if (Auth::check() && in_array(Auth::user()->rol, ['administrador', 'supervisor', 'tecnico'])) {
+        if (Auth::check() && in_array(Auth::user()->rol, ['Administrador', 'Supervisor', 'Técnico'])) {
             return $next($request);
         }
 

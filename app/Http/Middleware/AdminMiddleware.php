@@ -10,10 +10,10 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->rol === 'administrador') {
+        if (Auth::check() && Auth::user()->rol === 'Administrador') {
             return $next($request);
         }
 
-        abort(403, 'Acceso denegado. Solo administradores.');
+        abort(403, 'Acceso denegado. Solo Administradores.');
     }
 }

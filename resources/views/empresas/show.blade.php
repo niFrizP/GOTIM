@@ -28,10 +28,11 @@
                         <div>
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Estado</dt>
                             <dd class="mt-2">
-                                <span class="inline-block rounded px-2 py-1 text-xs font-semibold
+                                <span
+                                    class="inline-block rounded px-2 py-1 text-xs font-semibold
                                     {{ $empresa->estado === 'activo'
-    ? 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300'
-    : 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300' }}">
+                                        ? 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                                        : 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300' }}">
                                     {{ ucfirst($empresa->estado) }}
                                 </span>
                             </dd>
@@ -44,7 +45,7 @@
                         class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                         ← Volver a la lista
                     </a>
-                    @if (Auth::user()->rol === 'administrador')
+                    @if (Auth::user()->rol === 'Administrador')
                         @if ($empresa->estado === 'activo')
                             <button onclick="mostrarModal()"
                                 class="inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 ml-2">

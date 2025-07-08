@@ -10,7 +10,7 @@ class SupervisorMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->rol === 'supervisor') {
+        if (Auth::check() && Auth::user()->rol === 'Supervisor') {
             return $next($request);
         }
 

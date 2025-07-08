@@ -101,7 +101,7 @@
                         class="inline-block rounded bg-yellow-500 px-4 py-2 text-white hover:bg-yellow-600 ml-2">
                         Editar Producto
                     </a>
-                    @if (Auth::user()->rol === 'administrador')
+                    @if (Auth::user()->rol === 'Administrador')
                         {{-- Botón para desactivar/activar producto --}}
                         @if ($producto->estado)
                             <!-- Botón para inhabilitar -->

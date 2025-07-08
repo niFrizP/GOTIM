@@ -53,7 +53,7 @@
                                         class="text-gray-600 hover:underline dark:text-gray-300">Ver</a>
                                     <a href="{{ route('inventario.edit', $inv->id_inventario) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
-                                    @if (Auth::user()->rol === 'administrador')
+                                    @if (Auth::user()->rol === 'Administrador')
                                         @if ($inv->estado === 'activo')
                                             <a href="{{ route('inventario.desactivar', $inv->id_inventario) }}"
                                                 class="text-red-500 hover:underline">Desactivar</a>

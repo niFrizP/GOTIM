@@ -22,10 +22,11 @@
 
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200">Estado</h3>
-                    <span class="inline-block rounded px-2 py-1 text-sm font-semibold
+                    <span
+                        class="inline-block rounded px-2 py-1 text-sm font-semibold
                         {{ $categoria->estado === 'Inactiva'
-    ? 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-    : 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' }}">
+                            ? 'bg-red-200 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+                            : 'bg-green-200 text-green-800 dark:bg-green-900/20 dark:text-green-300' }}">
                         {{ $categoria->estado }}
                     </span>
                 </div>
@@ -35,7 +36,7 @@
                         class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                         ← Volver a la lista
                     </a>
-                    @if (Auth::user()->rol === 'administrador')
+                    @if (Auth::user()->rol === 'Administrador')
                         {{-- Editar --}}
                         @if ($categoria->estado === 'Inactiva')
                             <button

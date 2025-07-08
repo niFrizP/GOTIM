@@ -43,7 +43,7 @@
                         class="inline-block rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
                         ← Volver a la lista
                     </a>
-                    @if (Auth::user()->rol === 'administrador')
+                    @if (Auth::user()->rol === 'Administrador')
                         @if ($inventario->estado === 'activo')
                             <button onclick="mostrarModal({{ $inventario->id_inventario }})"
                                 class="ml-2 inline-block rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">

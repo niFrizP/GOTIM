@@ -62,22 +62,22 @@
                                         class="text-gray-600 dark:text-gray-300 hover:underline">Ver</a>
                                     <a href="{{ route('productos.edit', $producto->id_producto) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
-                                    @if (Auth::user()->rol === 'administrador')
-                                    @if ($producto->estado)
-                                        <button
-                                            onclick="mostrarModal('{{ $producto->id_producto }}', '{{ $producto->nombre_producto }}')"
-                                            class="text-red-500 hover:underline">
-                                            Inhabilitar
-                                        </button>
-                                    @else
-                                        <form action="{{ route('productos.reactivar', $producto->id_producto) }}"
-                                            method="POST" class="inline-block">
-                                            @csrf
-                                            <button type="submit" class="text-green-500 hover:underline">
-                                                Reactivar
+                                    @if (Auth::user()->rol === 'Administrador')
+                                        @if ($producto->estado)
+                                            <button
+                                                onclick="mostrarModal('{{ $producto->id_producto }}', '{{ $producto->nombre_producto }}')"
+                                                class="text-red-500 hover:underline">
+                                                Inhabilitar
                                             </button>
-                                        </form>
-                                    @endif
+                                        @else
+                                            <form action="{{ route('productos.reactivar', $producto->id_producto) }}"
+                                                method="POST" class="inline-block">
+                                                @csrf
+                                                <button type="submit" class="text-green-500 hover:underline">
+                                                    Reactivar
+                                                </button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>

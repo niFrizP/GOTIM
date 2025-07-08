@@ -32,20 +32,20 @@ class DashboardController extends Controller
 
         if ($filtro !== 'total') {
             if ($filtro === 'semana') {
-                $query->whereBetween('fecha_entrega', [now()->startOfWeek(), now()->endOfWeek()]);
+                $query->whereBetween('fecha_creacion', [now()->startOfWeek(), now()->endOfWeek()]);
             } elseif ($filtro === 'mes') {
-                $query->whereMonth('fecha_entrega', now()->month)
-                    ->whereYear('fecha_entrega', now()->year);
+                $query->whereMonth('fecha_creacion', now()->month)
+                    ->whereYear('fecha_creacion', now()->year);
             } elseif ($filtro === 'año') {
-                $query->whereYear('fecha_entrega', now()->year);
+                $query->whereYear('fecha_creacion', now()->year);
             }
         }
 
         // Gráficos
         $ordersByMonth = (clone $query)
-            ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTHNAME(fecha_entrega) as month'))
-            ->groupBy(DB::raw('MONTH(fecha_entrega)'), DB::raw('MONTHNAME(fecha_entrega)'))
-            ->orderBy(DB::raw('MONTH(fecha_entrega)'))
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTHNAME(fecha_creacion) as month'))
+            ->groupBy(DB::raw('MONTH(fecha_creacion)'), DB::raw('MONTHNAME(fecha_creacion)'))
+            ->orderBy(DB::raw('MONTH(fecha_creacion)'))
             ->pluck('count', 'month');
 
         $ordersByStatus = (clone $query)
@@ -103,12 +103,12 @@ class DashboardController extends Controller
         }
 
         if ($filtro === 'semana') {
-            $query->whereBetween('fecha_entrega', [now()->startOfWeek(), now()->endOfWeek()]);
+            $query->whereBetween('fecha_creacion', [now()->startOfWeek(), now()->endOfWeek()]);
         } elseif ($filtro === 'mes') {
-            $query->whereMonth('fecha_entrega', now()->month)
-                ->whereYear('fecha_entrega', now()->year);
+            $query->whereMonth('fecha_creacion', now()->month)
+                ->whereYear('fecha_creacion', now()->year);
         } elseif ($filtro === 'año') {
-            $query->whereYear('fecha_entrega', now()->year);
+            $query->whereYear('fecha_creacion', now()->year);
         }
 
         return $query->count();

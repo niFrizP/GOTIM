@@ -39,14 +39,15 @@
                                         class="text-gray-600 dark:text-gray-300 hover:underline">Ver</a>
                                     <a href="{{ route('tipo_productos.edit', $tipo->tipo_producto_id) }}"
                                         class="text-blue-500 hover:underline">Editar</a>
-                                    @if (Auth::user()->rol === 'administrador')
+                                    @if (Auth::user()->rol === 'Administrador')
                                         @if ($tipo->estado)
                                             <form method="POST"
                                                 action="{{ route('tipo_productos.desactivar', $tipo->tipo_producto_id) }}"
                                                 class="inline">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="text-red-500 hover:underline">Desactivar</button>
+                                                <button type="submit"
+                                                    class="text-red-500 hover:underline">Desactivar</button>
                                             </form>
                                         @else
                                             <form method="POST"
@@ -54,7 +55,8 @@
                                                 class="inline">
                                                 @csrf
                                                 @method('PATCH')
-                                                <button type="submit" class="text-green-500 hover:underline">Activar</button>
+                                                <button type="submit"
+                                                    class="text-green-500 hover:underline">Activar</button>
                                             </form>
                                         @endif
                                     @endif

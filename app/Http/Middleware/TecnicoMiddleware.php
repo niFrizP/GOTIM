@@ -10,7 +10,7 @@ class TecnicoMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->rol === 'tecnico') {
+        if (Auth::check() && Auth::user()->rol === 'Técnico') {
             return $next($request);
         }
 

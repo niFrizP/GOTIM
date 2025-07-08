@@ -157,10 +157,11 @@
                                         class="text-green-600 hover:underline">
                                         Exportar PDF
                                     </a>
-                                    @if (Auth::user()->rol === 'administrador')
+                                    @if (Auth::user()->rol === 'Administrador')
                                         {{-- Inhabilitar si no está finalizada --}}
                                         @if ($ot->fase === 'Habilitado')
-                                            <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST" class="inline">
+                                            <form action="{{ route('ot.desactivar', $ot->id_ot) }}" method="POST"
+                                                class="inline">
                                                 @csrf
                                                 <button type="submit" class="text-red-500 hover:underline"
                                                     onclick="return confirm('¿Inhabilitar esta OT?')">
@@ -168,7 +169,8 @@
                                                 </button>
                                             </form>
                                         @else
-                                            <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST" class="inline">
+                                            <form action="{{ route('ot.reactivar', $ot->id_ot) }}" method="POST"
+                                                class="inline">
                                                 @csrf
                                                 <button type="submit" class="text-green-500 hover:underline"
                                                     onclick="return confirm('¿Reactivar esta OT?')">
