@@ -79,7 +79,7 @@
                                     <input type="hidden" name="{{ $card['param'] }}" value="{{ $opcion }}">
                                     <button type="submit"
                                         class="text-xs px-2 py-1 rounded transition-all
-                                        {{ $card['filtro'] === $opcion ? 'bg-white text-black font-bold' : 'bg-black bg-opacity-30' }}">
+                                                                {{ $card['filtro'] === $opcion ? 'bg-white text-black font-bold' : 'bg-black bg-opacity-30' }}">
                                         {{ ucfirst($opcion) }}
                                     </button>
                                 </form>
@@ -114,9 +114,9 @@
                             ['id' => 'ordersChart', 'title' => 'Órdenes creadas por mes', 'icon' => 'calendar'],
                             ['id' => 'ordersByStatusChart', 'title' => 'Estado de Órdenes', 'icon' => 'bar-chart-3'],
                             [
-                                'id' => 'productsByCategoryChart',
-                                'title' => 'Productos por Categoría',
-                                'icon' => 'layers',
+                                'id' => 'servicesByMonthChart',
+                                'title' => 'Servicios utilizados por mes en las OT',
+                                'icon' => 'settings',
                             ],
                             ['id' => 'responsableOrdersChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
                         ];
@@ -184,10 +184,10 @@
                         </table>
                     </div>
                 @else
-                    <div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock
-                        suficiente.</div>
-            </div>
-            @endif
+                        <div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock
+                            suficiente.</div>
+                    </div>
+                @endif
 
         </div>
     </div>
@@ -195,13 +195,13 @@
 
     @push('scripts')
         <script type="application/json" id="dashboard-data">
-        {
-            "ordersByStatus": @json($ordersByStatus),
-            "ordersByMonth": @json($ordersByMonth),
-            "productCategories": @json($productCategories),
-            "responsableOrders": @json($responsableOrders)
-        }
-    </script>
+            {
+                "ordersByStatus": @json($ordersByStatus),
+                "ordersByMonth": @json($ordersByMonth),
+                "servicesByMonthFormatted": @json($servicesByMonthFormatted),
+                "responsableOrders": @json($responsableOrders)
+            }
+            </script>
         <script>
             // Ejes Y con enteros y tooltips coherentes
             const integerYAxisOptions = {
@@ -239,12 +239,12 @@
                 October: 'Octubre',
                 November: 'Noviembre',
                 December: 'Diciembre'
-            } [month] || month));
+            }[month] || month));
 
             // Tamaños para cada gráfico
             document.getElementById('ordersChart').style.height = '250px';
             document.getElementById('ordersByStatusChart').style.height = '250px';
-            document.getElementById('productsByCategoryChart').style.height = '250px';
+            document.getElementById('servicesByMonthChart').style.height = '250px';
             document.getElementById('responsableOrdersChart').style.height = '250px';
 
             // Gráfico: Órdenes por Mes
@@ -307,23 +307,62 @@
                 plugins: [ChartDataLabels]
             });
 
-            // Gráfico: Productos por Categoría
-            new Chart(document.getElementById('productsByCategoryChart'), {
-                type: 'bar',
+            // Gráfico: Servicios utilizados por mes en las OT (Lineal)
+            const servicesData = @json($servicesByMonthFormatted);
+
+            // Etiquetas de meses y servicios únicos
+            const serviceMonths = Object.keys(servicesData);
+            const allServices = [...new Set(serviceMonths.flatMap(month => Object.keys(servicesData[month])))];
+
+            // Traduce meses de los servicios si es necesario
+            const serviceMonthLabels = serviceMonths.map(month => ({
+                January: 'Enero',
+                February: 'Febrero',
+                March: 'Marzo',
+                April: 'Abril',
+                May: 'Mayo',
+                June: 'Junio',
+                July: 'Julio',
+                August: 'Agosto',
+                September: 'Septiembre',
+                October: 'Octubre',
+                November: 'Noviembre',
+                December: 'Diciembre'
+            }[month] || month));
+
+            // Dataset para cada servicio (linea)
+            const servicesDatasets = allServices.map((service, i) => ({
+                label: service,
+                data: serviceMonths.map(month => servicesData[month][service] || 0),
+                fill: false, // Línea sin relleno
+                tension: 0.2, // suavidad de la curva
+                pointRadius: 5, // tamaño del punto
+                pointHoverRadius: 7, // tamaño del punto al pasar mouse
+                // Chart.js asigna color automáticamente si no lo defines aquí
+            }));
+
+            new Chart(document.getElementById('servicesByMonthChart'), {
+                type: 'line',
                 data: {
-                    labels: {!! json_encode($productCategories->keys()) !!},
-                    datasets: [{
-                        label: 'Productos por Categoría',
-                        data: {!! json_encode($productCategories->values()) !!},
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                    }]
+                    labels: serviceMonthLabels,
+                    datasets: servicesDatasets
                 },
                 options: {
-                    scales: {
-                        y: integerYAxisOptions
-                    },
+                    responsive: true,
                     plugins: {
-                        tooltip: integerTooltipOptions
+                        tooltip: integerTooltipOptions,
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                        },
+                    },
+                    scales: {
+                        y: integerYAxisOptions,
+                        x: {
+                            // no hace falta stack en lineal
+                        }
                     }
                 }
             });
@@ -352,5 +391,6 @@
             });
         </script>
     @endpush
+
 
 </x-app-layout>

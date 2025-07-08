@@ -59,6 +59,25 @@ class DashboardController extends Controller
             ->groupBy(fn($producto) => optional($producto->categoria)->nombre_categoria)
             ->map->count();
 
+        // SERVICIOS POR MES
+        $servicesByMonth = (clone $query)
+            ->join('servicios_ot', 'ot.id_ot', '=', 'servicios_ot.id_ot')
+            ->join('servicios', 'servicios_ot.id_servicio', '=', 'servicios.id_servicio')
+            ->select(
+                DB::raw('MONTHNAME(ot.fecha_creacion) as month'),
+                'servicios.nombre_servicio',
+                DB::raw('COUNT(servicios_ot.id_servicio_ot) as cantidad')
+            )
+            ->groupBy(DB::raw('MONTH(ot.fecha_creacion)'), 'month', 'servicios.nombre_servicio')
+            ->orderBy(DB::raw('MONTH(ot.fecha_creacion)'))
+            ->get();
+
+        // Transformar a formato: [mes => [servicio => cantidad, ...], ...]
+        $servicesByMonthFormatted = [];
+        foreach ($servicesByMonth as $row) {
+            $servicesByMonthFormatted[$row->month][$row->nombre_servicio] = $row->cantidad;
+        }
+
         $lowStockProducts = DB::table('inventario')
             ->join('productos', 'inventario.id_producto', '=', 'productos.id_producto')
             ->where('inventario.cantidad', '<=', 3)
@@ -84,6 +103,7 @@ class DashboardController extends Controller
             'ordersByMonth',
             'ordersByStatus',
             'productCategories',
+            'servicesByMonthFormatted',
             'lowStockProducts',
             'responsableOrders',
             'ordersByClient',
