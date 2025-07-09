@@ -42,30 +42,23 @@ class OTController extends Controller
 
         $ordenes = $query->orderBy('fecha_creacion', 'desc')->paginate(10);
 
-        $clientes = Cliente::pluck('nombre_cliente', 'apellido_cliente', 'id_cliente', 'rut');
-        $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])->pluck('nombre', 'id');
-        $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
-
-        return view('ot.index', compact('ordenes', 'clientes', 'responsables', 'estados'));
-    }
-
-    public function create()
-    {
+        // Ahora sí, obtenemos clientes con nombre + apellido + rut concatenados, igual que en create()
         $clientes = Cliente::select('id_cliente', 'nombre_cliente', 'apellido_cliente', 'rut')
             ->get()
             ->mapWithKeys(function ($cliente) {
                 return [$cliente->id_cliente => $cliente->nombre_cliente . ' ' . $cliente->apellido_cliente . ' (' . $cliente->rut . ')'];
             });
+
         $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])
             ->get()
             ->mapWithKeys(function ($user) {
                 return [$user->id => $user->nombre . ' ' . $user->apellido . ' (' . $user->rol . ')'];
             });
-        $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
 
-        return view('ot.create', compact('clientes', 'responsables', 'servicios'));
+        $estados = EstadoOt::pluck('nombre_estado', 'id_estado');
+
+        return view('ot.index', compact('ordenes', 'clientes', 'responsables', 'estados'));
     }
-
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -77,9 +70,9 @@ class OTController extends Controller
             'servicios.*' => 'exists:servicios,id_servicio',
             'archivos.*' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif,pdf,doc,docx,xls,xlsx|max:10240',
         ], $messages = [
-                'archivos.*.mimes' => 'Solo se permiten archivos JPG, PNG, PDF, Word o Excel.',
-                'archivos.*.max' => 'El archivo no debe superar los 10MB.',
-            ]);
+            'archivos.*.mimes' => 'Solo se permiten archivos JPG, PNG, PDF, Word o Excel.',
+            'archivos.*.max' => 'El archivo no debe superar los 10MB.',
+        ]);
         // Asignar el estado inicial de la OT
         $data['id_estado'] = 1; // Estado "Recepcionada"
         // Validación adicional: la fecha_entrega no puede ser mayor a 5 años desde hoy
@@ -493,35 +486,35 @@ class OTController extends Controller
                 $descripcion = $cambiosReales->map(function ($chg) {
                     return match ($chg['campo']) {
                         'Productos Asociados' => (function () use ($chg) {
-                                $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
-                                $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
+                            $idsAntes = json_decode($chg['valor_anterior'], true) ?? [];
+                            $idsNuevo = json_decode($chg['valor_nuevo'], true) ?? [];
 
-                                $agregados = array_diff($idsNuevo, $idsAntes);
-                                $eliminados = array_diff($idsAntes, $idsNuevo);
+                            $agregados = array_diff($idsNuevo, $idsAntes);
+                            $eliminados = array_diff($idsAntes, $idsNuevo);
 
-                                if (!empty($agregados) && empty($eliminados)) {
-                                    $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
+                            if (!empty($agregados) && empty($eliminados)) {
+                                $nombres = \App\Models\Producto::whereIn('id_producto', $agregados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                    return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
-                                }
+                                return "<strong>Producto(s) agregado(s)</strong>: <em>{$nombres}</em>";
+                            }
 
-                                if (!empty($eliminados) && empty($agregados)) {
-                                    $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
+                            if (!empty($eliminados) && empty($agregados)) {
+                                $nombres = \App\Models\Producto::whereIn('id_producto', $eliminados)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                    return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
-                                }
+                                return "<strong>Producto(s) eliminado(s)</strong>: <em>{$nombres}</em>";
+                            }
 
-                                if (!empty($agregados) && !empty($eliminados)) {
-                                    $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
+                            if (!empty($agregados) && !empty($eliminados)) {
+                                $nombresAntes = \App\Models\Producto::whereIn('id_producto', $idsAntes)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
-                                    $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
+                                $nombresNuevo = \App\Models\Producto::whereIn('id_producto', $idsNuevo)
                                     ->get()->map(fn($p) => "{$p->nombre_producto} {$p->modelo} {$p->marca}")->implode(', ');
 
-                                    return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
-                                }
+                                return "<strong>Productos Asociados modificados</strong>: de <em>{$nombresAntes}</em> a <em>{$nombresNuevo}</em>";
+                            }
 
-                                return null;
-                            })(),
+                            return null;
+                        })(),
 
                         // 🔧 Aquí está el cambio que tú pediste
                         'nueva_descripcion' => "<strong>Nueva descripción</strong>: <em>{$chg['valor_nuevo']}</em>",

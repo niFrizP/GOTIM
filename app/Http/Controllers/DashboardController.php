@@ -19,7 +19,7 @@ class DashboardController extends Controller
         ];
 
         // Filtro global
-        $filtro = $request->input('filtro', 'año');
+        $filtro = $request->input('filtro', 'total');
 
         // Tarjetas
         $totalCliente = $this->filtrarClientes($filtros['clientes']);
@@ -52,7 +52,10 @@ class DashboardController extends Controller
             ->with('estadoOT')
             ->get()
             ->groupBy(fn($ot) => $ot->estadoOT->nombre_estado)
-            ->map->count();
+            ->map->count()
+            ->sortDesc()
+            ->take(5); // 👈 solo los 5 estados más usados
+
 
         $productCategories = Producto::with('categoria')
             ->get()

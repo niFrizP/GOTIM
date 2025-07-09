@@ -31,9 +31,11 @@
 
             {{-- FILTROS --}}
             <div class="mb-6 bg-white dark:bg-gray-700 p-4 rounded shadow-md">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                    Filtros de Búsqueda
+                </h3>
                 <form method="GET" action="{{ route('ot.index') }}"
                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-
                     {{-- Cliente --}}
                     <div>
                         <label for="cliente" class="block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -43,7 +45,7 @@
                             class="w-full p-2 border rounded dark:bg-gray-800 dark:text-gray-100">
                             <option value="">Todos</option>
                             @foreach ($clientes as $id => $nombre)
-                                <option value="{{ $id }}" @selected(request('cliente') == $id)>{{ $nombre }}
+                                <option value="{{ $id }}" @selected(request('cliente') == $id)>{{ $nombre }} 
                                 </option>
                             @endforeach
                         </select>
@@ -143,20 +145,23 @@
                                 <td class="border-b p-2 space-x-2">
                                     {{-- Ver --}}
                                     <a href="{{ route('ot.show', $ot->id_ot) }}"
-                                        class="text-gray-600 hover:underline dark:text-gray-300">
+                                        class="text-gray-600 hover:underline dark:text-gray-300"
+                                        title="Ver detalle de la OT">
                                         Ver
                                     </a>
 
                                     {{-- Editar --}}
-                                    <a href="{{ route('ot.edit', $ot->id_ot) }}" class="text-blue-500 hover:underline">
+                                    <a href="{{ route('ot.edit', $ot->id_ot) }}" class="text-blue-500 hover:underline"
+                                        title="Editar esta OT">
                                         Editar
                                     </a>
 
                                     {{-- Exportar PDF --}}
                                     <a href="{{ route('ot.export', $ot->id_ot) }}" target="_blank"
-                                        class="text-green-600 hover:underline">
+                                        class="text-green-600 hover:underline" title="Exportar esta OT en PDF">
                                         Exportar PDF
                                     </a>
+
                                     @if (Auth::user()->rol === 'Administrador')
                                         {{-- Inhabilitar si no está finalizada --}}
                                         @if ($ot->fase === 'Habilitado')
@@ -164,6 +169,7 @@
                                                 class="inline">
                                                 @csrf
                                                 <button type="submit" class="text-red-500 hover:underline"
+                                                    title="Inhabilitar esta OT"
                                                     onclick="return confirm('¿Inhabilitar esta OT?')">
                                                     Inhabilitar
                                                 </button>
@@ -173,6 +179,7 @@
                                                 class="inline">
                                                 @csrf
                                                 <button type="submit" class="text-green-500 hover:underline"
+                                                    title="Reactivar esta OT"
                                                     onclick="return confirm('¿Reactivar esta OT?')">
                                                     Reactivar
                                                 </button>
@@ -180,7 +187,6 @@
                                         @endif
                                     @endif
                                 </td>
-
                             </tr>
                         @empty
                             <tr>

@@ -94,8 +94,9 @@
             <!-- Gráficos -->
             <!--Filtro para gráficos-->
             <form method="GET" action="{{ route('dashboard') }}" class="mb-6 flex gap-4 items-center">
-                <label for="filtro" class="p-6 text-gray-900 dark:text-gray-100">Filtrar por:</label>
-                <select name="filtro" id="filtro" onchange="this.form.submit()" class="p-2 border rounded">
+                <label for="filtro" class="p-6 text-gray-900 dark:text-gray-100">Filtrar graficos por:</label>
+                <select name="filtro" id="filtro" onchange="this.form.submit()"
+                    class="px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300 appearance-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 pr-10">
                     <option value="total" {{ $filtro == 'total' ? 'selected' : '' }}>Total</option>
                     <option value="semana" {{ $filtro == 'semana' ? 'selected' : '' }}>Semana</option>
                     <option value="mes" {{ $filtro == 'mes' ? 'selected' : '' }}>Mes</option>
@@ -112,23 +113,33 @@
                     @php
                         $charts = [
                             ['id' => 'ordersChart', 'title' => 'Órdenes creadas por mes', 'icon' => 'calendar'],
-                            ['id' => 'ordersByStatusChart', 'title' => 'Estado de Órdenes', 'icon' => 'bar-chart-3'],
+                            ['id' => 'ordersByStatusChart', 'title' => 'Ordenes por estado (top 5) ', 'icon' => 'bar-chart-3'],
                             [
                                 'id' => 'servicesByMonthChart',
-                                'title' => 'Servicios utilizados por mes en las OT',
+                                'title' => 'Servicios realizados por mes ',
                                 'icon' => 'settings',
                             ],
-                            ['id' => 'responsableOrdersChart', 'title' => 'Órdenes por Responsable', 'icon' => 'users'],
+                            ['id' => 'responsableOrdersChart', 'title' => 'Órdenes asignadas por Responsable', 'icon' => 'users'],
                         ];
                     @endphp
 
                     @foreach ($charts as $chart)
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-                            <div class="mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100 font-bold">
-                                <i data-lucide="{{ $chart['icon'] }}" class="w-5 h-5"></i>
-                                {{ $chart['title'] }}
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow flex justify-center items-center">
+                            <div class="w-full text-gray-900 dark:text-gray-100">
+                                <div class="mb-4 flex items-center gap-2 font-bold">
+                                    <i data-lucide="{{ $chart['icon'] }}" class="w-5 h-5"></i>
+                                    {{ $chart['title'] }}
+                                </div>
+
+                                @if ($chart['id'] === 'ordersByStatusChart')
+                                    <div class="flex justify-center items-center">
+                                        <canvas id="{{ $chart['id'] }}"
+                                            style="max-width: 280px; max-height: 280px;"></canvas>
+                                    </div>
+                                @else
+                                    <canvas id="{{ $chart['id'] }}" class="h-64 w-full"></canvas>
+                                @endif
                             </div>
-                            <canvas id="{{ $chart['id'] }}" class="h-64 w-full"></canvas>
                         </div>
                     @endforeach
                 </div>
@@ -184,10 +195,10 @@
                         </table>
                     </div>
                 @else
-                        <div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock
-                            suficiente.</div>
-                    </div>
-                @endif
+                    <div class="text-gray-700 dark:text-gray-300 font-medium">Todos los productos tienen stock
+                        suficiente.</div>
+            </div>
+            @endif
 
         </div>
     </div>
@@ -239,7 +250,7 @@
                 October: 'Octubre',
                 November: 'Noviembre',
                 December: 'Diciembre'
-            }[month] || month));
+            } [month] || month));
 
             // Tamaños para cada gráfico
             document.getElementById('ordersChart').style.height = '250px';
@@ -282,6 +293,8 @@
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         datalabels: {
                             color: '#fff',
@@ -291,7 +304,7 @@
                             formatter: (value, ctx) => {
                                 const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const percent = ((value / total) * 100).toFixed(1);
-                                return `${percent}% (${value})`;
+                                return `${percent}%`;
                             }
                         },
                         legend: {
@@ -328,17 +341,16 @@
                 October: 'Octubre',
                 November: 'Noviembre',
                 December: 'Diciembre'
-            }[month] || month));
+            } [month] || month));
 
             // Dataset para cada servicio (linea)
             const servicesDatasets = allServices.map((service, i) => ({
                 label: service,
                 data: serviceMonths.map(month => servicesData[month][service] || 0),
                 fill: false, // Línea sin relleno
-                tension: 0.2, // suavidad de la curva
-                pointRadius: 5, // tamaño del punto
-                pointHoverRadius: 7, // tamaño del punto al pasar mouse
-                // Chart.js asigna color automáticamente si no lo defines aquí
+                tension: 0.1, // suavidad de la curva
+                pointRadius: 3, // tamaño del punto
+                pointHoverRadius: 5, // tamaño del punto al pasar mouse
             }));
 
             new Chart(document.getElementById('servicesByMonthChart'), {
@@ -352,7 +364,7 @@
                     plugins: {
                         tooltip: integerTooltipOptions,
                         legend: {
-                            position: 'top',
+                            position: 'bottom',
                         },
                         title: {
                             display: false,
@@ -361,7 +373,10 @@
                     scales: {
                         y: integerYAxisOptions,
                         x: {
-                            // no hace falta stack en lineal
+                            title: {
+                                display: true,
+                                text: 'Meses'
+                            }
                         }
                     }
                 }
