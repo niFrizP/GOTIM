@@ -59,6 +59,27 @@ class OTController extends Controller
 
         return view('ot.index', compact('ordenes', 'clientes', 'responsables', 'estados'));
     }
+
+    public function create()
+    {
+        // Ahora sí, obtenemos clientes con nombre + apellido + rut concatenados, igual que en create()
+        $clientes = Cliente::select('id_cliente', 'nombre_cliente', 'apellido_cliente', 'rut')
+            ->get()
+            ->mapWithKeys(function ($cliente) {
+                return [$cliente->id_cliente => $cliente->nombre_cliente . ' ' . $cliente->apellido_cliente . ' (' . $cliente->rut . ')'];
+            });
+
+        $responsables = User::whereIn('rol', ['Supervisor', 'Técnico'])
+            ->get()
+            ->mapWithKeys(function ($user) {
+                return [$user->id => $user->nombre . ' ' . $user->apellido . ' (' . $user->rol . ')'];
+            });
+        $servicios = Servicio::pluck('nombre_servicio', 'id_servicio');
+
+        return view('ot.create', compact('clientes', 'responsables', 'servicios'));
+    }
+
+
     public function store(Request $request)
     {
         $data = $request->validate([
